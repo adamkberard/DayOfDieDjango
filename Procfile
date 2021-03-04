@@ -1,1 +1,1 @@
-web: gunicorn CleanrLife.wsgi --log-file -
+web: gunicorn DayOfDie.wsgi --log-file -
