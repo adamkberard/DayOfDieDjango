@@ -1,4 +1,4 @@
-#!/Users/aberard/Programming/CleanrLife/CleanrLife/venv/bin/python3
+#!/Users/aberard/Programming/DayOfDie/DjangoOfDie/venv/bin/python3
 # When the django-admin.py deprecation ends, remove this script.
 import warnings
 
