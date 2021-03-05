@@ -70,6 +70,11 @@ def gameStats(request):
         playerData = {}
         playerData['name'] = player
         playerData['singlePoints'] = Point.objects.filter(scorer=player, typeOfPoint="PT").count
+        playerData['tinks'] = Point.objects.filter(scorer=player, typeOfPoint="TK").count
+        playerData['sinks'] = Point.objects.filter(scorer=player, typeOfPoint="SK").count
+        playerData['bounceSinks'] = Point.objects.filter(scorer=player, typeOfPoint="BS").count
+        playerData['partnerSinks'] = Point.objects.filter(scorer=player, typeOfPoint="PS").count
+        playerData['selfSinks'] = Point.objects.filter(scorer=player, typeOfPoint="SS").count
         playersData.append(playerData)
     context = {}
     context['playersData'] = playersData
