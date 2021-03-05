@@ -47,10 +47,10 @@ INSTALLED_APPS = [
     # Third-Party Apps
     'whitenoise.runserver_nostatic',
     'rest_framework',
-    'rest_framework.authtoken',
 
     # Local Apps
     #'apps.litter',
+    'games',
 ]
 
 REST_FRAMEWORK = {
