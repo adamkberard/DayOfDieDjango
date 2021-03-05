@@ -77,7 +77,7 @@ ROOT_URLCONF = 'DayOfDie.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': ['templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -89,6 +89,11 @@ TEMPLATES = [
         },
     },
 ]
+
+#SETTINGS_PATH = os.path.dirname(os.path.dirname(__file__))
+#TEMPLATE_DIRS = (
+#    os.path.join(SETTINGS_PATH, 'templates'),
+#)
 
 WSGI_APPLICATION = 'DayOfDie.wsgi.application'
 

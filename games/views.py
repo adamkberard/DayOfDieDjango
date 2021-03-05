@@ -61,3 +61,17 @@ def getGameJSON(game):
         points.append(model_to_dict(point))
 
     return {'game': model_to_dict(game), 'points': points}
+
+@csrf_exempt
+def gameStats(request):
+    playersData = []
+    players = {"Adam", "Ben", "Jake", "Kyle", "Marcus"}
+    for player in players:
+        playerData = {}
+        playerData['name'] = player
+        playerData['singlePoints'] = Point.objects.filter(scorer=player, typeOfPoint="PT").count
+        playersData.append(playerData)
+    context = {}
+    context['playersData'] = playersData
+    return render(request, 'games/stats.html', context)
+    return 

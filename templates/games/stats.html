@@ -1,0 +1,12 @@
+<h2>Test</h2>
+<table style="width:100%" border="1">
+  <tr>
+    <th>Name</th>
+    <th>Points</th>
+  </tr>
+  {% for playerData in playersData %}</h2>
+  <tr>
+    <td>{{playerData.name}}</td>
+    <td>{{playerData.singlePoints}}</td>
+  </tr>
+{% endfor %}
