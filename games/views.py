@@ -68,13 +68,21 @@ def gameStats(request):
     players = {"Adam", "Ben", "Jake", "Kyle", "Marcus"}
     for player in players:
         playerData = {}
+        singlePoints = playjPoint.objects.filter(scorer=player, typeOfPoint="PT").count
+        tinks = Point.objects.filter(scorer=player, typeOfPoint="TK").count
+        sinks = Point.objects.filter(scorer=player, typeOfPoint="SK").count
+        bounceSinks = Point.objects.filter(scorer=player, typeOfPoint="BS").count
+        partnerSinks = Point.objects.filter(scorer=player, typeOfPoint="PS").count
+        selfSinks = Point.objects.filter(scorer=player, typeOfPoint="SS").count
+        total = singlePoints + (2 * (tinks + bounceSinks)) + (3 * sinks)
         playerData['name'] = player
-        playerData['singlePoints'] = Point.objects.filter(scorer=player, typeOfPoint="PT").count
-        playerData['tinks'] = Point.objects.filter(scorer=player, typeOfPoint="TK").count
-        playerData['sinks'] = Point.objects.filter(scorer=player, typeOfPoint="SK").count
-        playerData['bounceSinks'] = Point.objects.filter(scorer=player, typeOfPoint="BS").count
-        playerData['partnerSinks'] = Point.objects.filter(scorer=player, typeOfPoint="PS").count
-        playerData['selfSinks'] = Point.objects.filter(scorer=player, typeOfPoint="SS").count
+        playerData['Total Points'] = total
+        playerData['singlePoints'] = singlePoints
+        playerData['tinks'] = tinks
+        playerData['sinks'] = sinks
+        playerData['bounceSinks'] = bounceSinks
+        playerData['partnerSinks'] = partnerSinks
+        playerData['selfSinks'] = selfSinks
         playersData.append(playerData)
     context = {}
     context['playersData'] = playersData
