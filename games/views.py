@@ -74,7 +74,7 @@ def gameStats(request):
         bounceSinks = Point.objects.filter(scorer=player, typeOfPoint="BS").count
         partnerSinks = Point.objects.filter(scorer=player, typeOfPoint="PS").count
         selfSinks = Point.objects.filter(scorer=player, typeOfPoint="SS").count
-        total = singlePoints + (2 * (tinks + bounceSinks)) + (3 * sinks)
+        #total = singlePoints + (2 * (tinks + bounceSinks)) + (3 * sinks)
         playerData['name'] = player
         playerData['Total Points'] = total
         playerData['singlePoints'] = singlePoints
