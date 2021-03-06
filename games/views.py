@@ -68,7 +68,7 @@ def gameStats(request):
     players = {"Adam", "Ben", "Jake", "Kyle", "Marcus"}
     for player in players:
         playerData = {}
-        singlePoints = playjPoint.objects.filter(scorer=player, typeOfPoint="PT").count
+        singlePoints = Point.objects.filter(scorer=player, typeOfPoint="PT").count
         tinks = Point.objects.filter(scorer=player, typeOfPoint="TK").count
         sinks = Point.objects.filter(scorer=player, typeOfPoint="SK").count
         bounceSinks = Point.objects.filter(scorer=player, typeOfPoint="BS").count
