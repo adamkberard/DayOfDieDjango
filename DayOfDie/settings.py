@@ -47,11 +47,15 @@ INSTALLED_APPS = [
     # Third-Party Apps
     'whitenoise.runserver_nostatic',
     'rest_framework',
+    'rest_framework.authtoken',
 
     # Local Apps
     #'apps.litter',
-    'games',
+    'apps.games',
+    'apps.my_auth',
 ]
+
+AUTH_USER_MODEL = 'my_auth.CustomUser'
 
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
