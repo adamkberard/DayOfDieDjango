@@ -1,66 +1,127 @@
-from django.shortcuts import render
-from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from rest_framework import authentication
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.renderers import JSONRenderer
 from rest_framework.parsers import JSONParser
-from django.forms.models import model_to_dict
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from .models import Game, Point
+from .serializers import GameSerializer, PointSerializer
+from apps.my_auth.models import CustomUser
 
-@csrf_exempt
-def gameCRUD(request):
+
+class GameDetailView(APIView):
     """
-    Creates a new game and all the points
+    View for single game related requests
+
+    * Requres token auth
     """
-    if request.method == 'GET':
-        games = []
-        gameSet = Game.objects.all()
-        for game in gameSet:
-            games.append(getGameJSON(game))
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = [authentication.TokenAuthentication]
+    renderer_classes = [JSONRenderer]
 
-        return JsonResponse(data=games, status=201, safe=False)
-    elif request.method == 'POST':
-        data = JSONParser().parse(request)
+    def get(self, request, pk):
+        """
+        Return a single game
+        """
+        try:
+            gameModel = Game.objects.users_games(user=request.user).filter(id=pk)
+            gamePoints  = Point.objects.filter(game=gameModel)
+        except Game.DoesNotExist:
+            errors = {'pk': 'Game id not found: ' + str(pk)}
+            returnData = {'errors': errors}
+            return Response(returnData)
 
-        gameDict = data['game']
-        pointDicts = gameDict['points']
+        gameSerialized = GameSerializer(gameModel)
+        pointsSerialized = PointSerializer(gamePoints, many=True)
+        returnData = {'game': gameSerialized.data,
+                      'points': pointsSerialized.data
+                     }
+        return Response(returnData)
 
-        # Gets the game data and creates and saves a game
-        game = Game()
-        game.playerOne = gameDict['playerOne']
-        game.playerTwo = gameDict['playerTwo']
-        game.playerThree = gameDict['playerThree']
-        game.playerFour = gameDict['playerFour']
-        game.save()
-        
-        # Creates all the different points
-        for pointDict in pointDicts:
-            tempPoint = Point()
-            tempPoint.typeOfPoint = pointDict['typeOfPoint']
-            tempPoint.scorer = pointDict['scorer']
-            tempPoint.scoredOn = pointDict['scoredOn']
-            tempPoint.game = game
-            tempPoint.save()
+    def put(self, request, pk):
+        """
+        Edits a game
+        """
+        #try:
+        #    gameModel = Game.objects.get(user=request.user, id=pk)
+        #    gamePoints  = Point.objects.filter(game=gameModel)
+        #except Game.DoesNotExist:
+        #    errors = {'pk': 'Game id not found: ' + str(pk)}
+        #    returnData = {'errors': errors}
+        #    return Response(returnData)
 
-        return JsonResponse(data={'status': 'okay'}, status=201)
+        #gameSerialized = GameSerializer(litterModel)
+        #pointsSerialized = PointSerializer(litterModel, many=True)
+        #returnData = {'game': gameSerialized,
+        #              'points': pointsSerialized
+        #             }
+        returnData = {'error': 'hello world'}
+        return Response(returnData)
 
-@csrf_exempt
-def gameCRUDDetail(request, gameId):
-    if request.method == 'GET':
-        pass
-    elif request.method == 'PUT':
-        pass
-    elif request.method == 'DELETE':
-        pass
+class GameView(APIView):
+    """
+    View for getting all lists, and posting
 
-def getGameJSON(game):
-    pointsSet = Point.objects.filter(game=game)
-    
-    points = []
+    * Requres token auth
+    """
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = [authentication.TokenAuthentication]
+    renderer_classes = [JSONRenderer]
 
-    for point in pointsSet:
-        points.append(model_to_dict(point))
+    def get(self, request):
+        gamesSet = Game.objects.users_games(user=request.user)
+        gamesSerialized = GameSerializer(gamesSet, many=True)
+        return Response(data=gamesSerialized.data, status=201)
 
-    return {'game': model_to_dict(game), 'points': points}
+    def post(self, request):
+        if 'game' not in request.data:
+            data = {'game': ['This field is required.']}
+            return Response(data=data, status=400)
+        # We have to convert the incoming usernames into their pk's
+        convertedGameData = convertToPK(request.data['game'])
+        pointsData = request.data['points']
+        serializedGame = GameSerializer(data=convertedGameData)
+
+        errors = {}
+        points = []
+
+        if serializedGame.is_valid():
+            game = serializedGame.save()
+        else:
+            return Response(data=serializedGame.errors)
+
+        for pointData in request.data['points']:
+            convertedPoint = convertToPK(pointData)
+            serializedPoint = PointSerializer(data=convertedPoint)
+            if serializedPoint.is_valid():
+                point = serializedPoint.save()
+                point.game = game
+                points.append(serializedPoint.data)
+            else:
+                errors.update(serializedPoint.errors)
+
+        if len(errors) == 0:
+            returnData = {'game': serializedGame.data,
+                          'points': points}
+            return Response(data=returnData)
+        else:
+            return Response(data=errors)
+
+
+def convertToPK(data):
+    terms = ['playerOne', 'playerTwo', 'playerThree', 'playerFour',
+             'scorer', 'scoredOn']
+
+    for term in terms:
+        if term in data:
+            username = data[term]
+            if username is not None:
+                data[term] = CustomUser.objects.get(username=username).id
+
+    return data
+      
 
 @csrf_exempt
 def gameStats(request):
@@ -87,4 +148,3 @@ def gameStats(request):
     context = {}
     context['playersData'] = playersData
     return render(request, 'games/stats.html', context)
-    return 

@@ -1,8 +1,12 @@
-from .views import gameCRUD, gameCRUDDetail, gameStats
-from django.urls import path
+from django.urls import path, register_converter
+
+from tools.ids_encoder import converters
+
+from .views import GameDetailView, GameView, gameStats
+
+register_converter(converters.HashidsConverter, 'hashids')
 
 urlpatterns = [
-    path('', gameCRUD, name='game-crud'),
-    path('<int:gameId>/', gameCRUDDetail, name='game-crud-detail'),
-    path('stats/', gameStats, name='game-stats'),
+    path('', GameView.as_view(), name='game_list'),
+    path('<hashids:pk>/', GameDetailView.as_view(), name='game_detail'),
 ]

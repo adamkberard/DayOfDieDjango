@@ -50,9 +50,11 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
 
     # Local Apps
-    #'apps.litter',
     'apps.games',
     'apps.my_auth',
+    'apps.friends',
+    'apps.teams',
+    'tools.ids_encoder',
 ]
 
 AUTH_USER_MODEL = 'my_auth.CustomUser'
@@ -62,7 +64,7 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.JSONRenderer',
         'rest_framework.renderers.BrowsableAPIRenderer',
     ],
-    'DATETIME_FORMAT': "%Y-%m-%d-%H:%M:%S",
+    'DATETIME_FORMAT': "%Y-%m-%d %H:%M:%S",
 }
 
 MIDDLEWARE = [
@@ -142,7 +144,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Los_Angeles'
+#TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
