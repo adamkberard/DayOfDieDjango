@@ -281,3 +281,13 @@ class Test_Game_GET_Detail(TestCase):
             # To do this I remove matching points until hopefully both
             # lists are empty
             self.assertTrue(pointsMatch(pointModels, pointsData))
+
+    def test_no_authentication(self):
+        """
+        Trying to get all the litter without any user auth
+        """
+        client = APIClient()
+        url = reverse('game_list')
+        response = client.get(url)
+
+        self.assertEqual(response.status_code, 401)

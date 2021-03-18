@@ -31,7 +31,9 @@ class PointSerializer(serializers.ModelSerializer):
         Changes the id to hashed id before it sends it out
         """
         ret = super().to_representation(instance)
-        ret['id'] = encode_id(ret['id'])
+
+        if ret['id'] is not None:
+            ret['id'] = encode_id(ret['id'])
 
         if ret['game'] is not None:
             ret['game'] = encode_id(ret['game'])
@@ -79,7 +81,8 @@ class GameSerializer(serializers.ModelSerializer):
         Changes the id to hashed id before it sends it out
         """
         ret = super().to_representation(instance)
-        ret['id'] = encode_id(ret['id'])
+        if ret['id'] is not None:
+            ret['id'] = encode_id(ret['id'])
 
         # Changes the player id's to their usernames
         players = ['playerOne', 'playerTwo', 'playerThree', 'playerFour']
