@@ -26,7 +26,7 @@ class GameDetailView(APIView):
         """
         try:
             usersGameModels = Game.objects.users_games(user=request.user)
-            gameModel = usersGameModels.filter(id=gameId)
+            gameModel = usersGameModels.get(id=gameId)
             gamePoints = Point.objects.filter(game=gameModel)
         except Game.DoesNotExist:
             errors = {'gameId': 'Game id not found: ' + str(gameId)}

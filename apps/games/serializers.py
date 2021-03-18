@@ -30,20 +30,20 @@ class PointSerializer(serializers.ModelSerializer):
         """
         Changes the id to hashed id before it sends it out
         """
-        res = super().to_representation(instance)
-        res['id'] = encode_id(res['id'])
+        ret = super().to_representation(instance)
+        ret['id'] = encode_id(ret['id'])
 
-        if res['game'] is not None:
-            res['game'] = encode_id(res['game'])
+        if ret['game'] is not None:
+            ret['game'] = encode_id(ret['game'])
 
         # Changes the player id's to their usernames
         players = ['scorer', 'scoredOn']
 
         for player in players:
-            if res[player] is not None:
-                playerId = res[player]
-                res[player] = CustomUser.objects.get(id=playerId).username
-        return res
+            if ret[player] is not None:
+                playerId = ret[player]
+                ret[player] = CustomUser.objects.get(id=playerId).username
+        return ret
 
 
 class GameSerializer(serializers.ModelSerializer):
@@ -78,14 +78,14 @@ class GameSerializer(serializers.ModelSerializer):
         """
         Changes the id to hashed id before it sends it out
         """
-        res = super().to_representation(instance)
-        res['id'] = encode_id(res['id'])
+        ret = super().to_representation(instance)
+        ret['id'] = encode_id(ret['id'])
 
         # Changes the player id's to their usernames
         players = ['playerOne', 'playerTwo', 'playerThree', 'playerFour']
 
         for player in players:
-            if res[player] is not None:
-                playerId = res[player]
-                res[player] = CustomUser.objects.get(id=playerId).username
-        return res
+            if ret[player] is not None:
+                playerId = ret[player]
+                ret[player] = CustomUser.objects.get(id=playerId).username
+        return ret

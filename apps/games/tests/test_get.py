@@ -145,7 +145,8 @@ class Test_Game_GET(TestCase):
 class Test_Game_GET_Detail(TestCase):
     def test_get_game(self):
         """
-        Trying to get a single game
+        Trying to get a single game that is also the players only
+        game
         """
         plyr = CustomUserFactory.create_batch(size=4)
         gameModel = GameFactory(playerOne=plyr[0], playerTwo=plyr[1],
@@ -155,7 +156,7 @@ class Test_Game_GET_Detail(TestCase):
                                                 game=gameModel)
 
         client = APIClient()
-        url = reverse('game-detail', kwargs={'gameId': gameModel.id})
+        url = reverse('game_detail', kwargs={'gameId': gameModel.id})
         client.force_authenticate(user=plyr[0])
         response = client.get(url)
         responseData = json.loads(response.content)
@@ -185,3 +186,98 @@ class Test_Game_GET_Detail(TestCase):
         # To do this I remove matching points until hopefully both
         # lists are empty
         self.assertTrue(pointsMatch(pointModels, pointsData))
+
+    def test_get_game_twice(self):
+        """
+        Trying to get a single game that is the players only game twice.
+        """
+        plyr = CustomUserFactory.create_batch(size=4)
+        gameModel = GameFactory(playerOne=plyr[0], playerTwo=plyr[1],
+                                playerThree=plyr[2], playerFour=plyr[3])
+        pointModels = PointFactory.create_batch(scorer=plyr[0],
+                                                typeOfPoint='PT', size=11,
+                                                game=gameModel)
+
+        client = APIClient()
+        url = reverse('game_detail', kwargs={'gameId': gameModel.id})
+        client.force_authenticate(user=plyr[0])
+
+        for i in range(0, 2):
+            response = client.get(url)
+            responseData = json.loads(response.content)
+
+            self.assertTrue('game' in responseData)
+            self.assertTrue('points' in responseData)
+            gameData = responseData['game']
+            pointsData = responseData['points']
+
+            # First I'll check the date times
+            dateFormatString = '%Y-%m-%d %H:%M:%S'
+            self.assertEqual(gameData['timeStarted'],
+                             gameModel.timeStarted.strftime(dateFormatString))
+            self.assertEqual(gameData['timeSaved'],
+                             gameModel.timeSaved.strftime(dateFormatString))
+
+            # Then I'll check the players
+            fields = ['playerOne', 'playerTwo', 'playerThree', 'playerFour']
+            for field in fields:
+                self.assertEqual(gameData[field],
+                                 getattr(gameModel, field).username)
+
+            # Then make sure we got an ID back
+            self.assertTrue(len(gameData['id']) >= 8)
+
+            # Then I check the points
+            # To do this I remove matching points until hopefully both
+            # lists are empty
+            self.assertTrue(pointsMatch(pointModels, pointsData))
+
+    def test_get_games_of_many(self):
+        """
+        Trying to get all the games of many
+        """
+        converter = HashidsConverter()
+        plyr = CustomUserFactory.create_batch(size=4)
+        gameModels = GameFactory.create_batch(playerOne=plyr[0],
+                                              playerTwo=plyr[1],
+                                              playerThree=plyr[2],
+                                              playerFour=plyr[3],
+                                              size=12)
+        for gameModel in gameModels:
+            pointModels = PointFactory.create_batch(scorer=plyr[0],
+                                                    typeOfPoint='PT', size=11,
+                                                    game=gameModel)
+
+
+        for gameModel in gameModels:
+            client = APIClient()
+            url = reverse('game_detail', kwargs={'gameId': gameModel.id})
+            client.force_authenticate(user=plyr[0])
+            response = client.get(url)
+            responseData = json.loads(response.content)
+
+            self.assertTrue('game' in responseData)
+            self.assertTrue('points' in responseData)
+            gameData = responseData['game']
+            pointsData = responseData['points']
+
+            # Next I'll check the date times
+            dateFormatString = '%Y-%m-%d %H:%M:%S'
+            self.assertEqual(gameData['timeStarted'],
+                             gameModel.timeStarted.strftime(dateFormatString))
+            self.assertEqual(gameData['timeSaved'],
+                             gameModel.timeSaved.strftime(dateFormatString))
+
+            # Then I'll check the players
+            fields = ['playerOne', 'playerTwo', 'playerThree', 'playerFour']
+            for field in fields:
+                self.assertEqual(gameData[field],
+                                 getattr(gameModel, field).username)
+
+            # Then make sure we got an ID back
+            self.assertTrue(len(gameData['id']) >= 8)
+
+            # Then I check the points
+            # To do this I remove matching points until hopefully both
+            # lists are empty
+            self.assertTrue(pointsMatch(pointModels, pointsData))
