@@ -30,7 +30,7 @@ DEBUG = True
 ALLOWED_HOSTS = ['0.0.0.0', 'localhost', '127.0.0.1', 'dayofdie.herokuapp.com']
 
 # ENVIRONMENT VARIABLES
-#SECRET_KEY = os.environ.get('SECRET_KEY')
+# SECRET_KEY = os.environ.get('SECRET_KEY')
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 
@@ -96,11 +96,6 @@ TEMPLATES = [
     },
 ]
 
-#SETTINGS_PATH = os.path.dirname(os.path.dirname(__file__))
-#TEMPLATE_DIRS = (
-#    os.path.join(SETTINGS_PATH, 'templates'),
-#)
-
 WSGI_APPLICATION = 'DayOfDie.wsgi.application'
 
 # Database
@@ -125,16 +120,21 @@ DATABASES['default'].update(db_from_env)
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        'NAME':
+        'django.contrib.auth.password_validation.' +
+        'UserAttributeSimilarityValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'NAME':
+        'django.contrib.auth.password_validation.MinimumLengthValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        'NAME':
+        'django.contrib.auth.password_validation.CommonPasswordValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        'NAME':
+        'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
 
@@ -144,8 +144,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'America/Los_Angeles'
-#TIME_ZONE = 'UTC'
+TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
@@ -160,15 +159,18 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-#location where django collect all static files
-STATIC_ROOT = os.path.join(BASE_DIR,'static')
+# location where django collect all static files
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 # location where you will store your static files
-STATICFILES_DIRS = [os.path.join(BASE_DIR,'DayOfDie/static')
-]
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'DayOfDie/static')]
 
-MEDIA_ROOT = os.path.join(BASE_DIR,'media')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
 # SALT
-HASHIDS_SALT='im the sasquatch kid. wait no. the big squaaaaaaaaaaatch hehe'
+HASHIDS = {
+    # Keep salt secret
+    'SALT': 'im the sasquatch kid. wait no. the big squaaaaaaaaaaatch hehe',
+    'MIN_LENGTH': 8
+}

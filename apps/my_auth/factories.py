@@ -1,12 +1,7 @@
-import random
-
 import factory
-from faker import Faker
-from faker.factory import Factory
 
 from .models import CustomUser
 
-Faker = Factory.create
 
 class CustomUserFactory(factory.django.DjangoModelFactory):
     class Meta:

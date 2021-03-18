@@ -1,4 +1,3 @@
-import datetime
 import json
 
 from django.test import TestCase
@@ -6,11 +5,10 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 
 from apps.my_auth.factories import CustomUserFactory
+from tools.helperFunctions.testHelperFuncs import pointsMatch
 
 from ..factories import GameFactory, PointFactory
 from ..serializers import GameSerializer, PointSerializer
-
-from ..models import Point
 
 
 class Test_Game_POST(TestCase):
@@ -18,26 +16,19 @@ class Test_Game_POST(TestCase):
         """
         Testing one simple post
         """
-        p1 = CustomUserFactory()
-        p2 = CustomUserFactory()
-        p3 = CustomUserFactory()
-        p4 = CustomUserFactory()
-        ogGameModel = GameFactory.build(playerOne=p1,
-                                        playerTwo=p2,
-                                        playerThree=p3,
-                                        playerFour=p4)
-        ogGameData = GameSerializer(ogGameModel)
-        ogPointModels = PointFactory.build_batch(scorer=p1, 
-                                                 typeOfPoint='PT',
-                                                 size=11)
-        ogPointData = PointSerializer(ogPointModels, many=True)
+        plyr = CustomUserFactory.create_batch(size=4)
+        gameModel = GameFactory.build(playerOne=plyr[0], playerTwo=plyr[1],
+                                      playerThree=plyr[2], playerFour=plyr[3])
+        pointModels = PointFactory.build_batch(scorer=plyr[0],
+                                               typeOfPoint='PT',
+                                               size=11)
 
-        data = {'game': ogGameData.data,
-                'points': ogPointData.data}
+        data = {'game': GameSerializer(gameModel).data,
+                'points': PointSerializer(pointModels, many=True).data}
 
         client = APIClient()
         url = reverse('game_list')
-        client.force_authenticate(user=p1)
+        client.force_authenticate(user=plyr[0])
         response = client.post(url, data, format='json')
         responseData = json.loads(response.content)
 
@@ -47,44 +38,25 @@ class Test_Game_POST(TestCase):
         pointsData = responseData['points']
 
         # First I'll check the date times
-        fields = ['timeStarted', 'timeSaved']
-        for field in fields:
-            self.assertEqual(gameData[field], getattr(ogGameModel, field).strftime("%Y-%m-%d %H:%M:%S"))
-        
+        dateFormatString = '%Y-%m-%d %H:%M:%S'
+        self.assertEqual(gameData['timeStarted'],
+                         gameModel.timeStarted.strftime(dateFormatString))
+        self.assertEqual(gameData['timeSaved'],
+                         gameModel.timeSaved.strftime(dateFormatString))
+
         # Then I'll check the players
         fields = ['playerOne', 'playerTwo', 'playerThree', 'playerFour']
         for field in fields:
-            self.assertEqual(gameData[field], getattr(ogGameModel, field).username)
+            self.assertEqual(gameData[field],
+                             getattr(gameModel, field).username)
 
         # Then make sure we got an ID back
         self.assertTrue(len(gameData['id']) >= 8)
 
         # Then I check the points
-        # To do this I remove matching points until hopefully both 
+        # To do this I remove matching points until hopefully both
         # lists are empty
-        self.assertTrue(self.pointsMatch(ogPointModels, pointsData))
-            
-    def pointsMatch(self, models, points):
-        if len(models) != len(points):
-            return False
-
-        for model in models:
-            for point in points:
-                if (self.pointMatch(model, point)):
-                    points.remove(point)
-                    break
-
-        return len(points) == 0
-
-    def pointMatch(self, model, point):
-        if model.scorer.username != point['scorer']:
-            return False
-        if model.typeOfPoint != point['typeOfPoint']:
-            return False
-        if model.scoredOn is not None:
-            if model.scoredOn.username != point['scoredOn']:
-                return False
-        return True
+        self.assertTrue(pointsMatch(pointModels, pointsData))
 
     def test_no_posts(self):
         """

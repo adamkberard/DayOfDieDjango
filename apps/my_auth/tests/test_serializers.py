@@ -1,8 +1,7 @@
 from django.test import TestCase
 
-from ..models import CustomUser
-from ..serializers import CustomUserSerializer
 from ..factories import CustomUserFactory
+from ..serializers import CustomUserSerializer
 
 
 class CustomUserSerializerTests(TestCase):
@@ -11,7 +10,7 @@ class CustomUserSerializerTests(TestCase):
         userModel = CustomUserFactory()
         serialized = CustomUserSerializer(userModel)
         sData = serialized.data
-        
+
         fields = ['username', 'email']
         for field in fields:
             self.assertEqual(sData[field], getattr(userModel, field))
@@ -23,8 +22,7 @@ class CustomUserSerializerTests(TestCase):
             userModels.append(CustomUserFactory())
         serialized = CustomUserSerializer(userModels, many=True)
         sData = serialized.data
-        
+
         for i in range(0, 10):
-            fields = ['username', 'email']
-            for field in fields:
-                self.assertEqual(sData[i][field], getattr(userModels[i], field))
+            self.assertEqual(sData['username'], userModels.username)
+            self.assertEqual(sData['email'], userModels.email)

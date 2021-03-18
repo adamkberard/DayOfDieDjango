@@ -1,9 +1,7 @@
 from rest_framework import serializers
 
-from tools.ids_encoder.converters import HashidsConverter
-
-from apps.my_auth.serializers import CustomUserSerializer
 from apps.my_auth.models import CustomUser
+from tools.ids_encoder import encode_id
 
 from .models import Game, Point
 
@@ -20,10 +18,10 @@ class PointSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         instance.typeOfPoint = validated_data.get('typeOfPoint',
-                                                   instance.typeOfPoint)
+                                                  instance.typeOfPoint)
         instance.scorer = validated_data.get('scorer', instance.scorer)
         instance.scoredOn = validated_data.get('scoredOn',
-                                                    instance.scoredOn)
+                                               instance.scoredOn)
         instance.game = validated_data.get('game', instance.game)
         instance.save()
         return instance
@@ -32,21 +30,20 @@ class PointSerializer(serializers.ModelSerializer):
         """
         Changes the id to hashed id before it sends it out
         """
-        ret = super().to_representation(instance)
-        converter = HashidsConverter()
-        if ret['id'] is not None:
-            ret['id'] = converter.to_url(ret['id'])
-        if ret['game'] is not None:
-            ret['game'] = converter.to_url(ret['game'])
+        res = super().to_representation(instance)
+        res['id'] = encode_id(res['id'])
+
+        if res['game'] is not None:
+            res['game'] = encode_id(res['game'])
 
         # Changes the player id's to their usernames
         players = ['scorer', 'scoredOn']
 
         for player in players:
-            if ret[player] is not None:
-                playerId = ret[player]
-                ret[player] = CustomUser.objects.get(id=playerId).username
-        return ret
+            if res[player] is not None:
+                playerId = res[player]
+                res[player] = CustomUser.objects.get(id=playerId).username
+        return res
 
 
 class GameSerializer(serializers.ModelSerializer):
@@ -61,12 +58,18 @@ class GameSerializer(serializers.ModelSerializer):
         return game
 
     def update(self, instance, validated_data):
-        instance.timeStarted = validated_data.get('timeStarted', instance.timeStarted)
-        instance.timeSaved = validated_data.get('timeSaved', instance.timeSaved)
-        instance.playerOne = validated_data.get('playerOne', instance.playerOne)
-        instance.playerTwo = validated_data.get('playerTwo', instance.playerTwo)
-        instance.playerThree = validated_data.get('playerThree', instance.playerThree)
-        instance.playerFour = validated_data.get('playerFour', instance.playerFour)
+        instance.timeStarted = validated_data.get('timeStarted',
+                                                  instance.timeStarted)
+        instance.timeSaved = validated_data.get('timeSaved',
+                                                instance.timeSaved)
+        instance.playerOne = validated_data.get('playerOne',
+                                                instance.playerOne)
+        instance.playerTwo = validated_data.get('playerTwo',
+                                                instance.playerTwo)
+        instance.playerThree = validated_data.get('playerThree',
+                                                  instance.playerThree)
+        instance.playerFour = validated_data.get('playerFour',
+                                                 instance.playerFour)
         instance.save()
 
         return instance
@@ -75,16 +78,14 @@ class GameSerializer(serializers.ModelSerializer):
         """
         Changes the id to hashed id before it sends it out
         """
-        ret = super().to_representation(instance)
-        converter = HashidsConverter()
-        if ret['id'] is not None:
-            ret['id'] = converter.to_url(ret['id'])
+        res = super().to_representation(instance)
+        res['id'] = encode_id(res['id'])
 
         # Changes the player id's to their usernames
         players = ['playerOne', 'playerTwo', 'playerThree', 'playerFour']
 
         for player in players:
-            if ret[player] is not None:
-                playerId = ret[player]
-                ret[player] = CustomUser.objects.get(id=playerId).username
-        return ret
+            if res[player] is not None:
+                playerId = res[player]
+                res[player] = CustomUser.objects.get(id=playerId).username
+        return res

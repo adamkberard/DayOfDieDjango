@@ -3,6 +3,7 @@ from django.db import models
 
 from .managers import GameManager
 
+
 class GameSettings(models.Model):
     # Settings for games
     numPointsToWin = models.IntegerField()
@@ -13,6 +14,7 @@ class GameSettings(models.Model):
     partnerSinkPointsValue = models.IntegerField()
     selfSinkPointsValue = models.IntegerField()
     winByTwo = models.BooleanField()
+
 
 # Create your models here.
 class Game(models.Model):
@@ -25,12 +27,11 @@ class Game(models.Model):
                                   on_delete=models.CASCADE,
                                   related_name="p2")
     playerThree = models.ForeignKey(settings.AUTH_USER_MODEL,
-                                  on_delete=models.CASCADE,
-                                  related_name="p3")
+                                    on_delete=models.CASCADE,
+                                    related_name="p3")
     playerFour = models.ForeignKey(settings.AUTH_USER_MODEL,
-                                  on_delete=models.CASCADE,
-                                  related_name="p4")
-
+                                   on_delete=models.CASCADE,
+                                   related_name="p4")
 
     objects = GameManager()
 
@@ -42,13 +43,18 @@ class Game(models.Model):
 
     def update(self, instance, validated_data):
         instance.timeSaved = validated_data.get('timeSaved',
-                                                   instance.timeSaved)
-        instance.playerOne = validated_data.get('playerOne', instance.playerOne)
-        instance.playerTwo = validated_data.get('playerTwo', instance.playerTwo)
-        instance.playerThree = validated_data.get('playerThree', instance.playerThree)
-        instance.playerFour = validated_data.get('playerFour', instance.playerFour)
+                                                instance.timeSaved)
+        instance.playerOne = validated_data.get('playerOne',
+                                                instance.playerOne)
+        instance.playerTwo = validated_data.get('playerTwo',
+                                                instance.playerTwo)
+        instance.playerThree = validated_data.get('playerThree',
+                                                  instance.playerThree)
+        instance.playerFour = validated_data.get('playerFour',
+                                                 instance.playerFour)
         instance.save()
         return instance
+
 
 class Point(models.Model):
     SINGLE_POINT = 'PT'
@@ -69,7 +75,7 @@ class Point(models.Model):
         (BOUNCE_SINK, 'bounce sink'),
         (PARTNER_SINK, 'partner sink'),
     ]
-    
+
     POINT_TYPE_CHOICES = SCORED_POINT_CHOICES + SCORED_ON_POINT_CHOICES
 
     typeOfPoint = models.CharField(max_length=2,
@@ -77,11 +83,11 @@ class Point(models.Model):
                                    default=SINGLE_POINT)
 
     scorer = models.ForeignKey(settings.AUTH_USER_MODEL,
-                                  on_delete=models.CASCADE)
+                               on_delete=models.CASCADE)
     scoredOn = models.ForeignKey(settings.AUTH_USER_MODEL,
-                                  on_delete=models.CASCADE,
-                                  related_name='scored',
-                                  null=True, blank=True)
+                                 on_delete=models.CASCADE,
+                                 related_name='scored',
+                                 null=True, blank=True)
 
     game = models.ForeignKey(Game, on_delete=models.CASCADE,
                              null=True, blank=True,
@@ -97,7 +103,8 @@ class Point(models.Model):
         elif self.typeOfPoint == "BS":
             return "{} bounce sank {}".format(self.scorer, self.scoredOn)
         elif self.typeOfPoint == "PS":
-            return "{} sank their partner, {}".format(self.scorer, self.scoredOn)
+            return "{} sank their partner, {}".format(self.scorer,
+                                                      self.scoredOn)
         elif self.typeOfPoint == "SS":
             return "{} self sank".format(self.scorer)
         return "You shouldn't be seeing this."
@@ -107,7 +114,7 @@ class Point(models.Model):
 
     def update(self, instance, validated_data):
         instance.typeOfPoint = validated_data.get('typeOfPoint',
-                                                   instance.typeOfPoint)
+                                                  instance.typeOfPoint)
         instance.scorer = validated_data.get('scorer', instance.scorer)
         instance.scoredOn = validated_data.get('scoredOn',
                                                instance.scoredOn)

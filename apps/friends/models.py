@@ -3,17 +3,16 @@ from django.db import models
 
 from .managers import FriendManager
 
-# Create your models here.
 
 class Friend(models.Model):
     teamCaptain = models.ForeignKey(settings.AUTH_USER_MODEL,
-                                  on_delete=models.CASCADE,
-                                  related_name="teamCaptain")
+                                    on_delete=models.CASCADE,
+                                    related_name="teamCaptain")
     teammate = models.ForeignKey(settings.AUTH_USER_MODEL,
-                                  on_delete=models.CASCADE,
-                                  related_name="teammate")
+                                 on_delete=models.CASCADE,
+                                 related_name="teammate")
 
     objects = FriendManager()
 
     def __str__(self):
-        return teamCaptain.username + " and " + teammate.username
+        return self.teamCaptain.username + " and " + self.teammate.username

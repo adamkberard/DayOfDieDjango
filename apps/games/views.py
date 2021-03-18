@@ -1,14 +1,13 @@
-from django.views.decorators.csrf import csrf_exempt
 from rest_framework import authentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.renderers import JSONRenderer
-from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from apps.my_auth.models import CustomUser
+
 from .models import Game, Point
 from .serializers import GameSerializer, PointSerializer
-from apps.my_auth.models import CustomUser
 
 
 class GameDetailView(APIView):
@@ -21,44 +20,45 @@ class GameDetailView(APIView):
     authentication_classes = [authentication.TokenAuthentication]
     renderer_classes = [JSONRenderer]
 
-    def get(self, request, pk):
+    def get(self, request, gameId):
         """
         Return a single game
         """
         try:
-            gameModel = Game.objects.users_games(user=request.user).filter(id=pk)
-            gamePoints  = Point.objects.filter(game=gameModel)
+            usersGameModels = Game.objects.users_games(user=request.user)
+            gameModel = usersGameModels.filter(id=gameId)
+            gamePoints = Point.objects.filter(game=gameModel)
         except Game.DoesNotExist:
-            errors = {'pk': 'Game id not found: ' + str(pk)}
+            errors = {'gameId': 'Game id not found: ' + str(gameId)}
             returnData = {'errors': errors}
             return Response(returnData)
 
         gameSerialized = GameSerializer(gameModel)
         pointsSerialized = PointSerializer(gamePoints, many=True)
         returnData = {'game': gameSerialized.data,
-                      'points': pointsSerialized.data
-                     }
+                      'points': pointsSerialized.data}
         return Response(returnData)
 
-    def put(self, request, pk):
+    def put(self, request, gameId):
         """
         Edits a game
         """
-        #try:
-        #    gameModel = Game.objects.get(user=request.user, id=pk)
-        #    gamePoints  = Point.objects.filter(game=gameModel)
-        #except Game.DoesNotExist:
-        #    errors = {'pk': 'Game id not found: ' + str(pk)}
-        #    returnData = {'errors': errors}
-        #    return Response(returnData)
+        # try:
+        #     gameModel = Game.objects.get(user=request.user, id=gameId)
+        #     gamePoints  = Point.objects.filter(game=gameModel)
+        # except Game.DoesNotExist:
+        #     errors = {'gameId': 'Game id not found: ' + str(gameId)}
+        #     returnData = {'errors': errors}
+        #     return Response(returnData)
 
-        #gameSerialized = GameSerializer(litterModel)
-        #pointsSerialized = PointSerializer(litterModel, many=True)
-        #returnData = {'game': gameSerialized,
-        #              'points': pointsSerialized
-        #             }
+        # gameSerialized = GameSerializer(litterModel)
+        # pointsSerialized = PointSerializer(litterModel, many=True)
+        # returnData = {'game': gameSerialized,
+        #               'points': pointsSerialized
+        #              }
         returnData = {'error': 'hello world'}
         return Response(returnData)
+
 
 class GameView(APIView):
     """
@@ -72,16 +72,27 @@ class GameView(APIView):
 
     def get(self, request):
         gamesSet = Game.objects.users_games(user=request.user)
-        gamesSerialized = GameSerializer(gamesSet, many=True)
-        return Response(data=gamesSerialized.data, status=201)
+        returnData = []
+        for game in gamesSet:
+            pointsSet = Point.objects.filter(game=game)
+            pointsSerialized = PointSerializer(pointsSet, many=True)
+            gameSerialized = GameSerializer(game)
+            gameDict = {'game': gameSerialized.data,
+                        'points': pointsSerialized.data}
+            returnData.append(gameDict)
+        return Response(data=returnData, status=201)
 
     def post(self, request):
+        # Since I'm doing more than one object at a time, I have to also
+        # check for to be sure the things exist
         if 'game' not in request.data:
             data = {'game': ['This field is required.']}
             return Response(data=data, status=400)
+        if 'points' not in request.data:
+            data = {'points': ['This field is required.']}
+            return Response(data=data, status=400)
         # We have to convert the incoming usernames into their pk's
         convertedGameData = convertToPK(request.data['game'])
-        pointsData = request.data['points']
         serializedGame = GameSerializer(data=convertedGameData)
 
         errors = {}
@@ -121,30 +132,3 @@ def convertToPK(data):
                 data[term] = CustomUser.objects.get(username=username).id
 
     return data
-      
-
-@csrf_exempt
-def gameStats(request):
-    playersData = []
-    players = {"Adam", "Ben", "Jake", "Kyle", "Marcus"}
-    for player in players:
-        playerData = {}
-        singlePoints = Point.objects.filter(scorer=player, typeOfPoint="PT").count
-        tinks = Point.objects.filter(scorer=player, typeOfPoint="TK").count
-        sinks = Point.objects.filter(scorer=player, typeOfPoint="SK").count
-        bounceSinks = Point.objects.filter(scorer=player, typeOfPoint="BS").count
-        partnerSinks = Point.objects.filter(scorer=player, typeOfPoint="PS").count
-        selfSinks = Point.objects.filter(scorer=player, typeOfPoint="SS").count
-        #total = singlePoints + (2 * (tinks + bounceSinks)) + (3 * sinks)
-        playerData['name'] = player
-        #playerData['totalPoints'] = total
-        playerData['singlePoints'] = singlePoints
-        playerData['tinks'] = tinks
-        playerData['sinks'] = sinks
-        playerData['bounceSinks'] = bounceSinks
-        playerData['partnerSinks'] = partnerSinks
-        playerData['selfSinks'] = selfSinks
-        playersData.append(playerData)
-    context = {}
-    context['playersData'] = playersData
-    return render(request, 'games/stats.html', context)

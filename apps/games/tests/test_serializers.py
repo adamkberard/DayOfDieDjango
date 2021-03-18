@@ -2,10 +2,9 @@ from django.test import TestCase
 
 from apps.my_auth.tests.factories import CustomUserFactory
 
-from ..models import Game, Point
+from ..factories import GameFactory, PointFactory
+from ..models import Point
 from ..serializers import GameSerializer, PointSerializer
-
-from ..factories import PointFactory, GameFactory
 
 
 class GameSerializerTests(TestCase):
@@ -16,10 +15,12 @@ class GameSerializerTests(TestCase):
         sData = serialized.data
 
         # First I'll check the date times
-        fields = ['timeStarted', 'timeSaved']
-        for field in fields:
-            self.assertEqual(sData[field], getattr(gameModel, field).strftime("%Y-%m-%d-%H:%M:%S"))
-        
+        dateFormatString = "%Y-%m-%d-%H:%M:%S"
+        self.assertEqual(sData['timeStarted'],
+                         gameModel.timeStarted.strftime(dateFormatString))
+        self.assertEqual(sData['timeSaved'],
+                         gameModel.timeSaved.strftime(dateFormatString))
+
         # Then I check the playerId's
         fields = ['playerOne', 'playerTwo', 'playerThree', 'playerFour']
         for field in fields:
@@ -37,7 +38,7 @@ class PointSerializerTests(TestCase):
         self.assertEqual(sData['typeOfPoint'], pointModel.typeOfPoint)
         self.assertEqual(sData['scorer'], pointModel.scorer.username)
         self.assertEqual(sData['scoredOn'], None)
-            
+
     def test_tink(self):
         """Testing a tink factory and serializer"""
         user1 = CustomUserFactory()
@@ -50,7 +51,7 @@ class PointSerializerTests(TestCase):
         self.assertEqual(sData['typeOfPoint'], pointModel.typeOfPoint)
         self.assertEqual(sData['scorer'], pointModel.scorer.username)
         self.assertEqual(sData['scoredOn'], pointModel.scoredOn.username)
-            
+
     def test_sink(self):
         """Testing a sink factory and serializer"""
         user1 = CustomUserFactory()
@@ -63,7 +64,7 @@ class PointSerializerTests(TestCase):
         self.assertEqual(sData['typeOfPoint'], pointModel.typeOfPoint)
         self.assertEqual(sData['scorer'], pointModel.scorer.username)
         self.assertEqual(sData['scoredOn'], pointModel.scoredOn.username)
-            
+
     def test_bounce_sink(self):
         """Testing a bounce sink factory and serializer"""
         user1 = CustomUserFactory()
@@ -76,7 +77,7 @@ class PointSerializerTests(TestCase):
         self.assertEqual(sData['typeOfPoint'], pointModel.typeOfPoint)
         self.assertEqual(sData['scorer'], pointModel.scorer.username)
         self.assertEqual(sData['scoredOn'], pointModel.scoredOn.username)
-            
+
     def test_partner_sink(self):
         """Testing a partner sink factory and serializer"""
         user1 = CustomUserFactory()
@@ -89,7 +90,7 @@ class PointSerializerTests(TestCase):
         self.assertEqual(sData['typeOfPoint'], pointModel.typeOfPoint)
         self.assertEqual(sData['scorer'], pointModel.scorer.username)
         self.assertEqual(sData['scoredOn'], pointModel.scoredOn.username)
-            
+
     def test_self_sink(self):
         """Testing a self sink factory and serializer"""
         user1 = CustomUserFactory()
