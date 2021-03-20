@@ -24,5 +24,5 @@ class CustomUserSerializerTests(TestCase):
         sData = serialized.data
 
         for i in range(0, 10):
-            self.assertEqual(sData['username'], userModels.username)
-            self.assertEqual(sData['email'], userModels.email)
+            self.assertEqual(sData[i]['username'], userModels[i].username)
+            self.assertEqual(sData[i]['email'], userModels[i].email)

@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from apps.my_auth.tests.factories import CustomUserFactory
+from apps.my_auth.factories import CustomUserFactory
 
 from ..factories import GameFactory, PointFactory
 from ..models import Point
@@ -15,7 +15,7 @@ class GameSerializerTests(TestCase):
         sData = serialized.data
 
         # First I'll check the date times
-        dateFormatString = "%Y-%m-%d-%H:%M:%S"
+        dateFormatString = "%Y-%m-%d %H:%M:%S"
         self.assertEqual(sData['timeStarted'],
                          gameModel.timeStarted.strftime(dateFormatString))
         self.assertEqual(sData['timeSaved'],

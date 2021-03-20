@@ -236,7 +236,6 @@ class Test_Game_GET_Detail(TestCase):
         """
         Trying to get all the games of many
         """
-        converter = HashidsConverter()
         plyr = CustomUserFactory.create_batch(size=4)
         gameModels = GameFactory.create_batch(playerOne=plyr[0],
                                               playerTwo=plyr[1],
@@ -247,7 +246,6 @@ class Test_Game_GET_Detail(TestCase):
             pointModels = PointFactory.create_batch(scorer=plyr[0],
                                                     typeOfPoint='PT', size=11,
                                                     game=gameModel)
-
 
         for gameModel in gameModels:
             client = APIClient()

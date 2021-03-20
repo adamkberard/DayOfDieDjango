@@ -1,6 +1,7 @@
 # My additional testing methods
 def pointsMatch(models, points):
     if len(models) != len(points):
+        print("LENGTH")
         return False
 
     for model in models:
