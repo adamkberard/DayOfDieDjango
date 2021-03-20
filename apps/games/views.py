@@ -29,8 +29,7 @@ class GameDetailView(APIView):
             gameModel = usersGameModels.get(id=gameId)
             gamePoints = Point.objects.filter(game=gameModel)
         except Game.DoesNotExist:
-            errors = {'gameId': 'Game id not found: ' + str(gameId)}
-            returnData = {'errors': errors}
+            returnData = {'error': 'Game id not found: ' + str(gameId)}
             return Response(returnData)
 
         gameSerialized = GameSerializer(gameModel)
@@ -43,20 +42,74 @@ class GameDetailView(APIView):
         """
         Edits a game
         """
-        # try:
-        #     gameModel = Game.objects.get(user=request.user, id=gameId)
-        #     gamePoints  = Point.objects.filter(game=gameModel)
-        # except Game.DoesNotExist:
-        #     errors = {'gameId': 'Game id not found: ' + str(gameId)}
-        #     returnData = {'errors': errors}
-        #     return Response(returnData)
+        try:
+            usersGameModels = Game.objects.users_games(user=request.user)
+            gameModel = usersGameModels.get(id=gameId)
+        except Game.DoesNotExist:
+            returnData = {'error': 'Game id not found: ' + str(gameId)}
+            return Response(returnData)
 
-        # gameSerialized = GameSerializer(litterModel)
-        # pointsSerialized = PointSerializer(litterModel, many=True)
-        # returnData = {'game': gameSerialized,
-        #               'points': pointsSerialized
-        #              }
-        returnData = {'error': 'hello world'}
+        # Updates the game and gets the serialized data or just gets the
+        # serialized data. Throws errors if found either way
+        if 'game' in request.data:
+            # First I have to take the id's and unhash them
+            request.data['id'] = gameId
+            convertedGame = convertToPK(request.data['game'])
+
+            gameSerialized = GameSerializer(gameModel, data=convertedGame)
+            if gameSerialized.is_valid():
+                gameModel = gameSerialized.save()
+            else:
+                return Response(gameSerialized.errors, status=400)
+
+        # Deletes old points and saves new ones
+        # Gets the serialized data or just gets the serialized data. Throws
+        # errors if found either way
+        if 'points' in request.data:
+            unsavedPoints = []
+
+            for pointData in request.data['points']:
+                convertedPoint = convertToPK(pointData)
+                convertedPoint['game'] = gameModel.id
+                serializedPoint = PointSerializer(data=convertedPoint)
+                if serializedPoint.is_valid():
+                    unsavedPoints.append(serializedPoint)
+                else:
+                    return Response(serializedPoint.errors)
+
+            # If everything goes right I delete the previous points
+            Point.objects.filter(game=gameModel).delete()
+
+            # Then I save all the points I just serialized
+            for unsavedPoint in unsavedPoints:
+                unsavedPoint.save(game=gameModel)
+
+        gameSerialized = GameSerializer(gameModel)
+        pointModels = Point.objects.filter(game=gameModel)
+        pointsSerialized = PointSerializer(pointModels, many=True)
+
+        returnData = {'game': gameSerialized.data,
+                      'points': pointsSerialized.data}
+        return Response(returnData)
+
+    def delete(self, request, gameId):
+        """
+        Deletes a game
+        """
+        try:
+            usersGameModels = Game.objects.users_games(user=request.user)
+            gameModel = usersGameModels.get(id=gameId)
+        except Game.DoesNotExist:
+            returnData = {'error': 'Game id not found: ' + str(gameId)}
+            return Response(returnData)
+
+        # Delete the points
+        Point.objects.filter(game=gameModel)
+
+        # Delete the game
+        Game.objects.get(id=gameModel.id).delete()
+
+        returnData = {'status': 'okay'}
         return Response(returnData)
 
 
@@ -107,8 +160,7 @@ class GameView(APIView):
             convertedPoint = convertToPK(pointData)
             serializedPoint = PointSerializer(data=convertedPoint)
             if serializedPoint.is_valid():
-                point = serializedPoint.save()
-                point.game = game
+                serializedPoint.save(game=game)
                 points.append(serializedPoint.data)
             else:
                 errors.update(serializedPoint.errors)

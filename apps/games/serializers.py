@@ -56,8 +56,7 @@ class GameSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def create(self, validated_data):
-        game = Game.objects.create(**validated_data)
-        return game
+        return Game.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
         instance.timeStarted = validated_data.get('timeStarted',
@@ -81,6 +80,7 @@ class GameSerializer(serializers.ModelSerializer):
         Changes the id to hashed id before it sends it out
         """
         ret = super().to_representation(instance)
+
         if ret['id'] is not None:
             ret['id'] = encode_id(ret['id'])
 
