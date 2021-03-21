@@ -5,14 +5,29 @@ from .managers import FriendManager
 
 
 class Friend(models.Model):
-    teamCaptain = models.ForeignKey(settings.AUTH_USER_MODEL,
-                                    on_delete=models.CASCADE,
-                                    related_name="teamCaptain")
-    teammate = models.ForeignKey(settings.AUTH_USER_MODEL,
-                                 on_delete=models.CASCADE,
-                                 related_name="teammate")
+    PENDING = 'PD'
+    DENIED = 'DE'
+    ACCEPTED = 'AC'
+
+    STATUS_OPTIONS = [
+        (PENDING, 'Pending'),
+        (DENIED, 'Denied'),
+        (ACCEPTED, 'Accepted'),
+    ]
+
+    friendOne = models.ForeignKey(settings.AUTH_USER_MODEL,
+                                  on_delete=models.CASCADE,
+                                  related_name='friendOne')
+    friendTwo = models.ForeignKey(settings.AUTH_USER_MODEL,
+                                  on_delete=models.CASCADE,
+                                  related_name='friendTwo')
+
+    status = models.CharField(max_length=2, choices=STATUS_OPTIONS,
+                              default=PENDING)
+    timeRequested = models.DateTimeField(auto_now_add=True)
+    timeRespondedTo = models.DateTimeField(auto_now=True)
 
     objects = FriendManager()
 
     def __str__(self):
-        return self.teamCaptain.username + " and " + self.teammate.username
+        return self.playerOne.username + " and " + self.playerTwo.username
