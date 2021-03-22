@@ -144,3 +144,4 @@ class FriendView(APIView):
         friendshipSerialized = FriendSerializer(friendshipModel)
 
         returnData = {'friend': friendshipSerialized.data}
+        return Response(returnData)
