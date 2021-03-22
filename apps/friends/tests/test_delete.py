@@ -19,7 +19,7 @@ class Test_Friend_DELETE(TestCase):
 
         client = APIClient()
         url = reverse('friend_detail', kwargs={'friendId': friendModel.id})
-        client.force_authenticate(user=friendModel.friendOne)
+        client.force_authenticate(user=friendModel.requester)
         response = client.delete(url)
         responseData = json.loads(response.content)
 

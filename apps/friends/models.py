@@ -15,15 +15,16 @@ class Friend(models.Model):
         (ACCEPTED, 'Accepted'),
     ]
 
-    friendOne = models.ForeignKey(settings.AUTH_USER_MODEL,
+    requester = models.ForeignKey(settings.AUTH_USER_MODEL,
                                   on_delete=models.CASCADE,
-                                  related_name='friendOne')
-    friendTwo = models.ForeignKey(settings.AUTH_USER_MODEL,
+                                  related_name='requester')
+    requested = models.ForeignKey(settings.AUTH_USER_MODEL,
                                   on_delete=models.CASCADE,
-                                  related_name='friendTwo')
+                                  related_name='requested')
 
     status = models.CharField(max_length=2, choices=STATUS_OPTIONS,
                               default=PENDING)
+
     timeRequested = models.DateTimeField(auto_now_add=True)
     timeRespondedTo = models.DateTimeField(auto_now=True)
 

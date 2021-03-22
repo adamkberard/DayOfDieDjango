@@ -37,8 +37,8 @@ def friendsMatch(models, friends):
 
 
 def friendMatch(model, friend):
-    temp1 = model.friendOne.username == friend['friend']
-    temp2 = model.friendTwo.username == friend['friend']
+    temp1 = model.requester.username == friend['friend']
+    temp2 = model.requested.username == friend['friend']
     if temp1 or temp2:
         dateFormatString = '%Y-%m-%d %H:%M:%S'
         temp = model.timeRequested.strftime(dateFormatString)
@@ -75,9 +75,9 @@ def fullFriendsMatch(models, friends):
 
 
 def fullFriendMatch(model, friend):
-    if model.friendOne.username != friend['friendOne']:
+    if model.requester.username != friend['requester']:
         return False
-    if model.friendTwo.username != friend['friendTwo']:
+    if model.requested.username != friend['requested']:
         return False
 
     dateFormatString = '%Y-%m-%d %H:%M:%S'

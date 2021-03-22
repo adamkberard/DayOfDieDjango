@@ -13,8 +13,8 @@ class FriendFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Friend
 
-    friendOne = factory.SubFactory(CustomUserFactory)
-    friendTwo = factory.SubFactory(CustomUserFactory)
+    requester = factory.SubFactory(CustomUserFactory)
+    requested = factory.SubFactory(CustomUserFactory)
     status = Friend.PENDING
 
     timeRequested = factory.fuzzy.FuzzyDateTime(datetime.datetime(2021, 3, 12,

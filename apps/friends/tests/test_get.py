@@ -24,9 +24,9 @@ class Test_Friend_GET(TestCase):
         totalFriends = numPlayerOne + numPlayerTwo
 
         for i in range(0, numPlayerOne):
-            friendModels.append(FriendFactory(friendOne=player))
+            friendModels.append(FriendFactory(requester=player))
         for i in range(0, numPlayerTwo):
-            friendModels.append(FriendFactory(friendTwo=player))
+            friendModels.append(FriendFactory(requested=player))
 
         client = APIClient()
         url = reverse('friend_list')
@@ -57,9 +57,9 @@ class Test_Friend_GET(TestCase):
         totalFriends = numPlayerOne + numPlayerTwo
 
         for i in range(0, numPlayerOne):
-            friendModels.append(FriendFactory(friendOne=player))
+            friendModels.append(FriendFactory(requester=player))
         for i in range(0, numPlayerTwo):
-            friendModels.append(FriendFactory(friendTwo=player))
+            friendModels.append(FriendFactory(requested=player))
 
         client = APIClient()
         url = reverse('friend_list')
@@ -111,7 +111,7 @@ class Test_Friend_GET_Detail(TestCase):
 
         client = APIClient()
         url = reverse('friend_detail', kwargs={'friendId': friendModel.id})
-        client.force_authenticate(user=friendModel.friendOne)
+        client.force_authenticate(user=friendModel.requester)
         response = client.get(url)
         responseData = json.loads(response.content)
 
@@ -134,9 +134,9 @@ class Test_Friend_GET_Detail(TestCase):
         numPlayerTwo = 10
 
         for i in range(0, numPlayerOne):
-            friendModels.append(FriendFactory(friendOne=player))
+            friendModels.append(FriendFactory(requester=player))
         for i in range(0, numPlayerTwo):
-            friendModels.append(FriendFactory(friendTwo=player))
+            friendModels.append(FriendFactory(requested=player))
 
         client = APIClient()
         client.force_authenticate(user=player)

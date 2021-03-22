@@ -7,6 +7,6 @@ class FriendManager(BaseUserManager):
     """
 
     def users_friends(self, user):
-        friendOnes = super().get_queryset().filter(friendTwo=user)
-        friendTwos = super().get_queryset().filter(friendOne=user)
-        return friendOnes | friendTwos
+        requesters = super().get_queryset().filter(requested=user)
+        requesteds = super().get_queryset().filter(requester=user)
+        return requesters | requesteds

@@ -21,10 +21,10 @@ class FriendSerializer(serializers.ModelSerializer):
                                                     instance.timeRequested)
         instance.timeRespondedTo = validated_data.get('timeRespondedTo',
                                                       instance.timeRespondedTo)
-        instance.friendOne = validated_data.get('friendOne',
-                                                instance.friendOne)
-        instance.friendTwo = validated_data.get('friendTwo',
-                                                instance.friendTwo)
+        instance.requester = validated_data.get('requester',
+                                                instance.requester)
+        instance.requested = validated_data.get('requested',
+                                                instance.requested)
         instance.status = validated_data.get('status', instance.status)
         instance.save()
 
@@ -40,8 +40,8 @@ class FriendSerializer(serializers.ModelSerializer):
             ret['id'] = encode_id(ret['id'])
 
         # Changes the friend id's to their usernames
-        friendId = ret['friendOne']
-        ret['friendOne'] = CustomUser.objects.get(id=friendId).username
-        friendId = ret['friendTwo']
-        ret['friendTwo'] = CustomUser.objects.get(id=friendId).username
+        friendId = ret['requester']
+        ret['requester'] = CustomUser.objects.get(id=friendId).username
+        friendId = ret['requested']
+        ret['requested'] = CustomUser.objects.get(id=friendId).username
         return ret
