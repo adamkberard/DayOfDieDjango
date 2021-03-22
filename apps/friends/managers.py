@@ -6,7 +6,7 @@ class FriendManager(BaseUserManager):
     Custom friend model manager to add my own filter thing
     """
 
-    def getFriends(self, user):
-        teammates = super().get_queryset().filter(teamCaptain=user).teammate
-        captains = super().get_queryset().filter(teammate=user).teamCaptain
-        return teammates | captains
+    def users_friends(self, user):
+        requesters = super().get_queryset().filter(requested=user)
+        requesteds = super().get_queryset().filter(requester=user)
+        return requesters | requesteds

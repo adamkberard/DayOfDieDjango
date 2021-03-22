@@ -4,7 +4,7 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.my_auth.models import CustomUser
+from tools.helperFunctions.helperFuncs import convertToPK
 
 from .models import Game, Point
 from .serializers import GameSerializer, PointSerializer
@@ -171,16 +171,3 @@ class GameView(APIView):
             return Response(data=returnData)
         else:
             return Response(data=errors)
-
-
-def convertToPK(data):
-    terms = ['playerOne', 'playerTwo', 'playerThree', 'playerFour',
-             'scorer', 'scoredOn']
-
-    for term in terms:
-        if term in data:
-            username = data[term]
-            if username is not None:
-                data[term] = CustomUser.objects.get(username=username).id
-
-    return data
