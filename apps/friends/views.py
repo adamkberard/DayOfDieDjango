@@ -33,7 +33,7 @@ class FriendDetailView(APIView):
 
         friendSerialized = FriendSerializer(friendModel)
         returnData = {'friend': friendSerialized.data}
-        return Response(returnData)
+        return Response(returnData, status=200)
 
     def put(self, request, friendId):
         """
@@ -43,29 +43,29 @@ class FriendDetailView(APIView):
             usersFriendModels = Friend.objects.users_friends(user=request.user)
             friendModel = usersFriendModels.get(id=friendId)
         except Friend.DoesNotExist:
-            returnData = {'error': 'Friend id not found: ' + str(friendId)}
-            return Response(returnData)
+            returnData = {'friendId': 'Friend id not found: ' + str(friendId)}
+            return Response(returnData, status=400)
 
         if 'status' in request.data:
             if request.data['status'] == 'accept':
                 # They can only accept it if they are the requested
                 if request.user == friendModel.requester:
-                    errStr = 'Cannot accept a friend request as the requester.'
-                    return Response({'error': errStr})
+                    estr = 'Cannot accept a friend request as the requester.'
+                    return Response({'errors': [estr]}, status=400)
                 else:
                     friendModel.status = friendModel.ACCEPTED
                     friendModel.save()
             elif request.data['status'] == 'deny':
                 if request.user == friendModel.requester:
-                    errStr = 'Cannot deny a friend request as the requester.'
-                    return Response({'error': errStr})
+                    estr = 'Cannot deny a friend request as the requester.'
+                    return Response({'errors': [estr]}, status=400)
                 else:
                     friendModel.status = friendModel.DENIED
                     friendModel.save()
 
         friendSerialized = FriendSerializer(friendModel)
         returnData = {'friend': friendSerialized.data}
-        return Response(returnData)
+        return Response(returnData, status=200)
 
     def delete(self, request, friendId):
         """
@@ -75,12 +75,11 @@ class FriendDetailView(APIView):
             usersFriendModels = Friend.objects.users_friends(user=request.user)
             friendModel = usersFriendModels.get(id=friendId)
         except Friend.DoesNotExist:
-            returnData = {'error': 'Friend id not found: ' + str(friendId)}
-            return Response(returnData)
+            returnData = {'friendId': ['Friend id not found: ' + str(friendId)]}
+            return Response(returnData, status=400)
 
         friendModel.delete()
-        returnData = {'status': 'okay'}
-        return Response(returnData)
+        return Response(status=200)
 
 
 class FriendView(APIView):
@@ -97,8 +96,8 @@ class FriendView(APIView):
         try:
             usersFriendModels = Friend.objects.users_friends(user=request.user)
         except Friend.DoesNotExist:
-            returnData = {'error': 'Friend id not found: '}
-            return Response(returnData)
+            returnData = {'friendId': 'Friend id not found: ' + str(friendId)}
+            return Response(returnData, status=400)
 
         friendsSerialized = FriendSerializer(usersFriendModels, many=True)
         myOwnData = []
@@ -121,7 +120,7 @@ class FriendView(APIView):
                         break
 
         returnData = {'friends': myOwnData}
-        return Response(returnData)
+        return Response(returnData, status=200)
 
     def post(self, request):
         """Posting a new friend. Pretty simple stuff"""
@@ -134,9 +133,9 @@ class FriendView(APIView):
         try:
             friendModel = CustomUser.objects.get(username=usrname)
         except CustomUser.DoesNotExist:
-            errStr = 'Cannot find a user with username: {}'.format(usrname)
-            returnData = {'error': errStr}
-            return Response(returnData)
+            estr = 'Cannot find a user with username: {}'.format(usrname)
+            returnData = {'friend': [estr]}
+            return Response(returnData, status=400)
 
         # Creating friendship, default is pending so that works out
         friendshipModel = Friend(requester=request.user, requested=friendModel)
@@ -144,4 +143,4 @@ class FriendView(APIView):
         friendshipSerialized = FriendSerializer(friendshipModel)
 
         returnData = {'friend': friendshipSerialized.data}
-        return Response(returnData)
+        return Response(returnData, status=201)

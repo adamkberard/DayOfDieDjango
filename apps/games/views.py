@@ -158,7 +158,7 @@ class GameView(APIView):
         if serializedGame.is_valid():
             game = serializedGame.save()
         else:
-            return Response(data=serializedGame.errors)
+            return Response(data=serializedGame.errors, status=400)
 
         for pointData in request.data['points']:
             convertedPoint = convertToPK(pointData)

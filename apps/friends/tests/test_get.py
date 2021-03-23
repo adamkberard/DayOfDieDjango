@@ -32,6 +32,8 @@ class Test_Friend_GET(TestCase):
         url = reverse('friend_list')
         client.force_authenticate(user=player)
         response = client.get(url)
+
+        self.assertEqual(response.status_code, 200)
         responseData = json.loads(response.content)
 
         self.assertTrue('friends' in responseData)
@@ -65,6 +67,8 @@ class Test_Friend_GET(TestCase):
         url = reverse('friend_list')
         client.force_authenticate(user=player)
         response = client.get(url)
+
+        self.assertEqual(response.status_code, 200)
         responseData = json.loads(response.content)
 
         self.assertTrue('friends' in responseData)
@@ -87,8 +91,11 @@ class Test_Friend_GET(TestCase):
         url = reverse('friend_list')
         client.force_authenticate(user=user)
         response = client.get(url)
+
+        self.assertEqual(response.status_code, 200)
         responseData = json.loads(response.content)
 
+        self.assertTrue('friends' in responseData)
         self.assertEqual(responseData['friends'], [])
 
     def test_no_authentication(self):
@@ -113,6 +120,8 @@ class Test_Friend_GET_Detail(TestCase):
         url = reverse('friend_detail', kwargs={'friendId': friendModel.id})
         client.force_authenticate(user=friendModel.requester)
         response = client.get(url)
+
+        self.assertEqual(response.status_code, 200)
         responseData = json.loads(response.content)
 
         self.assertTrue('friend' in responseData)
@@ -143,6 +152,8 @@ class Test_Friend_GET_Detail(TestCase):
         for friendModel in friendModels:
             url = reverse('friend_detail', kwargs={'friendId': friendModel.id})
             response = client.get(url)
+
+            self.assertEqual(response.status_code, 200)
             responseData = json.loads(response.content)
 
             self.assertTrue('friend' in responseData)

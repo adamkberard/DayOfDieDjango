@@ -21,9 +21,8 @@ class Test_Friend_DELETE(TestCase):
         url = reverse('friend_detail', kwargs={'friendId': friendModel.id})
         client.force_authenticate(user=friendModel.requester)
         response = client.delete(url)
-        responseData = json.loads(response.content)
-
-        self.assertEqual(responseData['status'], 'okay')
+        
+        self.assertEqual(response.status_code, 200)
         self.assertEqual(Friend.objects.filter(id=friendModel.id).count(), 0)
 
     def test_delete_friend_not_in(self):
@@ -37,26 +36,32 @@ class Test_Friend_DELETE(TestCase):
         url = reverse('friend_detail', kwargs={'friendId': friendModel.id})
         client.force_authenticate(user=playerThree)
         response = client.delete(url)
+
+        self.assertEqual(response.status_code, 400)
         responseData = json.loads(response.content)
 
-        errStr = 'Friend id not found: '
-        self.assertTrue(responseData['error'].startswith(errStr))
+        self.assertTrue('friendId' in responseData)
+        estr = 'Friend id not found: {}'.format(friendModel.id)
+        self.assertEqual(responseData['friendId'], [estr])
 
     def test_bad_litter_id(self):
         """
-        Testing a simple delete with no litter id
+        Testing a simple delete with bad litter id
         """
         friendModel = FriendFactory()
         playerThree = CustomUserFactory()
 
         client = APIClient()
-        url = reverse('friend_detail', kwargs={'friendId': friendModel.id})
+        url = reverse('friend_detail', kwargs={'friendId': 0})
         client.force_authenticate(user=playerThree)
         response = client.delete(url)
+
+        self.assertEqual(response.status_code, 400)
         responseData = json.loads(response.content)
 
-        errStr = 'Friend id not found: '
-        self.assertTrue(responseData['error'].startswith(errStr))
+        self.assertTrue('friendId' in responseData)
+        estr = 'Friend id not found: {}'.format(0)
+        self.assertEqual(responseData['friendId'], [estr])
 
     def test_no_authentication(self):
         """
