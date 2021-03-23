@@ -38,6 +38,8 @@ class Test_Game_PUT(TestCase):
         url = reverse('game_detail', kwargs={'gameId': gameModel.id})
         client.force_authenticate(user=plyr[1])
         response = client.put(url, data, format='json')
+
+        self.assertEqual(response.status_code, 200)
         responseData = json.loads(response.content)
 
         # Now that we have the data, I can change the model without affecting
@@ -89,6 +91,8 @@ class Test_Game_PUT(TestCase):
         url = reverse('game_detail', kwargs={'gameId': gameModel.id})
         client.force_authenticate(user=plyr[2])
         response = client.put(url, data, format='json')
+
+        self.assertEqual(response.status_code, 200)
         responseData = json.loads(response.content)
 
         # Now that we have the data, I can change the model without affecting
@@ -140,6 +144,8 @@ class Test_Game_PUT(TestCase):
         url = reverse('game_detail', kwargs={'gameId': gameModel.id})
         client.force_authenticate(user=plyr[3])
         response = client.put(url, data, format='json')
+
+        self.assertEqual(response.status_code, 200)
         responseData = json.loads(response.content)
 
         # Now that we have the data, I can change the model without affecting
@@ -191,6 +197,8 @@ class Test_Game_PUT(TestCase):
         url = reverse('game_detail', kwargs={'gameId': gameModel.id})
         client.force_authenticate(user=plyr[0])
         response = client.put(url, data, format='json')
+
+        self.assertEqual(response.status_code, 200)
         responseData = json.loads(response.content)
 
         # Now that we have the data, I can change the model without affecting
@@ -242,11 +250,13 @@ class Test_Game_PUT(TestCase):
         url = reverse('game_detail', kwargs={'gameId': gameModel.id})
         client.force_authenticate(user=plyr[0])
         response = client.put(url, data, format='json')
+
+        self.assertEqual(response.status_code, 400)
         responseData = json.loads(response.content)
 
-        self.assertTrue('error' in responseData)
-        eStr = 'Game id not found: '
-        self.assertTrue(responseData['error'].startswith(eStr))
+        self.assertTrue('gameId' in responseData)
+        estr = 'Game id not found: {}'.format(gameModel.id)
+        self.assertEqual(responseData['gameId'], [estr])
 
     def test_put_change_p2_as_new_player(self):
         """
@@ -270,11 +280,13 @@ class Test_Game_PUT(TestCase):
         url = reverse('game_detail', kwargs={'gameId': gameModel.id})
         client.force_authenticate(user=plyr[1])
         response = client.put(url, data, format='json')
+
+        self.assertEqual(response.status_code, 400)
         responseData = json.loads(response.content)
 
-        self.assertTrue('error' in responseData)
-        eStr = 'Game id not found: '
-        self.assertTrue(responseData['error'].startswith(eStr))
+        self.assertTrue('gameId' in responseData)
+        estr = 'Game id not found: {}'.format(gameModel.id)
+        self.assertEqual(responseData['gameId'], [estr])
 
     def test_put_change_p3_as_new_player(self):
         """
@@ -298,11 +310,13 @@ class Test_Game_PUT(TestCase):
         url = reverse('game_detail', kwargs={'gameId': gameModel.id})
         client.force_authenticate(user=plyr[2])
         response = client.put(url, data, format='json')
+
+        self.assertEqual(response.status_code, 400)
         responseData = json.loads(response.content)
 
-        self.assertTrue('error' in responseData)
-        eStr = 'Game id not found: '
-        self.assertTrue(responseData['error'].startswith(eStr))
+        self.assertTrue('gameId' in responseData)
+        estr = 'Game id not found: {}'.format(gameModel.id)
+        self.assertEqual(responseData['gameId'], [estr])
 
     def test_put_change_p4_as_new_player(self):
         """
@@ -326,11 +340,13 @@ class Test_Game_PUT(TestCase):
         url = reverse('game_detail', kwargs={'gameId': gameModel.id})
         client.force_authenticate(user=plyr[3])
         response = client.put(url, data, format='json')
+
+        self.assertEqual(response.status_code, 400)
         responseData = json.loads(response.content)
 
-        self.assertTrue('error' in responseData)
-        eStr = 'Game id not found: '
-        self.assertTrue(responseData['error'].startswith(eStr))
+        self.assertTrue('gameId' in responseData)
+        estr = 'Game id not found: {}'.format(gameModel.id)
+        self.assertEqual(responseData['gameId'], [estr])
 
     def test_put_change_points_as_p1(self):
         """
@@ -354,6 +370,8 @@ class Test_Game_PUT(TestCase):
         url = reverse('game_detail', kwargs={'gameId': gameModel.id})
         client.force_authenticate(user=plyr[0])
         response = client.put(url, data, format='json')
+
+        self.assertEqual(response.status_code, 200)
         responseData = json.loads(response.content)
 
         # Checking everything just to be sure the game didn't change at all
@@ -406,6 +424,8 @@ class Test_Game_PUT(TestCase):
         url = reverse('game_detail', kwargs={'gameId': gameModel.id})
         client.force_authenticate(user=plyr[1])
         response = client.put(url, data, format='json')
+
+        self.assertEqual(response.status_code, 200)
         responseData = json.loads(response.content)
 
         # Checking everything just to be sure the game didn't change at all
@@ -458,6 +478,8 @@ class Test_Game_PUT(TestCase):
         url = reverse('game_detail', kwargs={'gameId': gameModel.id})
         client.force_authenticate(user=plyr[2])
         response = client.put(url, data, format='json')
+
+        self.assertEqual(response.status_code, 200)
         responseData = json.loads(response.content)
 
         # Checking everything just to be sure the game didn't change at all
@@ -510,6 +532,8 @@ class Test_Game_PUT(TestCase):
         url = reverse('game_detail', kwargs={'gameId': gameModel.id})
         client.force_authenticate(user=plyr[3])
         response = client.put(url, data, format='json')
+
+        self.assertEqual(response.status_code, 200)
         responseData = json.loads(response.content)
 
         # Checking everything just to be sure the game didn't change at all
@@ -559,6 +583,8 @@ class Test_Game_PUT(TestCase):
         url = reverse('game_detail', kwargs={'gameId': gameModel.id})
         client.force_authenticate(user=plyr[0])
         response = client.put(url, data, format='json')
+
+        self.assertEqual(response.status_code, 200)
         responseData = json.loads(response.content)
 
         # Checking everything just to be sure the game didn't change at all

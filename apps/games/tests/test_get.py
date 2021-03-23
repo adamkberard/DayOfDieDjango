@@ -17,17 +17,17 @@ class Test_Game_GET(TestCase):
         Trying to get all the games a person has played.
         Which is one in this case.
         """
-        plyr = CustomUserFactory.create_batch(size=4)
-        gameModel = GameFactory(playerOne=plyr[0], playerTwo=plyr[1],
-                                playerThree=plyr[2], playerFour=plyr[3])
-        pointModels = PointFactory.create_batch(scorer=plyr[0],
+        gameModel = GameFactory()
+        pointModels = PointFactory.create_batch(scorer=gameModel.playerOne,
                                                 typeOfPoint='PT', size=11,
                                                 game=gameModel)
 
         client = APIClient()
         url = reverse('game_list')
-        client.force_authenticate(user=plyr[0])
+        client.force_authenticate(user=gameModel.playerOne)
         response = client.get(url)
+
+        self.assertEqual(response.status_code, 200)
         responseData = json.loads(response.content)
 
         self.assertTrue('game' in responseData[0])
@@ -77,6 +77,8 @@ class Test_Game_GET(TestCase):
         url = reverse('game_list')
         client.force_authenticate(user=plyr[0])
         response = client.get(url)
+
+        self.assertEqual(response.status_code, 200)
         responseData = json.loads(response.content)
 
         for fullGame in responseData:
@@ -127,6 +129,8 @@ class Test_Game_GET(TestCase):
         url = reverse('game_list')
         client.force_authenticate(user=user)
         response = client.get(url)
+
+        self.assertEqual(response.status_code, 200)
         responseData = json.loads(response.content)
 
         self.assertEqual(responseData, [])
@@ -148,17 +152,17 @@ class Test_Game_GET_Detail(TestCase):
         Trying to get a single game that is also the players only
         game
         """
-        plyr = CustomUserFactory.create_batch(size=4)
-        gameModel = GameFactory(playerOne=plyr[0], playerTwo=plyr[1],
-                                playerThree=plyr[2], playerFour=plyr[3])
-        pointModels = PointFactory.create_batch(scorer=plyr[0],
+        gameModel = GameFactory()
+        pointModels = PointFactory.create_batch(scorer=gameModel.playerOne,
                                                 typeOfPoint='PT', size=11,
                                                 game=gameModel)
 
         client = APIClient()
         url = reverse('game_detail', kwargs={'gameId': gameModel.id})
-        client.force_authenticate(user=plyr[0])
+        client.force_authenticate(user=gameModel.playerOne)
         response = client.get(url)
+
+        self.assertEqual(response.status_code, 200)
         responseData = json.loads(response.content)
 
         self.assertTrue('game' in responseData)
@@ -191,20 +195,19 @@ class Test_Game_GET_Detail(TestCase):
         """
         Trying to get a single game that is the players only game twice.
         """
-        plyr = CustomUserFactory.create_batch(size=4)
-        gameModel = GameFactory(playerOne=plyr[0], playerTwo=plyr[1],
-                                playerThree=plyr[2], playerFour=plyr[3])
-        pointModels = PointFactory.create_batch(scorer=plyr[0],
+        gameModel = GameFactory()
+        pointModels = PointFactory.create_batch(scorer=gameModel.playerOne,
                                                 typeOfPoint='PT', size=11,
                                                 game=gameModel)
 
         client = APIClient()
         url = reverse('game_detail', kwargs={'gameId': gameModel.id})
-        client.force_authenticate(user=plyr[0])
+        client.force_authenticate(user=gameModel.playerOne)
 
         for i in range(0, 2):
             response = client.get(url)
             responseData = json.loads(response.content)
+            self.assertEqual(response.status_code, 200)
 
             self.assertTrue('game' in responseData)
             self.assertTrue('points' in responseData)
@@ -252,6 +255,8 @@ class Test_Game_GET_Detail(TestCase):
             url = reverse('game_detail', kwargs={'gameId': gameModel.id})
             client.force_authenticate(user=plyr[0])
             response = client.get(url)
+
+            self.assertEqual(response.status_code, 200)
             responseData = json.loads(response.content)
 
             self.assertTrue('game' in responseData)

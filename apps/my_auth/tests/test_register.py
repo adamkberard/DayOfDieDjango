@@ -15,7 +15,12 @@ class Test_Register_View(TestCase):
         client = APIClient()
         url = reverse('my_register')
         response = client.post(url, data, format='json')
+
+        self.assertEqual(response.status_code, 201)
         responseData = json.loads(response.content)
+
+        self.assertTrue('token' in responseData)
+        self.assertTrue('username' in responseData)
 
         self.assertTrue(responseData['token'] is not None)
         self.assertTrue(responseData['username'] is not None)
@@ -28,11 +33,12 @@ class Test_Register_View(TestCase):
         client = APIClient()
         url = reverse('my_register')
         response = client.post(url, data, format='json')
-        responseData = json.loads(response.content)
 
         self.assertEqual(response.status_code, 401)
-        errorString = 'Could not create an account with those credentials.'
-        self.assertEqual(responseData['error'], errorString)
+        responseData = json.loads(response.content)
+
+        estr = 'Could not create an account with those credentials.'
+        self.assertEqual(responseData['errors'], [estr])
 
     def test_register_no_email(self):
         data = {'password': 'pass4test'}
@@ -40,9 +46,10 @@ class Test_Register_View(TestCase):
         client = APIClient()
         url = reverse('my_register')
         response = client.post(url, data, format='json')
-        responseData = json.loads(response.content)
 
         self.assertEqual(response.status_code, 400)
+        responseData = json.loads(response.content)
+
         self.assertEqual(responseData['email'][0],
                          'This field is required.')
 
@@ -52,9 +59,10 @@ class Test_Register_View(TestCase):
         client = APIClient()
         url = reverse('my_register')
         response = client.post(url, data, format='json')
-        responseData = json.loads(response.content)
 
         self.assertEqual(response.status_code, 400)
+        responseData = json.loads(response.content)
+
         self.assertEqual(responseData['password'][0],
                          'This field is required.')
 
@@ -64,9 +72,10 @@ class Test_Register_View(TestCase):
         client = APIClient()
         url = reverse('my_register')
         response = client.post(url, data, format='json')
-        responseData = json.loads(response.content)
 
         self.assertEqual(response.status_code, 400)
+        responseData = json.loads(response.content)
+
         self.assertEqual(responseData['email'][0], 'This field is required.')
         self.assertEqual(responseData['password'][0],
                          'This field is required.')

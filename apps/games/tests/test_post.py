@@ -30,6 +30,8 @@ class Test_Game_POST(TestCase):
         url = reverse('game_list')
         client.force_authenticate(user=plyr[0])
         response = client.post(url, data, format='json')
+
+        self.assertEqual(response.status_code, 201)
         responseData = json.loads(response.content)
 
         self.assertTrue('game' in responseData)
@@ -69,6 +71,8 @@ class Test_Game_POST(TestCase):
         url = reverse('game_list')
         client.force_authenticate(user=user)
         response = client.post(url, format='json')
+
+        self.assertEqual(response.status_code, 400)
         responseData = json.loads(response.content)
 
         self.assertEqual(responseData['game'][0], 'This field is required.')

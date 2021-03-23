@@ -35,7 +35,7 @@ class LoginView(APIView):
 
             if user is None:
                 # Just gotta say shits wrong
-                returnData = {'error': 'Email or password wrong.'}
+                returnData = {'errors': ['Email or password wrong.']}
                 return Response(returnData, status=401)
             else:
                 # Gotta check if there's a token and create it if not
@@ -43,7 +43,7 @@ class LoginView(APIView):
                 token, created = Token.objects.get_or_create(user=user)
                 returnData = {'token': str(token),
                               'username': user.username}
-                return Response(returnData)
+                return Response(returnData, status=201)
         return Response(serializer.errors, status=400)
 
 
@@ -66,21 +66,16 @@ class RegisterView(APIView):
             try:
                 user = CustomUser.objects.create_user(email, password=password)
             except IntegrityError:
-                eString = 'Could not create an account with those credentials.'
-                returnData = {'error': eString}
+                estr = 'Could not create an account with those credentials.'
+                returnData = {'errors': [estr]}
                 return Response(returnData, status=401)
 
-            if user is None:
-                # Just gotta say shits wrong
-                returnData = {'error': 'Username or password wrong.'}
-                return Response(returnData)
-            else:
-                # Gotta check if there's a token and create it if not
-                # Then we send the token
-                token, created = Token.objects.get_or_create(user=user)
-                returnData = {'token': str(token),
-                              'username': user.username}
-                return Response(returnData)
+            # Gotta check if there's a token and create it if not
+            # Then we send the token
+            token, created = Token.objects.get_or_create(user=user)
+            returnData = {'token': str(token),
+                          'username': user.username}
+            return Response(returnData, status=201)
         return Response(serializer.errors, status=400)
 
 
@@ -102,7 +97,7 @@ class UserView(APIView):
         Returns the user data, what that is is TBD
         """
         userSerialized = CustomUserSerializer(request.user)
-        return Response(userSerialized.data)
+        return Response(userSerialized.data, status=200)
 
     def post(self, request):
         """
@@ -113,6 +108,6 @@ class UserView(APIView):
 
         if serialized.is_valid():
             serialized.save()
-            return Response(serialized.data)
+            return Response(serialized.data, status=200)
         else:
             return Response(serialized.errors, status=400)

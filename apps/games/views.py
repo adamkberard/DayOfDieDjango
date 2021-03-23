@@ -29,8 +29,9 @@ class GameDetailView(APIView):
             gameModel = usersGameModels.get(id=gameId)
             gamePoints = Point.objects.filter(game=gameModel)
         except Game.DoesNotExist:
-            returnData = {'error': 'Game id not found: ' + str(gameId)}
-            return Response(returnData)
+            estr = 'Game id not found: {}'.format(gameId)
+            returnData = {'gameId': [estr]}
+            return Response(returnData, status=400)
 
         gameSerialized = GameSerializer(gameModel)
         pointsSerialized = PointSerializer(gamePoints, many=True)
@@ -46,8 +47,9 @@ class GameDetailView(APIView):
             usersGameModels = Game.objects.users_games(user=request.user)
             gameModel = usersGameModels.get(id=gameId)
         except Game.DoesNotExist:
-            returnData = {'error': 'Game id not found: ' + str(gameId)}
-            return Response(returnData)
+            estr = 'Game id not found: {}'.format(gameId)
+            returnData = {'gameId': [estr]}
+            return Response(returnData, status=400)
 
         # Updates the game and gets the serialized data or just gets the
         # serialized data. Throws errors if found either way
@@ -75,7 +77,7 @@ class GameDetailView(APIView):
                 if serializedPoint.is_valid():
                     unsavedPoints.append(serializedPoint)
                 else:
-                    return Response(serializedPoint.errors)
+                    return Response(serializedPoint.errors, status=400)
 
             # If everything goes right I delete the previous points
             Point.objects.filter(game=gameModel).delete()
@@ -90,7 +92,7 @@ class GameDetailView(APIView):
 
         returnData = {'game': gameSerialized.data,
                       'points': pointsSerialized.data}
-        return Response(returnData)
+        return Response(returnData, status=200)
 
     def delete(self, request, gameId):
         """
@@ -100,17 +102,17 @@ class GameDetailView(APIView):
             usersGameModels = Game.objects.users_games(user=request.user)
             gameModel = usersGameModels.get(id=gameId)
         except Game.DoesNotExist:
-            returnData = {'error': 'Game id not found: ' + str(gameId)}
-            return Response(returnData)
+            estr = 'Game id not found: {}'.format(gameId)
+            returnData = {'gameId': [estr]}
+            return Response(returnData, status=400)
 
         # Delete the points
-        Point.objects.filter(game=gameModel)
+        Point.objects.filter(game=gameModel).delete()
 
         # Delete the game
         Game.objects.get(id=gameModel.id).delete()
 
-        returnData = {'status': 'okay'}
-        return Response(returnData)
+        return Response(status=200)
 
 
 class GameView(APIView):
@@ -133,22 +135,24 @@ class GameView(APIView):
             gameDict = {'game': gameSerialized.data,
                         'points': pointsSerialized.data}
             returnData.append(gameDict)
-        return Response(data=returnData, status=201)
+        return Response(data=returnData, status=200)
 
     def post(self, request):
         # Since I'm doing more than one object at a time, I have to also
         # check for to be sure the things exist
+        edict = {}
         if 'game' not in request.data:
-            data = {'game': ['This field is required.']}
-            return Response(data=data, status=400)
+            edict['game'] = ['This field is required.']
         if 'points' not in request.data:
-            data = {'points': ['This field is required.']}
-            return Response(data=data, status=400)
+            edict['points'] = ['This field is required.']
+
+        if len(edict) != 0:
+            return Response(data=edict, status=400)
+
         # We have to convert the incoming usernames into their pk's
         convertedGameData = convertToPK(request.data['game'])
         serializedGame = GameSerializer(data=convertedGameData)
 
-        errors = {}
         points = []
 
         if serializedGame.is_valid():
@@ -163,11 +167,11 @@ class GameView(APIView):
                 serializedPoint.save(game=game)
                 points.append(serializedPoint.data)
             else:
-                errors.update(serializedPoint.errors)
+                edict.update(serializedPoint.errors)
 
-        if len(errors) == 0:
+        if len(edict) != 0:
+            return Response(data=edict, status=400)
+        else:
             returnData = {'game': serializedGame.data,
                           'points': points}
-            return Response(data=returnData)
-        else:
-            return Response(data=errors)
+            return Response(data=returnData, status=201)
