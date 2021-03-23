@@ -27,10 +27,11 @@ SECRET_KEY = '+8q*_rmne*livuzd^x=#@rc@9wxa_522vjdfcoi5yk(z^lp#h_'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['0.0.0.0', 'localhost', '127.0.0.1', 'dayofdie.herokuapp.com']
+ALLOWED_HOSTS = ['dayofdie.herokuapp.com', 'dayofdie-test.herokuapp.com',
+                 '0.0.0.0', 'localhost', '127.0.0.1']
 
 # ENVIRONMENT VARIABLES
-#SECRET_KEY = os.environ.get('SECRET_KEY')
+# SECRET_KEY = os.environ.get('SECRET_KEY')
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 
@@ -50,9 +51,11 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
 
     # Local Apps
-    #'apps.litter',
     'apps.games',
     'apps.my_auth',
+    'apps.friends',
+    'apps.teams',
+    'tools.ids_encoder',
 ]
 
 AUTH_USER_MODEL = 'my_auth.CustomUser'
@@ -62,7 +65,7 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.JSONRenderer',
         'rest_framework.renderers.BrowsableAPIRenderer',
     ],
-    'DATETIME_FORMAT': "%Y-%m-%d-%H:%M:%S",
+    'DATETIME_FORMAT': "%Y-%m-%d %H:%M:%S",
 }
 
 MIDDLEWARE = [
@@ -94,11 +97,6 @@ TEMPLATES = [
     },
 ]
 
-#SETTINGS_PATH = os.path.dirname(os.path.dirname(__file__))
-#TEMPLATE_DIRS = (
-#    os.path.join(SETTINGS_PATH, 'templates'),
-#)
-
 WSGI_APPLICATION = 'DayOfDie.wsgi.application'
 
 # Database
@@ -123,16 +121,21 @@ DATABASES['default'].update(db_from_env)
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        'NAME':
+        'django.contrib.auth.password_validation.' +
+        'UserAttributeSimilarityValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'NAME':
+        'django.contrib.auth.password_validation.MinimumLengthValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        'NAME':
+        'django.contrib.auth.password_validation.CommonPasswordValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        'NAME':
+        'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
 
@@ -157,15 +160,18 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-#location where django collect all static files
-STATIC_ROOT = os.path.join(BASE_DIR,'static')
+# location where django collect all static files
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 # location where you will store your static files
-STATICFILES_DIRS = [os.path.join(BASE_DIR,'DayOfDie/static')
-]
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'DayOfDie/static')]
 
-MEDIA_ROOT = os.path.join(BASE_DIR,'media')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
 # SALT
-HASHIDS_SALT='im the sasquatch kid. wait no. the big squaaaaaaaaaaatch hehe'
+HASHIDS = {
+    # Keep salt secret
+    'SALT': 'im the sasquatch kid. wait no. the big squaaaaaaaaaaatch hehe',
+    'MIN_LENGTH': 8
+}
