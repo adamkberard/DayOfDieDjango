@@ -31,4 +31,4 @@ class Friend(models.Model):
     objects = FriendManager()
 
     def __str__(self):
-        return self.playerOne.username + " and " + self.playerTwo.username
+        return self.requester.username + " and " + self.requested.username
