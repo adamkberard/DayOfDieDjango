@@ -26,7 +26,7 @@ class Test_Team_PUT(TestCase):
         client.force_authenticate(user=teamModel.teammate)
         response = client.put(url, data, format='json')
 
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         responseData = json.loads(response.content)
 
         # Now that we have the data, I can change the model without affecting
@@ -60,7 +60,7 @@ class Test_Team_PUT(TestCase):
 
         # Finally make sure we actually changed the status
         self.assertTrue('status' in teamData)
-        self.assertTrue(teamModel.status, teamData['status'])
+        self.assertEqual(teamModel.status, teamData['status'])
 
     def test_put_accept_team_as_teamCaptain(self):
         """
@@ -125,7 +125,7 @@ class Test_Team_PUT(TestCase):
 
         # Finally make sure we actually changed the status
         self.assertTrue('status' in teamData)
-        self.assertTrue(teamModel.status, teamData['status'])
+        self.assertEqual(teamModel.status, teamData['status'])
 
     def test_put_denied_team_as_teamCaptain(self):
         """

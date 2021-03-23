@@ -22,9 +22,9 @@ class TeamSerializer(serializers.ModelSerializer):
         instance.timeRespondedTo = validated_data.get('timeRespondedTo',
                                                       instance.timeRespondedTo)
         instance.teamCaptain = validated_data.get('teamCaptain',
-                                                instance.teamCaptain)
+                                                  instance.teamCaptain)
         instance.teammate = validated_data.get('teammate',
-                                                instance.teammate)
+                                               instance.teammate)
         instance.status = validated_data.get('status', instance.status)
         instance.save()
 

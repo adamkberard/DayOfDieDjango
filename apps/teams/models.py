@@ -30,11 +30,11 @@ class Team(models.Model):
     ]
 
     teamCaptain = models.ForeignKey(settings.AUTH_USER_MODEL,
-                                  on_delete=models.CASCADE,
-                                  related_name='teamCaptain')
+                                    on_delete=models.CASCADE,
+                                    related_name='teamCaptain')
     teammate = models.ForeignKey(settings.AUTH_USER_MODEL,
-                                  on_delete=models.CASCADE,
-                                  related_name='teammate')
+                                 on_delete=models.CASCADE,
+                                 related_name='teammate')
 
     status = models.CharField(max_length=2, choices=STATUS_OPTIONS,
                               default=PENDING)

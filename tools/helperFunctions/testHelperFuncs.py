@@ -98,6 +98,7 @@ def fullFriendMatch(model, friend):
 
     return True
 
+
 def teamsMatch(models, teams):
     if len(models) != len(teams):
         return False
@@ -145,9 +146,9 @@ def fullTeamsMatch(models, teams):
         return False
 
     for model in models:
-        for team in friends:
+        for team in teams:
             if (fullTeamMatch(model, team)):
-                teams.remove(friend)
+                teams.remove(team)
                 break
 
     return len(teams) == 0

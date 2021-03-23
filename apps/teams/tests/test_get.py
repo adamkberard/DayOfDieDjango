@@ -5,7 +5,7 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 
 from apps.my_auth.factories import CustomUserFactory
-from tools.helperFunctions.testHelperFuncs import teamsMatch, fullTeamMatch
+from tools.helperFunctions.testHelperFuncs import fullTeamMatch, teamsMatch
 
 from ..factories import TeamFactory
 
@@ -33,7 +33,7 @@ class Test_Team_GET(TestCase):
         client.force_authenticate(user=player)
         response = client.get(url)
 
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         responseData = json.loads(response.content)
 
         self.assertTrue('teams' in responseData)
@@ -68,7 +68,7 @@ class Test_Team_GET(TestCase):
         client.force_authenticate(user=player)
         response = client.get(url)
 
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         responseData = json.loads(response.content)
 
         self.assertTrue('teams' in responseData)
@@ -92,9 +92,10 @@ class Test_Team_GET(TestCase):
         client.force_authenticate(user=user)
         response = client.get(url)
 
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         responseData = json.loads(response.content)
 
+        self.assertTrue('teams' in responseData)
         self.assertEqual(responseData['teams'], [])
 
     def test_no_authentication(self):
@@ -120,7 +121,7 @@ class Test_Team_GET_Detail(TestCase):
         client.force_authenticate(user=teamModel.teamCaptain)
         response = client.get(url)
 
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         responseData = json.loads(response.content)
 
         self.assertTrue('team' in responseData)
@@ -152,7 +153,7 @@ class Test_Team_GET_Detail(TestCase):
             url = reverse('team_detail', kwargs={'teamId': teamModel.id})
             response = client.get(url)
 
-            self.assertTrue(response.status_code, 200)
+            self.assertEqual(response.status_code, 200)
             responseData = json.loads(response.content)
 
             self.assertTrue('team' in responseData)

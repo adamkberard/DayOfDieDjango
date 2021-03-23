@@ -15,14 +15,14 @@ class Test_Team_POST(TestCase):
         teamCaptainModel = CustomUserFactory()
         teammateModel = CustomUserFactory()
 
-        data = {'team': teammateModel.username}
+        data = {'teammate': teammateModel.username}
 
         client = APIClient()
         url = reverse('team_list')
         client.force_authenticate(user=teamCaptainModel)
         response = client.post(url, data, format='json')
 
-        self.assertTrue(response.status_code, 201)
+        self.assertEqual(response.status_code, 201)
         responseData = json.loads(response.content)
 
         self.assertTrue('team' in responseData)
@@ -53,10 +53,10 @@ class Test_Team_POST(TestCase):
         client.force_authenticate(user=user)
         response = client.post(url, format='json')
 
-        self.assertTrue(response.status_code, 400)
+        self.assertEqual(response.status_code, 400)
         responseData = json.loads(response.content)
 
-        self.assertEqual(responseData['team'][0], 'This field is required.')
+        self.assertEqual(responseData['teammate'], ['This field is required.'])
 
     def test_no_authentication(self):
         """

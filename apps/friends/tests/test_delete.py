@@ -21,7 +21,7 @@ class Test_Friend_DELETE(TestCase):
         url = reverse('friend_detail', kwargs={'friendId': friendModel.id})
         client.force_authenticate(user=friendModel.requester)
         response = client.delete(url)
-        
+
         self.assertEqual(response.status_code, 200)
         self.assertEqual(Friend.objects.filter(id=friendModel.id).count(), 0)
 
@@ -48,7 +48,6 @@ class Test_Friend_DELETE(TestCase):
         """
         Testing a simple delete with bad litter id
         """
-        friendModel = FriendFactory()
         playerThree = CustomUserFactory()
 
         client = APIClient()

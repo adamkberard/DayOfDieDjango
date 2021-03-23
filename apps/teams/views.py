@@ -120,18 +120,18 @@ class TeamView(APIView):
 
     def post(self, request):
         """Posting a new team. Pretty simple stuff"""
-        if 'team' not in request.data:
-            data = {'team': ['This field is required.']}
+        if 'teammate' not in request.data:
+            data = {'teammate': ['This field is required.']}
             return Response(data=data, status=400)
 
         # Making sure the incoming team exists
-        usrname = request.data['team']
+        usrname = request.data['teammate']
         try:
             teamModel = CustomUser.objects.get(username=usrname)
         except CustomUser.DoesNotExist:
             estr = 'Cannot find a user with username: {}'.format(usrname)
-            returnData = {'error': estr}
-            return Response(returnData)
+            returnData = {'errors': [estr]}
+            return Response(returnData, status=400)
 
         # Creating teamship, default is pending so that works out
         teamshipModel = Team(teamCaptain=request.user, teammate=teamModel)
@@ -139,4 +139,4 @@ class TeamView(APIView):
         teamshipSerialized = TeamSerializer(teamshipModel)
 
         returnData = {'team': teamshipSerialized.data}
-        return Response(returnData)
+        return Response(returnData, status=201)

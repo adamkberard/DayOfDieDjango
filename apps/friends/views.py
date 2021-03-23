@@ -75,7 +75,8 @@ class FriendDetailView(APIView):
             usersFriendModels = Friend.objects.users_friends(user=request.user)
             friendModel = usersFriendModels.get(id=friendId)
         except Friend.DoesNotExist:
-            returnData = {'friendId': ['Friend id not found: ' + str(friendId)]}
+            estr = 'Friend id not found: {}' + str(friendId)
+            returnData = {'friendId': [estr]}
             return Response(returnData, status=400)
 
         friendModel.delete()
@@ -93,13 +94,9 @@ class FriendView(APIView):
     renderer_classes = [JSONRenderer]
 
     def get(self, request):
-        try:
-            usersFriendModels = Friend.objects.users_friends(user=request.user)
-        except Friend.DoesNotExist:
-            returnData = {'friendId': 'Friend id not found: ' + str(friendId)}
-            return Response(returnData, status=400)
-
+        usersFriendModels = Friend.objects.users_friends(user=request.user)
         friendsSerialized = FriendSerializer(usersFriendModels, many=True)
+
         myOwnData = []
         for temp in friendsSerialized.data:
             myOwnData.append(temp)

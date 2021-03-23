@@ -22,8 +22,7 @@ class Test_Team_DELETE(TestCase):
         client.force_authenticate(user=teamModel.teamCaptain)
         response = client.delete(url)
 
-        self.assertTrue(response.status_code, 200)
-
+        self.assertEqual(response.status_code, 200)
         self.assertEqual(Team.objects.filter(id=teamModel.id).count(), 0)
 
     def test_delete_team_not_in(self):
@@ -38,12 +37,12 @@ class Test_Team_DELETE(TestCase):
         client.force_authenticate(user=playerThree)
         response = client.delete(url)
 
-        self.assertTrue(response.status_code, 400)
+        self.assertEqual(response.status_code, 400)
         responseData = json.loads(response.content)
 
         self.assertTrue('teamId' in responseData)
-        estr = 'Team id not found: '.format(teamModel.id)
-        self.assertTrue(responseData['teamId'], [estr])
+        estr = 'Team id not found: {}'.format(teamModel.id)
+        self.assertEqual(responseData['teamId'], [estr])
 
     def test_bad_litter_id(self):
         """
@@ -59,7 +58,7 @@ class Test_Team_DELETE(TestCase):
 
         self.assertTrue('teamId' in responseData)
         estr = 'Team id not found: 0'
-        self.assertTrue(responseData['teamId'], [estr])
+        self.assertEqual(responseData['teamId'], [estr])
 
     def test_no_authentication(self):
         """
