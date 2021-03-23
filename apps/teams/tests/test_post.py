@@ -21,6 +21,8 @@ class Test_Team_POST(TestCase):
         url = reverse('team_list')
         client.force_authenticate(user=teamCaptainModel)
         response = client.post(url, data, format='json')
+
+        self.assertTrue(response.status_code, 201)
         responseData = json.loads(response.content)
 
         self.assertTrue('team' in responseData)
@@ -50,6 +52,8 @@ class Test_Team_POST(TestCase):
         url = reverse('team_list')
         client.force_authenticate(user=user)
         response = client.post(url, format='json')
+
+        self.assertTrue(response.status_code, 400)
         responseData = json.loads(response.content)
 
         self.assertEqual(responseData['team'][0], 'This field is required.')

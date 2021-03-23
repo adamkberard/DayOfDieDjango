@@ -21,6 +21,8 @@ class Test_Friend_POST(TestCase):
         url = reverse('friend_list')
         client.force_authenticate(user=requesterModel)
         response = client.post(url, data, format='json')
+
+        self.assertEqual(response.status_code, 201)
         responseData = json.loads(response.content)
 
         self.assertTrue('friend' in responseData)
@@ -31,12 +33,15 @@ class Test_Friend_POST(TestCase):
         self.assertTrue('timeRespondedTo' in friendData)
 
         # Then I check the status
+        self.assertTrue('status' in friendData)
         self.assertEqual(friendData['status'], 'PD')
 
         # Then I'll check the friend
+        self.assertTrue('requested' in friendData)
         self.assertEqual(friendData['requested'], requestedModel.username)
 
         # Then make sure we got an ID back
+        self.assertTrue('id' in friendData)
         self.assertTrue(len(friendData['id']) >= 8)
 
     def test_no_posts(self):
@@ -50,9 +55,12 @@ class Test_Friend_POST(TestCase):
         url = reverse('friend_list')
         client.force_authenticate(user=user)
         response = client.post(url, format='json')
+
+        self.assertEqual(response.status_code, 400)
         responseData = json.loads(response.content)
 
-        self.assertEqual(responseData['friend'][0], 'This field is required.')
+        self.assertTrue('friend' in responseData)
+        self.assertEqual(responseData['friend'], ['This field is required.'])
 
     def test_no_authentication(self):
         """

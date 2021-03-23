@@ -32,6 +32,8 @@ class Test_Team_GET(TestCase):
         url = reverse('team_list')
         client.force_authenticate(user=player)
         response = client.get(url)
+
+        self.assertTrue(response.status_code, 200)
         responseData = json.loads(response.content)
 
         self.assertTrue('teams' in responseData)
@@ -65,6 +67,8 @@ class Test_Team_GET(TestCase):
         url = reverse('team_list')
         client.force_authenticate(user=player)
         response = client.get(url)
+
+        self.assertTrue(response.status_code, 200)
         responseData = json.loads(response.content)
 
         self.assertTrue('teams' in responseData)
@@ -87,6 +91,8 @@ class Test_Team_GET(TestCase):
         url = reverse('team_list')
         client.force_authenticate(user=user)
         response = client.get(url)
+
+        self.assertTrue(response.status_code, 200)
         responseData = json.loads(response.content)
 
         self.assertEqual(responseData['teams'], [])
@@ -113,6 +119,8 @@ class Test_Team_GET_Detail(TestCase):
         url = reverse('team_detail', kwargs={'teamId': teamModel.id})
         client.force_authenticate(user=teamModel.teamCaptain)
         response = client.get(url)
+
+        self.assertTrue(response.status_code, 200)
         responseData = json.loads(response.content)
 
         self.assertTrue('team' in responseData)
@@ -143,6 +151,8 @@ class Test_Team_GET_Detail(TestCase):
         for teamModel in teamModels:
             url = reverse('team_detail', kwargs={'teamId': teamModel.id})
             response = client.get(url)
+
+            self.assertTrue(response.status_code, 200)
             responseData = json.loads(response.content)
 
             self.assertTrue('team' in responseData)

@@ -25,6 +25,8 @@ class Test_Team_PUT(TestCase):
         url = reverse('team_detail', kwargs={'teamId': teamModel.id})
         client.force_authenticate(user=teamModel.teammate)
         response = client.put(url, data, format='json')
+
+        self.assertTrue(response.status_code, 200)
         responseData = json.loads(response.content)
 
         # Now that we have the data, I can change the model without affecting
@@ -36,25 +38,28 @@ class Test_Team_PUT(TestCase):
 
         # Gotta make sure the team id didn't change cuz that would
         # be annoying
+        self.assertTrue('id' in teamData)
         self.assertEqual(teamModel.id, decode_id(teamData['id']))
 
         # First I'll check the date times
         dateFStr = '%Y-%m-%d %H:%M:%S'
+        self.assertTrue('timeRequested' in teamData)
         self.assertEqual(teamData['timeRequested'],
                          teamModel.timeRequested.strftime(dateFStr))
+        self.assertTrue('timeRespondedTo' in teamData)
         self.assertEqual(teamData['timeRespondedTo'],
                          teamModel.timeRespondedTo.strftime(dateFStr))
 
         # Then I'll check the players
+        self.assertTrue('teamCaptain' in teamData)
         self.assertEqual(teamModel.teamCaptain.username,
                          teamData['teamCaptain'])
+        self.assertTrue('teammate' in teamData)
         self.assertEqual(teamModel.teammate.username,
                          teamData['teammate'])
 
-        # Then make sure we got an ID back
-        self.assertTrue(len(teamData['id']) >= 8)
-
         # Finally make sure we actually changed the status
+        self.assertTrue('status' in teamData)
         self.assertTrue(teamModel.status, teamData['status'])
 
     def test_put_accept_team_as_teamCaptain(self):
@@ -71,10 +76,9 @@ class Test_Team_PUT(TestCase):
         response = client.put(url, data, format='json')
         responseData = json.loads(response.content)
 
-        self.assertTrue('error' in responseData)
-
-        errStr = 'Cannot accept a team request as the teamCaptain.'
-        self.assertEqual(responseData['error'], errStr)
+        self.assertTrue('errors' in responseData)
+        estr = 'Cannot accept a team request as the teamCaptain.'
+        self.assertEqual(responseData['errors'], [estr])
 
     def test_put_denied_team_as_requsted(self):
         """
@@ -99,26 +103,28 @@ class Test_Team_PUT(TestCase):
 
         # Gotta make sure the team id didn't change cuz that would
         # be annoying
-
+        self.assertTrue('id' in teamData)
         self.assertEqual(teamModel.id, decode_id(teamData['id']))
 
         # First I'll check the date times
         dateFStr = '%Y-%m-%d %H:%M:%S'
+        self.assertTrue('timeRequested' in teamData)
         self.assertEqual(teamData['timeRequested'],
                          teamModel.timeRequested.strftime(dateFStr))
+        self.assertTrue('timeRespondedTo' in teamData)
         self.assertEqual(teamData['timeRespondedTo'],
                          teamModel.timeRespondedTo.strftime(dateFStr))
 
         # Then I'll check the players
+        self.assertTrue('teamCaptain' in teamData)
         self.assertEqual(teamModel.teamCaptain.username,
                          teamData['teamCaptain'])
+        self.assertTrue('teammate' in teamData)
         self.assertEqual(teamModel.teammate.username,
                          teamData['teammate'])
 
-        # Then make sure we got an ID back
-        self.assertTrue(len(teamData['id']) >= 8)
-
         # Finally make sure we actually changed the status
+        self.assertTrue('status' in teamData)
         self.assertTrue(teamModel.status, teamData['status'])
 
     def test_put_denied_team_as_teamCaptain(self):
@@ -135,10 +141,9 @@ class Test_Team_PUT(TestCase):
         response = client.put(url, data, format='json')
         responseData = json.loads(response.content)
 
-        self.assertTrue('error' in responseData)
-
-        errStr = 'Cannot deny a team request as the teamCaptain.'
-        self.assertEqual(responseData['error'], errStr)
+        self.assertTrue('errors' in responseData)
+        estr = 'Cannot deny a team request as the teamCaptain.'
+        self.assertEqual(responseData['errors'], [estr])
 
     def test_no_authentication(self):
         """

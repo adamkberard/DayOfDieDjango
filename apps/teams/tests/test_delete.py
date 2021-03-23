@@ -21,9 +21,9 @@ class Test_Team_DELETE(TestCase):
         url = reverse('team_detail', kwargs={'teamId': teamModel.id})
         client.force_authenticate(user=teamModel.teamCaptain)
         response = client.delete(url)
-        responseData = json.loads(response.content)
 
-        self.assertEqual(responseData['status'], 'okay')
+        self.assertTrue(response.status_code, 200)
+
         self.assertEqual(Team.objects.filter(id=teamModel.id).count(), 0)
 
     def test_delete_team_not_in(self):
@@ -37,26 +37,29 @@ class Test_Team_DELETE(TestCase):
         url = reverse('team_detail', kwargs={'teamId': teamModel.id})
         client.force_authenticate(user=playerThree)
         response = client.delete(url)
+
+        self.assertTrue(response.status_code, 400)
         responseData = json.loads(response.content)
 
-        errStr = 'Team id not found: '
-        self.assertTrue(responseData['error'].startswith(errStr))
+        self.assertTrue('teamId' in responseData)
+        estr = 'Team id not found: '.format(teamModel.id)
+        self.assertTrue(responseData['teamId'], [estr])
 
     def test_bad_litter_id(self):
         """
         Testing a simple delete with no litter id
         """
-        teamModel = TeamFactory()
-        playerThree = CustomUserFactory()
+        player = CustomUserFactory()
 
         client = APIClient()
-        url = reverse('team_detail', kwargs={'teamId': teamModel.id})
-        client.force_authenticate(user=playerThree)
+        url = reverse('team_detail', kwargs={'teamId': 0})
+        client.force_authenticate(user=player)
         response = client.delete(url)
         responseData = json.loads(response.content)
 
-        errStr = 'Team id not found: '
-        self.assertTrue(responseData['error'].startswith(errStr))
+        self.assertTrue('teamId' in responseData)
+        estr = 'Team id not found: 0'
+        self.assertTrue(responseData['teamId'], [estr])
 
     def test_no_authentication(self):
         """
