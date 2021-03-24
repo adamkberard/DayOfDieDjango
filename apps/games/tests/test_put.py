@@ -60,6 +60,10 @@ class Test_Game_PUT(TestCase):
         self.assertEqual(gameData['timeSaved'],
                          gameModel.timeSaved.strftime(dateFormatString))
 
+        # Check stat keeping record
+        self.assertTrue('statType' in gameData)
+        self.assertEqual(gameData['statType'], gameModel.statType)
+
         # Then I'll check the players
         fields = ['playerOne', 'playerTwo', 'playerThree', 'playerFour']
         for field in fields:
@@ -112,6 +116,10 @@ class Test_Game_PUT(TestCase):
                          gameModel.timeStarted.strftime(dateFormatString))
         self.assertEqual(gameData['timeSaved'],
                          gameModel.timeSaved.strftime(dateFormatString))
+
+        # Check stat keeping record
+        self.assertTrue('statType' in gameData)
+        self.assertEqual(gameData['statType'], gameModel.statType)
 
         # Then I'll check the players
         fields = ['playerOne', 'playerTwo', 'playerThree', 'playerFour']
@@ -172,6 +180,10 @@ class Test_Game_PUT(TestCase):
             self.assertEqual(gameData[field],
                              getattr(gameModel, field).username)
 
+        # Check stat keeping record
+        self.assertTrue('statType' in gameData)
+        self.assertEqual(gameData['statType'], gameModel.statType)
+
         # Then make sure we got an ID back
         self.assertTrue(len(gameData['id']) >= 8)
 
@@ -224,6 +236,10 @@ class Test_Game_PUT(TestCase):
         for field in fields:
             self.assertEqual(gameData[field],
                              getattr(gameModel, field).username)
+
+        # Check stat keeping record
+        self.assertTrue('statType' in gameData)
+        self.assertEqual(gameData['statType'], gameModel.statType)
 
         # Then make sure we got an ID back
         self.assertTrue(len(gameData['id']) >= 8)
@@ -394,6 +410,10 @@ class Test_Game_PUT(TestCase):
             self.assertEqual(gameData[field],
                              getattr(gameModel, field).username)
 
+        # Check stat keeping record
+        self.assertTrue('statType' in gameData)
+        self.assertEqual(gameData['statType'], gameModel.statType)
+
         # Then make sure we got an ID back
         self.assertTrue(len(gameData['id']) >= 8)
 
@@ -447,6 +467,10 @@ class Test_Game_PUT(TestCase):
         for field in fields:
             self.assertEqual(gameData[field],
                              getattr(gameModel, field).username)
+
+        # Check stat keeping record
+        self.assertTrue('statType' in gameData)
+        self.assertEqual(gameData['statType'], gameModel.statType)
 
         # Then make sure we got an ID back
         self.assertTrue(len(gameData['id']) >= 8)
@@ -502,6 +526,10 @@ class Test_Game_PUT(TestCase):
             self.assertEqual(gameData[field],
                              getattr(gameModel, field).username)
 
+        # Check stat keeping record
+        self.assertTrue('statType' in gameData)
+        self.assertEqual(gameData['statType'], gameModel.statType)
+
         # Then make sure we got an ID back
         self.assertTrue(len(gameData['id']) >= 8)
 
@@ -556,6 +584,10 @@ class Test_Game_PUT(TestCase):
             self.assertEqual(gameData[field],
                              getattr(gameModel, field).username)
 
+        # Check stat keeping record
+        self.assertTrue('statType' in gameData)
+        self.assertEqual(gameData['statType'], gameModel.statType)
+
         # Then make sure we got an ID back
         self.assertTrue(len(gameData['id']) >= 8)
 
@@ -606,6 +638,10 @@ class Test_Game_PUT(TestCase):
         for field in fields:
             self.assertEqual(gameData[field],
                              getattr(gameModel, field).username)
+
+        # Check stat keeping record
+        self.assertTrue('statType' in gameData)
+        self.assertEqual(gameData['statType'], gameModel.statType)
 
         # Then make sure we got an ID back
         self.assertTrue(len(gameData['id']) >= 8)

@@ -21,6 +21,8 @@ class GameSerializerTests(TestCase):
         self.assertEqual(sData['timeSaved'],
                          gameModel.timeSaved.strftime(dateFormatString))
 
+        self.assertEqual(sData['statType'], gameModel.statType)
+
         # Then I check the playerId's
         fields = ['playerOne', 'playerTwo', 'playerThree', 'playerFour']
         for field in fields:

@@ -51,6 +51,10 @@ class Test_Game_GET(TestCase):
         # Then make sure we got an ID back
         self.assertTrue(len(gameData['id']) >= 8)
 
+        # Check stat keeping record
+        self.assertTrue('statType' in gameData)
+        self.assertEqual(gameData['statType'], gameModel.statType)
+
         # Then I check the points
         # To do this I remove matching points until hopefully both
         # lists are empty
@@ -109,6 +113,10 @@ class Test_Game_GET(TestCase):
             for field in fields:
                 self.assertEqual(gameData[field],
                                  getattr(gameModel, field).username)
+
+            # Check stat keeping record
+            self.assertTrue('statType' in gameData)
+            self.assertEqual(gameData['statType'], gameModel.statType)
 
             # Then make sure we got an ID back
             self.assertTrue(len(gameData['id']) >= 8)
@@ -183,6 +191,10 @@ class Test_Game_GET_Detail(TestCase):
             self.assertEqual(gameData[field],
                              getattr(gameModel, field).username)
 
+        # Check stat keeping record
+        self.assertTrue('statType' in gameData)
+        self.assertEqual(gameData['statType'], gameModel.statType)
+
         # Then make sure we got an ID back
         self.assertTrue(len(gameData['id']) >= 8)
 
@@ -230,6 +242,10 @@ class Test_Game_GET_Detail(TestCase):
             # Then make sure we got an ID back
             self.assertTrue(len(gameData['id']) >= 8)
 
+            # Check stat keeping record
+            self.assertTrue('statType' in gameData)
+            self.assertEqual(gameData['statType'], gameModel.statType)
+
             # Then I check the points
             # To do this I remove matching points until hopefully both
             # lists are empty
@@ -276,6 +292,10 @@ class Test_Game_GET_Detail(TestCase):
             for field in fields:
                 self.assertEqual(gameData[field],
                                  getattr(gameModel, field).username)
+
+            # Check stat keeping record
+            self.assertTrue('statType' in gameData)
+            self.assertEqual(gameData['statType'], gameModel.statType)
 
             # Then make sure we got an ID back
             self.assertTrue(len(gameData['id']) >= 8)
