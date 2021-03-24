@@ -52,6 +52,10 @@ class Test_Game_POST(TestCase):
             self.assertEqual(gameData[field],
                              getattr(gameModel, field).username)
 
+        # Check stat keeping record
+        self.assertTrue('statType' in gameData)
+        self.assertEqual(gameData['statType'], gameModel.statType)
+
         # Then make sure we got an ID back
         self.assertTrue(len(gameData['id']) >= 8)
 

@@ -18,6 +18,20 @@ class GameSettings(models.Model):
 
 # Create your models here.
 class Game(models.Model):
+    JUST_POINTS = 'JP'
+    REG_STATS = 'RS'
+    FULL_STATS = 'FS'
+
+    STAT_OPTIONS = [
+        (JUST_POINTS, 'Just Points'),
+        (REG_STATS, 'Regular Stats'),
+        (FULL_STATS, 'Full Stats'),
+    ]
+
+    statType = models.CharField(max_length=2,
+                                choices=STAT_OPTIONS,
+                                default=REG_STATS)
+
     timeStarted = models.DateTimeField()
     timeSaved = models.DateTimeField()
     playerOne = models.ForeignKey(settings.AUTH_USER_MODEL,

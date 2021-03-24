@@ -59,6 +59,7 @@ class GameSerializer(serializers.ModelSerializer):
         return Game.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
+        instance.statType = validated_data.get('statType', instance.statType)
         instance.timeStarted = validated_data.get('timeStarted',
                                                   instance.timeStarted)
         instance.timeSaved = validated_data.get('timeSaved',
