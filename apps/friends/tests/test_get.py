@@ -33,6 +33,7 @@ class Test_Friend_GET(TestCase):
         self.assertTrue('friends' in responseData)
         self.assertEqual(len(responseData['friends']), 1)
         friendSet = responseData['friends'][0]
+
         friendMatched = checkFriendMatch(friendSet, friendModelData,
                                          both=False)
         self.assertEqual('valid', friendMatched)
@@ -124,7 +125,8 @@ class Test_Friend_GET_Detail(TestCase):
         responseData = json.loads(response.content)
         self.assertEqual(len(responseData), 1)
 
-        friendMatched = checkFriendMatch(responseData, friendModelData)
+        friendMatched = checkFriendMatch(responseData, friendModelData,
+                                         both=True)
         self.assertEqual('valid', friendMatched)
 
     def test_get_friend_many(self):
@@ -163,7 +165,8 @@ class Test_Friend_GET_Detail(TestCase):
             responseData = json.loads(response.content)
             self.assertEqual(len(responseData), 1)
 
-            friendMatched = checkFriendMatch(responseData, friendModelData)
+            friendMatched = checkFriendMatch(responseData, friendModelData,
+                                             both=True)
             self.assertEqual('valid', friendMatched)
 
     def test_no_authentication(self):

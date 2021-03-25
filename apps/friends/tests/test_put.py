@@ -33,8 +33,9 @@ class Test_Friend_PUT(TestCase):
         friendModel.status = friendModel.ACCEPTED
         friendModelData = FriendSerializer(friendModel).data
 
+        avoid = ['id', 'timeRequested', 'timeRespondedTo']
         friendMatched = checkFriendMatch(responseData, friendModelData,
-                                         ids=False, times=False)
+                                         toAvoid=avoid)
         self.assertEqual('valid', friendMatched)
 
     def test_put_accept_friend_as_requester(self):
@@ -77,8 +78,9 @@ class Test_Friend_PUT(TestCase):
         friendModel.status = friendModel.DENIED
         friendModelData = FriendSerializer(friendModel).data
 
+        avoid = ['id', 'timeRequested', 'timeRespondedTo']
         friendMatched = checkFriendMatch(responseData, friendModelData,
-                                         ids=False, times=False)
+                                         toAvoid=avoid)
         self.assertEqual('valid', friendMatched)
 
     def test_put_denied_friend_as_requester(self):

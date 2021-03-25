@@ -42,7 +42,7 @@ class Test_Game_POST(TestCase):
 
         self.assertTrue('game' in responseData)
         gameMatched = checkGameMatch(responseData, gameModelData,
-                                     pointModelsData, ids=False)
+                                     pointModelsData, toAvoid=['id'])
         self.assertEqual('valid', gameMatched)
 
     def test_no_authentication(self):

@@ -1,7 +1,7 @@
 # Just a bunch of helper funcs for testing games
 
 def checkGameMatch(gameSetData, gameModelData, pointModelsData,
-                   points=True, ids=True):
+                   toAvoid=[]):
     errors = {}
     if 'game' not in gameSetData:
         errors['game'] = ['No game']
@@ -9,60 +9,27 @@ def checkGameMatch(gameSetData, gameModelData, pointModelsData,
 
     gameData = gameSetData['game']
 
-    if points:
+    if 'points' not in toAvoid:
         if 'points' in gameData:
             if not pointsMatch(pointModelsData, gameData['points']):
                 errors['game_points'] = ['Points do not match']
         else:
             errors['game_points'] = ['No game points']
 
-    if 'timeStarted' in gameData:
-        resp = gameData['timeStarted']
-        mod = gameModelData['timeStarted']
-        if resp != mod:
-            estr = '{} != {}'.format(resp, mod)
-            errors['game_timeStarted'] = [estr]
-    else:
-        errors['game_timeStarted'] = ['No game timeStarted']
+    # Other Fields that are much simpler
+    fields = ['timeStarted', 'timeSaved', 'playerOne', 'playerTwo',
+              'playerThree', 'playerFour', 'statType', 'id']
+    fieldsToTest = listDiff(fields, toAvoid)
 
-    if 'timeSaved' in gameData:
-        resp = gameData['timeSaved']
-        mod = gameModelData['timeSaved']
-        if resp != mod:
-            estr = '{} != {}'.format(resp, mod)
-            errors['game_timeSaved'] = [estr]
-    else:
-        errors['game_timeSaved'] = ['No game timeSaved']
-
-    # Then I'll check the players
-    fields = ['playerOne', 'playerTwo', 'playerThree', 'playerFour']
-    for field in fields:
+    for field in fieldsToTest:
         if field in gameData:
-            resp = gameData[field]
-            mod = gameModelData[field]
-            if resp != mod:
-                estr = '{} != {}'.format(resp, mod)
+            response = gameData[field]
+            model = gameModelData[field]
+            if response != model:
+                estr = '{} != {}'.format(response, model)
                 errors['game_{}'.format(field)] = [estr]
         else:
-            errors['game_{}'.format(field)] = ['No {}'.format(field)]
-
-    if ids:
-        if 'id' in gameData:
-            resp = gameData['id']
-            mod = gameModelData['id']
-            if resp != mod:
-                estr = '{} != {}'.format(resp, mod)
-                errors['game_id'.format()] = [estr]
-        else:
-            errors['game_id'] = ['No game id']
-
-    if 'statType' in gameData:
-        resp = gameData['statType']
-        mod = gameModelData['statType']
-        if resp != mod:
-            estr = '{} != {}'.format(resp, mod)
-    else:
-        errors['game_statType'] = ['No game stat type']
+            errors['game_{}'.format(field)] = ['No game {}'.format(field)]
 
     if len(errors) == 0:
         return 'valid'
@@ -91,3 +58,8 @@ def pointMatch(expectedData, recievedData):
     if expectedData['scoredOn'] != recievedData['scoredOn']:
         return False
     return True
+
+
+def listDiff(list1, list2):
+    out = [item for item in list1 if item not in list2]
+    return out

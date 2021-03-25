@@ -33,8 +33,9 @@ class Test_Friend_POST(TestCase):
         responseData = json.loads(response.content)
         self.assertEqual(len(responseData), 1)
 
+        avoid = ['id', 'timeRequested', 'timeRespondedTo']
         friendMatched = checkFriendMatch(responseData, friendModelData,
-                                         ids=False, times=False)
+                                         toAvoid=avoid)
         self.assertEqual('valid', friendMatched)
 
     def test_no_authentication(self):
