@@ -28,7 +28,8 @@ class TeamDetailView(APIView):
             usersTeamModels = Team.objects.users_teams(user=request.user)
             teamModel = usersTeamModels.get(id=teamId)
         except Team.DoesNotExist:
-            returnData = {'teamId': ['Team id not found: ' + str(teamId)]}
+            estr = 'Team id not found: {}'.format(teamId)
+            returnData = {'teamId': [estr]}
             return Response(returnData, status=400)
 
         teamSerialized = TeamSerializer(teamModel)
@@ -43,21 +44,22 @@ class TeamDetailView(APIView):
             usersTeamModels = Team.objects.users_teams(user=request.user)
             teamModel = usersTeamModels.get(id=teamId)
         except Team.DoesNotExist:
-            returnData = {'teamId': ['Team id not found: ' + str(teamId)]}
+            estr = 'Team id not found: {}'.format(teamId)
+            returnData = {'teamId': [estr]}
             return Response(returnData, status=400)
 
         if 'status' in request.data:
             if request.data['status'] == 'accept':
                 # They can only accept it if they are the teammate
                 if request.user == teamModel.teamCaptain:
-                    estr = 'Cannot accept a team request as the teamCaptain.'
+                    estr = 'Cannot accept a team request as the requester.'
                     return Response({'errors': [estr]}, status=400)
                 else:
                     teamModel.status = teamModel.ACCEPTED
                     teamModel.save()
             elif request.data['status'] == 'deny':
                 if request.user == teamModel.teamCaptain:
-                    estr = 'Cannot deny a team request as the teamCaptain.'
+                    estr = 'Cannot deny a team request as the requester.'
                     return Response({'errors': [estr]}, status=400)
                 else:
                     teamModel.status = teamModel.DENIED
@@ -75,7 +77,8 @@ class TeamDetailView(APIView):
             usersTeamModels = Team.objects.users_teams(user=request.user)
             teamModel = usersTeamModels.get(id=teamId)
         except Team.DoesNotExist:
-            returnData = {'teamId': ['Team id not found: ' + str(teamId)]}
+            estr = 'Team id not found: {}'.format(teamId)
+            returnData = {'teamId': [estr]}
             return Response(returnData, status=400)
 
         teamModel.delete()
@@ -93,44 +96,35 @@ class TeamView(APIView):
     renderer_classes = [JSONRenderer]
 
     def get(self, request):
-        usersTeamModels = Team.objects.users_teams(user=request.user)
+        teamSet = Team.objects.users_teams(user=request.user)
 
-        teamsSerialized = TeamSerializer(usersTeamModels, many=True)
-        myOwnData = []
-        for temp in teamsSerialized.data:
-            myOwnData.append(temp)
+        teamDatas = []
+        for team in teamSet:
+            teamData = TeamSerializer(team).data
+            if teamData['teamCaptain'] == request.user.username:
+                teamData['teammate'] = teamData['teammate']
+                teamData.pop('teamCaptain', None)
+            elif teamData['teammate'] == request.user.username:
+                teamData['teammate'] = teamData['teamCaptain']
+                teamData.pop('teamCaptain', None)
+            teamDatas.append({'team': teamData})
 
-        for teamData in myOwnData:
-            for field in teamData:
-                if field == 'teamCaptain':
-                    if teamData['teamCaptain'] == request.user.username:
-                        teamData['partner'] = teamData['teammate']
-                        teamData.pop('teamCaptain', None)
-                        teamData.pop('teammate', None)
-                        break
-                if field == 'teammate':
-                    if teamData['teammate'] == request.user.username:
-                        teamData['partner'] = teamData['teamCaptain']
-                        teamData.pop('teamCaptain', None)
-                        teamData.pop('teammate', None)
-                        break
-
-        returnData = {'teams': myOwnData}
+        returnData = {'teams': teamDatas}
         return Response(returnData, status=200)
 
     def post(self, request):
         """Posting a new team. Pretty simple stuff"""
-        if 'teammate' not in request.data:
-            data = {'teammate': ['This field is required.']}
+        if 'team' not in request.data:
+            data = {'team': ['This field is required.']}
             return Response(data=data, status=400)
 
         # Making sure the incoming team exists
-        usrname = request.data['teammate']
+        usrname = request.data['team']
         try:
             teamModel = CustomUser.objects.get(username=usrname)
         except CustomUser.DoesNotExist:
             estr = 'Cannot find a user with username: {}'.format(usrname)
-            returnData = {'errors': [estr]}
+            returnData = {'team': [estr]}
             return Response(returnData, status=400)
 
         # Creating teamship, default is pending so that works out

@@ -1,4 +1,4 @@
-from tools.helperFunctions.helperFuncs import listDiff
+from tools.helperFuncs import listDiff
 
 
 def checkFriendMatch(responseFriendData, friendModelData, both=True,

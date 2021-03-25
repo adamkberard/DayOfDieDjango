@@ -4,7 +4,7 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from tools.helperFunctions.helperFuncs import convertToPK
+from tools.helperFuncs import convertToPK
 
 from .models import Game, Point
 from .serializers import GameSerializer, PointSerializer
