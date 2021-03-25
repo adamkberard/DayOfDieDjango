@@ -126,7 +126,6 @@ class Test_Game_GET_Detail(TestCase):
         responseData = json.loads(response.content)
         self.assertEqual(len(responseData), 1)
 
-        self.assertTrue('game' in responseData)
         gameMatched = checkGameMatch(responseData, gameModelData,
                                      pointModelsData)
         self.assertEqual('valid', gameMatched)
@@ -153,7 +152,6 @@ class Test_Game_GET_Detail(TestCase):
             responseData = json.loads(response.content)
             self.assertEqual(len(responseData), 1)
 
-            self.assertTrue('game' in responseData)
             gameMatched = checkGameMatch(responseData, gameModelData,
                                          pointModelsData)
             self.assertEqual('valid', gameMatched)
@@ -187,7 +185,6 @@ class Test_Game_GET_Detail(TestCase):
             self.assertEqual(response.status_code, 200)
             responseData = json.loads(response.content)
 
-            self.assertTrue('game' in responseData)
             gameMatched = checkGameMatch(responseData, gameModelData,
                                          pointModelsData)
             self.assertEqual('valid', gameMatched)

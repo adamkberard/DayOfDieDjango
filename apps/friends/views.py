@@ -28,8 +28,9 @@ class FriendDetailView(APIView):
             usersFriendModels = Friend.objects.users_friends(user=request.user)
             friendModel = usersFriendModels.get(id=friendId)
         except Friend.DoesNotExist:
-            returnData = {'error': 'Friend id not found: '.format(friendId)}
-            return Response(returnData)
+            estr = 'Friend id not found: {}'.format(friendId)
+            returnData = {'friendId': [estr]}
+            return Response(returnData, status=400)
 
         friendSerialized = FriendSerializer(friendModel)
         returnData = {'friend': friendSerialized.data}
@@ -43,7 +44,8 @@ class FriendDetailView(APIView):
             usersFriendModels = Friend.objects.users_friends(user=request.user)
             friendModel = usersFriendModels.get(id=friendId)
         except Friend.DoesNotExist:
-            returnData = {'friendId': 'Friend id not found: ' + str(friendId)}
+            estr = 'Friend id not found: {}'.format(friendId)
+            returnData = {'friendId': [estr]}
             return Response(returnData, status=400)
 
         if 'status' in request.data:
@@ -94,29 +96,22 @@ class FriendView(APIView):
     renderer_classes = [JSONRenderer]
 
     def get(self, request):
-        usersFriendModels = Friend.objects.users_friends(user=request.user)
-        friendsSerialized = FriendSerializer(usersFriendModels, many=True)
+        friendSet = Friend.objects.users_friends(user=request.user)
 
-        myOwnData = []
-        for temp in friendsSerialized.data:
-            myOwnData.append(temp)
+        friendDatas = []
+        for friend in friendSet:
+            friendData = FriendSerializer(friend).data
+            if friendData['requester'] == request.user.username:
+                friendData['friend'] = friendData['requested']
+                friendData.pop('requester', None)
+                friendData.pop('requested', None)
+            elif friendData['requested'] == request.user.username:
+                friendData['friend'] = friendData['requester']
+                friendData.pop('requester', None)
+                friendData.pop('requested', None)
+            friendDatas.append({'friend': friendData})
 
-        for friendData in myOwnData:
-            for field in friendData:
-                if field == 'requester':
-                    if friendData['requester'] == request.user.username:
-                        friendData['friend'] = friendData['requested']
-                        friendData.pop('requester', None)
-                        friendData.pop('requested', None)
-                        break
-                if field == 'requested':
-                    if friendData['requested'] == request.user.username:
-                        friendData['friend'] = friendData['requester']
-                        friendData.pop('requester', None)
-                        friendData.pop('requested', None)
-                        break
-
-        returnData = {'friends': myOwnData}
+        returnData = {'friends': friendDatas}
         return Response(returnData, status=200)
 
     def post(self, request):
