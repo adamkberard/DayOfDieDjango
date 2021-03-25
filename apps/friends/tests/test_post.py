@@ -6,61 +6,37 @@ from rest_framework.test import APIClient
 
 from apps.my_auth.factories import CustomUserFactory
 
+from ..factories import FriendFactory
+from ..serializers import FriendSerializer
+from .comparers import checkFriendMatch
+
 
 class Test_Friend_POST(TestCase):
     def test_one_post(self):
         """
         Testing one simple post
         """
-        requesterModel = CustomUserFactory()
-        requestedModel = CustomUserFactory()
+        requester = CustomUserFactory()
+        requested = CustomUserFactory()
+        friendModel = FriendFactory.build(requester=requester,
+                                          requested=requested)
+        friendModelData = FriendSerializer(friendModel).data
 
-        data = {'friend': requestedModel.username}
+        data = {'friend': requested.username}
 
         client = APIClient()
         url = reverse('friend_list')
-        client.force_authenticate(user=requesterModel)
+        client.force_authenticate(user=requester)
         response = client.post(url, data, format='json')
 
         self.assertEqual(response.status_code, 201)
         responseData = json.loads(response.content)
+        self.assertEqual(len(responseData), 1)
 
-        self.assertTrue('friend' in responseData)
-        friendData = responseData['friend']
-
-        # First I'll check to make sure the dates exist
-        self.assertTrue('timeRequested' in friendData)
-        self.assertTrue('timeRespondedTo' in friendData)
-
-        # Then I check the status
-        self.assertTrue('status' in friendData)
-        self.assertEqual(friendData['status'], 'PD')
-
-        # Then I'll check the friend
-        self.assertTrue('requested' in friendData)
-        self.assertEqual(friendData['requested'], requestedModel.username)
-
-        # Then make sure we got an ID back
-        self.assertTrue('id' in friendData)
-        self.assertTrue(len(friendData['id']) >= 8)
-
-    def test_no_posts(self):
-        """
-        Testing a post with no data
-        """
-
-        user = CustomUserFactory()
-
-        client = APIClient()
-        url = reverse('friend_list')
-        client.force_authenticate(user=user)
-        response = client.post(url, format='json')
-
-        self.assertEqual(response.status_code, 400)
-        responseData = json.loads(response.content)
-
-        self.assertTrue('friend' in responseData)
-        self.assertEqual(responseData['friend'], ['This field is required.'])
+        avoid = ['id', 'timeRequested', 'timeRespondedTo']
+        friendMatched = checkFriendMatch(responseData, friendModelData,
+                                         toAvoid=avoid)
+        self.assertEqual('valid', friendMatched)
 
     def test_no_authentication(self):
         """

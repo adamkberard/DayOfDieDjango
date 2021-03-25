@@ -5,9 +5,10 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 
 from apps.my_auth.factories import CustomUserFactory
-from tools.helperFunctions.testHelperFuncs import fullTeamMatch, teamsMatch
 
 from ..factories import TeamFactory
+from ..serializers import TeamSerializer
+from .comparers import checkTeamMatch
 
 
 class Test_Team_GET(TestCase):
@@ -17,16 +18,8 @@ class Test_Team_GET(TestCase):
         teams. They only have one team in this case.
         """
         player = CustomUserFactory()
-        teamModels = []
-
-        numPlayerOne = 1
-        numPlayerTwo = 0
-        totalTeams = numPlayerOne + numPlayerTwo
-
-        for i in range(0, numPlayerOne):
-            teamModels.append(TeamFactory(teamCaptain=player))
-        for i in range(0, numPlayerTwo):
-            teamModels.append(TeamFactory(teammate=player))
+        teamModel = TeamFactory(teamCaptain=player)
+        teamModelData = TeamSerializer(teamModel).data
 
         client = APIClient()
         url = reverse('team_list')
@@ -35,16 +28,15 @@ class Test_Team_GET(TestCase):
 
         self.assertEqual(response.status_code, 200)
         responseData = json.loads(response.content)
+        self.assertEqual(len(responseData), 1)
 
         self.assertTrue('teams' in responseData)
-        teamsData = responseData['teams']
+        self.assertEqual(len(responseData['teams']), 1)
+        teamSet = responseData['teams'][0]
 
-        # Make sure the number of teams is one
-        self.assertEqual(len(teamsData), totalTeams)
-
-        # Now I check all the things
-        # Starting with the team username
-        self.assertTrue(teamsMatch(teamModels, teamsData))
+        teamMatched = checkTeamMatch(teamSet, teamModelData,
+                                     both=False)
+        self.assertEqual('valid', teamMatched)
 
     def test_get_teams_many(self):
         """
@@ -53,15 +45,20 @@ class Test_Team_GET(TestCase):
         """
         player = CustomUserFactory()
         teamModels = []
+        teamModelDatas = []
 
-        numPlayerOne = 10
-        numPlayerTwo = 10
-        totalTeams = numPlayerOne + numPlayerTwo
+        numRequester = 10
+        numRequested = 10
+        totalTeams = numRequester + numRequested
 
-        for i in range(0, numPlayerOne):
-            teamModels.append(TeamFactory(teamCaptain=player))
-        for i in range(0, numPlayerTwo):
-            teamModels.append(TeamFactory(teammate=player))
+        for i in range(0, numRequester):
+            tempModel = TeamFactory(teamCaptain=player)
+            teamModels.append(tempModel)
+            teamModelDatas.append(TeamSerializer(tempModel).data)
+        for i in range(0, numRequested):
+            tempModel = TeamFactory(teammate=player)
+            teamModels.append(tempModel)
+            teamModelDatas.append(TeamSerializer(tempModel).data)
 
         client = APIClient()
         url = reverse('team_list')
@@ -70,33 +67,34 @@ class Test_Team_GET(TestCase):
 
         self.assertEqual(response.status_code, 200)
         responseData = json.loads(response.content)
+        self.assertEqual(len(responseData), 1)
 
         self.assertTrue('teams' in responseData)
-        teamsData = responseData['teams']
-
-        # Make sure the number of teams is one
-        self.assertEqual(len(teamsData), totalTeams)
-
-        # Now I check all the things
-        # Starting with the team username
-        self.assertTrue(teamsMatch(teamModels, teamsData))
+        self.assertEqual(len(responseData['teams']), totalTeams)
+        for i in range(0, totalTeams):
+            teamSet = responseData['teams'][i]
+            teamModelData = teamModelDatas[i]
+            teamMatched = checkTeamMatch(teamSet, teamModelData,
+                                         both=False)
+            self.assertEqual('valid', teamMatched)
 
     def test_get_no_teams(self):
         """
         Trying to get all the teams a person has logged which is none.
         """
-        user = CustomUserFactory()
+        player = CustomUserFactory()
 
         client = APIClient()
         url = reverse('team_list')
-        client.force_authenticate(user=user)
+        client.force_authenticate(user=player)
         response = client.get(url)
 
         self.assertEqual(response.status_code, 200)
         responseData = json.loads(response.content)
+        self.assertEqual(len(responseData), 1)
 
         self.assertTrue('teams' in responseData)
-        self.assertEqual(responseData['teams'], [])
+        self.assertEqual(len(responseData['teams']), 0)
 
     def test_no_authentication(self):
         """
@@ -114,22 +112,22 @@ class Test_Team_GET_Detail(TestCase):
         """
         Trying to get a single team based on their id
         """
-        teamModel = TeamFactory()
+        player = CustomUserFactory()
+        teamModel = TeamFactory(teamCaptain=player)
+        teamModelData = TeamSerializer(teamModel).data
 
         client = APIClient()
         url = reverse('team_detail', kwargs={'teamId': teamModel.id})
-        client.force_authenticate(user=teamModel.teamCaptain)
+        client.force_authenticate(user=player)
         response = client.get(url)
 
         self.assertEqual(response.status_code, 200)
         responseData = json.loads(response.content)
+        self.assertEqual(len(responseData), 1)
 
-        self.assertTrue('team' in responseData)
-        teamData = responseData['team']
-
-        # Now I check all the things
-        # Starting with the team username
-        self.assertTrue(fullTeamMatch(teamModel, teamData))
+        teamMatched = checkTeamMatch(responseData, teamModelData,
+                                     both=True)
+        self.assertEqual('valid', teamMatched)
 
     def test_get_team_many(self):
         """
@@ -138,30 +136,38 @@ class Test_Team_GET_Detail(TestCase):
         """
         player = CustomUserFactory()
         teamModels = []
+        teamModelDatas = []
 
-        numPlayerOne = 10
-        numPlayerTwo = 10
+        numRequester = 10
+        numRequested = 10
+        totalTeams = numRequester + numRequested
 
-        for i in range(0, numPlayerOne):
-            teamModels.append(TeamFactory(teamCaptain=player))
-        for i in range(0, numPlayerTwo):
-            teamModels.append(TeamFactory(teammate=player))
+        for i in range(0, numRequester):
+            tempModel = TeamFactory(teamCaptain=player)
+            teamModels.append(tempModel)
+            teamModelDatas.append(TeamSerializer(tempModel).data)
+        for i in range(0, numRequested):
+            tempModel = TeamFactory(teammate=player)
+            teamModels.append(tempModel)
+            teamModelDatas.append(TeamSerializer(tempModel).data)
 
         client = APIClient()
         client.force_authenticate(user=player)
-        for teamModel in teamModels:
+
+        for i in range(0, totalTeams):
+            teamModel = teamModels[i]
+            teamModelData = teamModelDatas[i]
+
             url = reverse('team_detail', kwargs={'teamId': teamModel.id})
             response = client.get(url)
 
             self.assertEqual(response.status_code, 200)
             responseData = json.loads(response.content)
+            self.assertEqual(len(responseData), 1)
 
-            self.assertTrue('team' in responseData)
-            teamData = responseData['team']
-
-            # Now I check all the things
-            # Starting with the team username
-            self.assertTrue(fullTeamMatch(teamModel, teamData))
+            teamMatched = checkTeamMatch(responseData, teamModelData,
+                                         both=True)
+            self.assertEqual('valid', teamMatched)
 
     def test_no_authentication(self):
         """

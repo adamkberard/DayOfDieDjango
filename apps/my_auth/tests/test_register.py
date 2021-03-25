@@ -5,6 +5,7 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 
 from ..models import CustomUser
+from .comparers import checkRegisterMatch
 
 
 class Test_Register_View(TestCase):
@@ -19,11 +20,8 @@ class Test_Register_View(TestCase):
         self.assertEqual(response.status_code, 201)
         responseData = json.loads(response.content)
 
-        self.assertTrue('token' in responseData)
-        self.assertTrue('username' in responseData)
-
-        self.assertTrue(responseData['token'] is not None)
-        self.assertTrue(responseData['username'] is not None)
+        matched = checkRegisterMatch(responseData)
+        self.assertEqual('valid', matched)
 
     def test_incorrect_user_register(self):
         """Testing a registration login where the username is taken."""

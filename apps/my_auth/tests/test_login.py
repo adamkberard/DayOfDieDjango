@@ -5,14 +5,19 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 
 from ..models import CustomUser
+from ..serializers import CustomUserSerializer
+from .comparers import checkLoginMatch
 
 
 class Test_Login_View(TestCase):
 
     def test_correct_login(self):
         """Testing a legitimate login."""
-        CustomUser.objects.create_user('test@gmail.com', password='pass4test')
-        data = {'email': 'test@gmail.com', 'password': 'pass4test'}
+        email = 'test@gmail.com'
+        password = 'pass4test'
+        myModel = CustomUser.objects.create_user(email, password)
+        modelData = CustomUserSerializer(myModel).data
+        data = {'email': email, 'password': password}
 
         client = APIClient()
         url = reverse('my_login')
@@ -21,10 +26,8 @@ class Test_Login_View(TestCase):
         self.assertEqual(response.status_code, 201)
         responseData = json.loads(response.content)
 
-        self.assertTrue('token' in responseData)
-        self.assertTrue(responseData['token'] is not None)
-        self.assertTrue('username' in responseData)
-        self.assertTrue(responseData['username'] is not None)
+        matched = checkLoginMatch(responseData, modelData)
+        self.assertEqual('valid', matched)
 
     def test_incorrect_user_login(self):
         """Testing an incorrect email/username login."""

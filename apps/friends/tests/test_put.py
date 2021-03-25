@@ -4,9 +4,9 @@ from django.test import TestCase
 from django.urls import reverse
 from rest_framework.test import APIClient
 
-from tools.ids_encoder import decode_id
-
 from ..factories import FriendFactory
+from ..serializers import FriendSerializer
+from .comparers import checkFriendMatch
 
 # Change player and make sure points change too
 # Make sure the id doesn't change for friends after edits
@@ -28,39 +28,15 @@ class Test_Friend_PUT(TestCase):
 
         self.assertEqual(response.status_code, 200)
         responseData = json.loads(response.content)
+        self.assertEqual(len(responseData), 1)
 
-        # Now that we have the data, I can change the model without affecting
-        # anything. It just makes testing easier
         friendModel.status = friendModel.ACCEPTED
+        friendModelData = FriendSerializer(friendModel).data
 
-        self.assertTrue('friend' in responseData)
-        friendData = responseData['friend']
-
-        # Gotta make sure the friend id didn't change cuz that would
-        # be annoying
-        self.assertTrue('id' in friendData)
-        self.assertEqual(friendModel.id, decode_id(friendData['id']))
-
-        # First I'll check the date times
-        dateFStr = '%Y-%m-%d %H:%M:%S'
-        self.assertTrue('timeRequested' in friendData)
-        self.assertEqual(friendData['timeRequested'],
-                         friendModel.timeRequested.strftime(dateFStr))
-        self.assertTrue('timeRespondedTo' in friendData)
-        self.assertEqual(friendData['timeRespondedTo'],
-                         friendModel.timeRespondedTo.strftime(dateFStr))
-
-        # Then I'll check the players
-        self.assertTrue('requester' in friendData)
-        self.assertEqual(friendModel.requester.username,
-                         friendData['requester'])
-        self.assertTrue('requested' in friendData)
-        self.assertEqual(friendModel.requested.username,
-                         friendData['requested'])
-
-        # Finally make sure we actually changed the status
-        self.assertTrue('status' in friendData)
-        self.assertTrue(friendModel.status, friendData['status'])
+        avoid = ['id', 'timeRequested', 'timeRespondedTo']
+        friendMatched = checkFriendMatch(responseData, friendModelData,
+                                         toAvoid=avoid)
+        self.assertEqual('valid', friendMatched)
 
     def test_put_accept_friend_as_requester(self):
         """
@@ -97,39 +73,15 @@ class Test_Friend_PUT(TestCase):
 
         self.assertEqual(response.status_code, 200)
         responseData = json.loads(response.content)
+        self.assertEqual(len(responseData), 1)
 
-        # Now that we have the data, I can change the model without affecting
-        # anything. It just makes testing easier
         friendModel.status = friendModel.DENIED
+        friendModelData = FriendSerializer(friendModel).data
 
-        self.assertTrue('friend' in responseData)
-        friendData = responseData['friend']
-
-        # Gotta make sure the friend id didn't change cuz that would
-        # be annoying
-        self.assertTrue('id' in friendData)
-        self.assertEqual(friendModel.id, decode_id(friendData['id']))
-
-        # First I'll check the date times
-        dateFStr = '%Y-%m-%d %H:%M:%S'
-        self.assertTrue('timeRequested' in friendData)
-        self.assertEqual(friendData['timeRequested'],
-                         friendModel.timeRequested.strftime(dateFStr))
-        self.assertTrue('timeRespondedTo' in friendData)
-        self.assertEqual(friendData['timeRespondedTo'],
-                         friendModel.timeRespondedTo.strftime(dateFStr))
-
-        # Then I'll check the players
-        self.assertTrue('requester' in friendData)
-        self.assertEqual(friendModel.requester.username,
-                         friendData['requester'])
-        self.assertTrue('requested' in friendData)
-        self.assertEqual(friendModel.requested.username,
-                         friendData['requested'])
-
-        # Finally make sure we actually changed the status
-        self.assertTrue('status' in friendData)
-        self.assertTrue(friendModel.status, friendData['status'])
+        avoid = ['id', 'timeRequested', 'timeRespondedTo']
+        friendMatched = checkFriendMatch(responseData, friendModelData,
+                                         toAvoid=avoid)
+        self.assertEqual('valid', friendMatched)
 
     def test_put_denied_friend_as_requester(self):
         """

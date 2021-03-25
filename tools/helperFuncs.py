@@ -12,3 +12,7 @@ def convertToPK(data):
                 data[term] = CustomUser.objects.get(username=username).id
 
     return data
+
+
+def listDiff(list1, list2):
+    return [item for item in list1 if item not in list2]

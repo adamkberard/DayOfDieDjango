@@ -23,24 +23,24 @@ class Test_Friend_DELETE(TestCase):
         response = client.delete(url)
 
         self.assertEqual(response.status_code, 200)
+
         self.assertEqual(Friend.objects.filter(id=friendModel.id).count(), 0)
 
     def test_delete_friend_not_in(self):
         """
         Testing a simple delete but on a friend the user wasn't in
         """
+        otherPlayer = CustomUserFactory()
         friendModel = FriendFactory()
-        playerThree = CustomUserFactory()
 
         client = APIClient()
         url = reverse('friend_detail', kwargs={'friendId': friendModel.id})
-        client.force_authenticate(user=playerThree)
+        client.force_authenticate(user=otherPlayer)
         response = client.delete(url)
 
         self.assertEqual(response.status_code, 400)
         responseData = json.loads(response.content)
 
-        self.assertTrue('friendId' in responseData)
         estr = 'Friend id not found: {}'.format(friendModel.id)
         self.assertEqual(responseData['friendId'], [estr])
 
@@ -48,17 +48,16 @@ class Test_Friend_DELETE(TestCase):
         """
         Testing a simple delete with bad litter id
         """
-        playerThree = CustomUserFactory()
+        player = CustomUserFactory()
 
         client = APIClient()
         url = reverse('friend_detail', kwargs={'friendId': 0})
-        client.force_authenticate(user=playerThree)
+        client.force_authenticate(user=player)
         response = client.delete(url)
 
         self.assertEqual(response.status_code, 400)
         responseData = json.loads(response.content)
 
-        self.assertTrue('friendId' in responseData)
         estr = 'Friend id not found: {}'.format(0)
         self.assertEqual(responseData['friendId'], [estr])
 
