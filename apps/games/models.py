@@ -1,137 +1,93 @@
 from django.conf import settings
+import uuid as uuid_lib
 from django.db import models
+from ..core.models import TimeStampedModel
 
 from .managers import GameManager
 
-
-class GameSettings(models.Model):
-    # Settings for games
-    numPointsToWin = models.IntegerField()
-    singlePointsValue = models.IntegerField()
-    tinkPointsValue = models.IntegerField()
-    sinkPointsValue = models.IntegerField()
-    bounceSinkPointsValue = models.IntegerField()
-    partnerSinkPointsValue = models.IntegerField()
-    selfSinkPointsValue = models.IntegerField()
-    winByTwo = models.BooleanField()
+from ..friends.models import Friend
 
 
 # Create your models here.
-class Game(models.Model):
-    JUST_POINTS = 'JP'
-    REG_STATS = 'RS'
-    FULL_STATS = 'FS'
+class Game(TimeStampedModel):
+    TYPE_PICKUP = 'pu'
+    TYPE_MARATHON = 'ma'
+    TYPE_TOURNAMENT = 'tm'
 
-    STAT_OPTIONS = [
-        (JUST_POINTS, 'Just Points'),
-        (REG_STATS, 'Regular Stats'),
-        (FULL_STATS, 'Full Stats'),
-    ]
+    TYPE_CHOICES = (
+        (TYPE_PICKUP, 'Pickup Game'),
+        (TYPE_MARATHON, 'Marathon Game'),
+        (TYPE_TOURNAMENT, 'Tournament Game')
+    )
 
-    statType = models.CharField(max_length=2,
-                                choices=STAT_OPTIONS,
-                                default=REG_STATS)
+    time_started = models.DateTimeField()
+    time_ended = models.DateTimeField()
 
-    timeStarted = models.DateTimeField()
-    timeSaved = models.DateTimeField()
-    playerOne = models.ForeignKey(settings.AUTH_USER_MODEL,
-                                  on_delete=models.CASCADE,
-                                  related_name="p1")
-    playerTwo = models.ForeignKey(settings.AUTH_USER_MODEL,
-                                  on_delete=models.CASCADE,
-                                  related_name="p2")
-    playerThree = models.ForeignKey(settings.AUTH_USER_MODEL,
-                                    on_delete=models.CASCADE,
-                                    related_name="p3")
-    playerFour = models.ForeignKey(settings.AUTH_USER_MODEL,
-                                   on_delete=models.CASCADE,
-                                   related_name="p4")
+    uuid = models.UUIDField(db_index=True, default=uuid_lib.uuid4, editable=False)
+
+    type = models.CharField(
+        max_length=2,
+        choices=TYPE_CHOICES,
+        default=TYPE_PICKUP
+    )
+
+    team_one = models.ForeignKey(Friend,
+                                 on_delete=models.CASCADE,
+                                 related_name="team_one")
+    team_two = models.ForeignKey(Friend,
+                                 on_delete=models.CASCADE,
+                                 related_name="team_two")
+
+    team_one_score = models.SmallIntegerField()
+    team_two_score = models.SmallIntegerField()
+
+    confirmed = models.BooleanField()
 
     objects = GameManager()
 
     def __str__(self):
-        return str(self.timeSaved)
-
-    def create(self, validated_data):
-        return Game.objects.create(**validated_data)
-
-    def update(self, instance, validated_data):
-        instance.timeSaved = validated_data.get('timeSaved',
-                                                instance.timeSaved)
-        instance.playerOne = validated_data.get('playerOne',
-                                                instance.playerOne)
-        instance.playerTwo = validated_data.get('playerTwo',
-                                                instance.playerTwo)
-        instance.playerThree = validated_data.get('playerThree',
-                                                  instance.playerThree)
-        instance.playerFour = validated_data.get('playerFour',
-                                                 instance.playerFour)
-        instance.save()
-        return instance
+        return str(self.time_started)
 
 
-class Point(models.Model):
-    SINGLE_POINT = 'PT'
-    TINK = 'TK'
-    SINK = 'SK'
-    BOUNCE_SINK = 'BS'
-    PARTNER_SINK = 'PS'
-    SELF_SINK = 'SS'
+class Point(TimeStampedModel):
+    TYPE_SINGLE = 'sg'
+    TYPE_TINK = 'tk'
+    TYPE_SINK = 'sk'
+    TYPE_BOUNCE_SINK = 'bs'
+    TYPE_PARTNER_SINK = 'ps'
+    TYPE_SELF_SINK = 'ss'
+    TYPE_FIFA = 'ff'
+    TYPE_FIELD_GOAL = 'fg'
 
-    SCORED_POINT_CHOICES = [
-        (SINGLE_POINT, 'regular point'),
-        (SELF_SINK, 'self sink'),
-    ]
+    TYPE_CHOICES = (
+        (TYPE_SINGLE, 'Single Point'),
+        (TYPE_TINK, 'Tink'),
+        (TYPE_SINK, 'Sink'),
+        (TYPE_BOUNCE_SINK, 'Bounce Sink'),
+        (TYPE_PARTNER_SINK, 'Partner Sink'),
+        (TYPE_SELF_SINK, 'Self Sink'),
+        (TYPE_FIFA, 'Fifa'),
+        (TYPE_FIELD_GOAL, 'Field Goal'),
+    )
 
-    SCORED_ON_POINT_CHOICES = [
-        (TINK, 'tink'),
-        (SINK, 'sink'),
-        (BOUNCE_SINK, 'bounce sink'),
-        (PARTNER_SINK, 'partner sink'),
-    ]
+    uuid = models.UUIDField(db_index=True, default=uuid_lib.uuid4, editable=False)
 
-    POINT_TYPE_CHOICES = SCORED_POINT_CHOICES + SCORED_ON_POINT_CHOICES
+    type = models.CharField(max_length=2, choices=TYPE_CHOICES, default=TYPE_SINGLE)
 
-    typeOfPoint = models.CharField(max_length=2,
-                                   choices=POINT_TYPE_CHOICES,
-                                   default=SINGLE_POINT)
+    scorer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+                               related_name="scorer")
+    scored_on = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+                                  related_name="scored_on", blank=True, null=True)
 
-    scorer = models.ForeignKey(settings.AUTH_USER_MODEL,
-                               on_delete=models.CASCADE)
-    scoredOn = models.ForeignKey(settings.AUTH_USER_MODEL,
-                                 on_delete=models.CASCADE,
-                                 related_name='scored',
-                                 null=True, blank=True)
+    scored_on_position = models.SmallIntegerField(null=True, blank=True)
 
-    game = models.ForeignKey(Game, on_delete=models.CASCADE,
-                             null=True, blank=True,
-                             related_name='scoredOn')
+    game = models.ForeignKey(Game, on_delete=models.CASCADE, related_name="game")
+
+    objects = GameManager()
 
     def __str__(self):
-        if self.typeOfPoint == 'PT':
-            return "{} scored".format(self.scorer)
-        elif self.typeOfPoint == "TK":
-            return "{} tinked {}".format(self.scorer, self.scoredOn)
-        elif self.typeOfPoint == "SK":
-            return "{} sank {}".format(self.scorer, self.scoredOn)
-        elif self.typeOfPoint == "BS":
-            return "{} bounce sank {}".format(self.scorer, self.scoredOn)
-        elif self.typeOfPoint == "PS":
-            return "{} sank their partner, {}".format(self.scorer,
-                                                      self.scoredOn)
-        elif self.typeOfPoint == "SS":
-            return "{} self sank".format(self.scorer)
-        return "You shouldn't be seeing this."
-
-    def create(self, validated_data):
-        return Point.objects.create(**validated_data)
-
-    def update(self, instance, validated_data):
-        instance.typeOfPoint = validated_data.get('typeOfPoint',
-                                                  instance.typeOfPoint)
-        instance.scorer = validated_data.get('scorer', instance.scorer)
-        instance.scoredOn = validated_data.get('scoredOn',
-                                               instance.scoredOn)
-        instance.game = validated_data.get('game', instance.game)
-        instance.save()
-        return instance
+        if self.scored_on is None:
+            scored_on_email = ""
+        else:
+            scored_on_email = self.scored_on.email
+        return str('{} scored on {}: {}'.format(self.scorer.email, scored_on_email, self.type))

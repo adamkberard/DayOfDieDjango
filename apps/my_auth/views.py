@@ -1,4 +1,3 @@
-from django.contrib.auth import authenticate
 from django.db import IntegrityError
 from rest_framework import authentication
 from rest_framework.authtoken.models import Token
@@ -7,44 +6,17 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.generics import CreateAPIView
 
 from .models import CustomUser
 from .serializers import CustomUserSerializer, MyAuthSerializer
 
 
-class LoginView(APIView):
+class LoginView(CreateAPIView):
     """
     View for authenticating users
-
-    * Requires email, password
     """
     serializer_class = MyAuthSerializer
-    renderer_classes = [JSONRenderer]
-
-    def post(self, request):
-        """
-        Returns a token if the login is successfull
-        """
-
-        data = JSONParser().parse(request)
-        serializer = MyAuthSerializer(data=data)
-        if serializer.is_valid():
-            email = serializer.data['email']
-            password = serializer.data['password']
-            user = authenticate(username=email, password=password)
-
-            if user is None:
-                # Just gotta say shits wrong
-                returnData = {'errors': ['Email or password wrong.']}
-                return Response(returnData, status=401)
-            else:
-                # Gotta check if there's a token and create it if not
-                # Then we send the token
-                token, created = Token.objects.get_or_create(user=user)
-                returnData = {'token': str(token),
-                              'username': user.username}
-                return Response(returnData, status=201)
-        return Response(serializer.errors, status=400)
 
 
 class RegisterView(APIView):

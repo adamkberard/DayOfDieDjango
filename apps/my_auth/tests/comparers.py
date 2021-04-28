@@ -1,36 +1,45 @@
-# Helper functions for testing
-
-def checkLoginMatch(responseData, modelData):
+def checkLoginMatch(response, userData, gamesData, friendsData, toAvoid=[]):
     errors = {}
-    if 'token' not in responseData:
-        errors['token'] = ['No token']
-    elif responseData['token'] is None:
-        errors['token'] = ['Token is none']
-
-    if 'username' not in responseData:
-        errors['username'] = ['No username']
-    elif responseData['username'] != modelData['username']:
-        estr = '{} doesnt match {}'
-        estr.format(responseData['username'], modelData['username'])
-        errors['username'] = [estr]
-
-    if len(errors) == 0:
-        return 'valid'
+    if 'token' in response:
+        # Can check maybe length or something honestly idk
+        pass
     else:
-        return errors
-
-
-def checkRegisterMatch(responseData):
-    errors = {}
-    if 'token' not in responseData:
         errors['token'] = ['No token']
-    elif responseData['token'] is None:
-        errors['token'] = ['Token is none']
 
-    if 'username' not in responseData:
-        errors['username'] = ['No username']
-    elif responseData['username'] is None:
-        errors['username'] = ['Username is none']
+    if 'user' in response:
+        # Probably run user comparer
+        pass
+    else:
+        errors['user'] = ['No user']
+
+    if 'games' in response:
+        # Probably run game comparer
+        # Also make sure it's a list
+        pass
+    else:
+        errors['games'] = ['No games']
+
+    if 'friends' in response:
+        # Probably run friend comparer
+        # Also make sure it's a list
+        pass
+    else:
+        errors['friends'] = ['No friends']
+
+    # Other Fields that are much simpler
+    fields = ['timeStarted', 'timeSaved', 'playerOne', 'playerTwo',
+              'playerThree', 'playerFour', 'statType', 'id']
+    fieldsToTest = listDiff(fields, toAvoid)
+
+    for field in fieldsToTest:
+        if field in gameData:
+            response = gameData[field]
+            model = gameModelData[field]
+            if response != model:
+                estr = '{} != {}'.format(response, model)
+                errors['game_{}'.format(field)] = [estr]
+        else:
+            errors['game_{}'.format(field)] = ['No game {}'.format(field)]
 
     if len(errors) == 0:
         return 'valid'

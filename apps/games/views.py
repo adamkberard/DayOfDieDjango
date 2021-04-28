@@ -1,191 +1,90 @@
+from rest_framework.generics import (
+    ListCreateAPIView,
+    ListAPIView,
+    RetrieveUpdateDestroyAPIView
+)
 from rest_framework import authentication
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
-from rest_framework.views import APIView
-
-from tools.helperFuncs import convertToPK
+from rest_framework.permissions import IsAuthenticated
 
 from .models import Game, Point
 from .serializers import GameSerializer, PointSerializer
 
 
-class GameDetailView(APIView):
-    """
-    View for single game related requests
-
-    * Requres token auth
-    """
-    permission_classes = (IsAuthenticated,)
+class GameListCreateAPIView(ListCreateAPIView):
+    permission_classes = (IsAuthenticated, )
     authentication_classes = [authentication.TokenAuthentication]
-    renderer_classes = [JSONRenderer]
+    serializer_class = GameSerializer
+    lookup_field = 'uuid'
 
-    def get(self, request, gameId):
-        """
-        Return a single game
-        """
-        try:
-            usersGameModels = Game.objects.users_games(user=request.user)
-            gameModel = usersGameModels.get(id=gameId)
-            gamePoints = Point.objects.filter(game=gameModel)
-        except Game.DoesNotExist:
-            estr = 'Game id not found: {}'.format(gameId)
-            returnData = {'gameId': [estr]}
-            return Response(returnData, status=400)
-
-        gameSerialized = GameSerializer(gameModel)
-        pointsSerialized = PointSerializer(gamePoints, many=True)
-        tempDict = gameSerialized.data
-        tempDict['points'] = pointsSerialized.data
-        return Response({'game': tempDict}, status=200)
-
-    def put(self, request, gameId):
-        """
-        Edits a game
-        """
-        try:
-            usersGameModels = Game.objects.users_games(user=request.user)
-            gameModel = usersGameModels.get(id=gameId)
-        except Game.DoesNotExist:
-            estr = 'Game id not found: {}'.format(gameId)
-            returnData = {'gameId': [estr]}
-            return Response(returnData, status=400)
-
-        # Updates the game and gets the serialized data or just gets the
-        # serialized data. Throws errors if found either way
-        if 'game' not in request.data:
-            estr = 'This field is required.'
-            returnData = {'game': [estr]}
-            return Response(returnData, status=400)
-
-        if 'points' not in request.data['game']:
-            estr = 'This field is required.'
-            returnData = {'game_points': [estr]}
-            return Response(returnData, status=400)
-
-        # First I have to take the id's and unhash them
-        if 'id' in request.data['game']:
-            convertedGame = convertToPK(request.data['game'])
-        else:
-            estr = 'This field is required.'
-            returnData = {'game_id': [estr]}
-            return Response(returnData, status=400)
-
-        gameSerialized = GameSerializer(gameModel, data=convertedGame)
-        if gameSerialized.is_valid():
-            gameModel = gameSerialized.save()
-        else:
-            return Response(gameSerialized.errors, status=400)
-
-        unsavedPoints = []
-        for pointData in request.data['game']['points']:
-            convertedPoint = convertToPK(pointData)
-            convertedPoint['game'] = gameModel.id
-            serializedPoint = PointSerializer(data=convertedPoint)
-            if serializedPoint.is_valid():
-                unsavedPoints.append(serializedPoint)
-            else:
-                return Response(serializedPoint.errors, status=400)
-
-        # If everything goes right I delete the previous points
-        Point.objects.filter(game=gameModel).delete()
-
-        # Then I save all the points I just serialized
-        for unsavedPoint in unsavedPoints:
-            unsavedPoint.save(game=gameModel)
-
-        gameSerialized = GameSerializer(gameModel)
-        pointModels = Point.objects.filter(game=gameModel)
-        pointsSerialized = PointSerializer(pointModels, many=True)
-
-        tempDict = gameSerialized.data
-        tempDict['points'] = pointsSerialized.data
-        returnData = {'game': tempDict}
-        return Response(returnData, status=200)
-
-    def delete(self, request, gameId):
-        """
-        Deletes a game
-        """
-        try:
-            usersGameModels = Game.objects.users_games(user=request.user)
-            gameModel = usersGameModels.get(id=gameId)
-        except Game.DoesNotExist:
-            estr = 'Game id not found: {}'.format(gameId)
-            returnData = {'gameId': [estr]}
-            return Response(returnData, status=400)
-
-        # Delete the points
-        Point.objects.filter(game=gameModel).delete()
-
-        # Delete the game
-        Game.objects.get(id=gameModel.id).delete()
-
-        return Response(status=200)
+    def get_queryset(self):
+        return Game.objects.users_games(user=self.request.user)
 
 
-class GameView(APIView):
+class GameRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     """
-    View for getting all lists, and posting
-
-    * Requres token auth
+    Getting, updating, or deleting an existing game
     """
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, )
     authentication_classes = [authentication.TokenAuthentication]
-    renderer_classes = [JSONRenderer]
+    serializer_class = GameSerializer
+    lookup_field = 'uuid'
 
-    def get(self, request):
-        gamesSet = Game.objects.users_games(user=request.user)
-        returnData = []
-        for game in gamesSet:
-            gamePoints = Point.objects.filter(game=game)
+    def get_queryset(self):
+        return Game.objects.users_games(user=self.request.user)
 
-            gameSerialized = GameSerializer(game)
-            pointsSerialized = PointSerializer(gamePoints, many=True)
 
-            tempDict = gameSerialized.data
-            tempDict['points'] = pointsSerialized.data
-            returnData.append({'game': tempDict})
+class PointListCreateAPIView(ListAPIView):
+    """
+    Getting all of a users points and also creating
+    """
+    permission_classes = (IsAuthenticated, )
+    authentication_classes = [authentication.TokenAuthentication]
+    serializer_class = PointSerializer
 
-        return Response(data={'games': returnData}, status=200)
+    def get_queryset(self):
+        return Point.objects.filter(scorer=self.request.user)
 
-    def post(self, request):
-        # Since I'm doing more than one object at a time, I have to also
-        # check for to be sure the things exist
-        edict = {}
-        if 'game' not in request.data:
-            edict['game'] = ['This field is required.']
-            return edict
-        if 'points' not in request.data['game']:
-            edict['points'] = ['This field is required in game.']
+    # def post(self, request, *args, **kwargs):
+    #     """
+    #     #checks if post request data is an array initializes serializer with many=True
+    #     else executes default CreateModelMixin.create function
+    #     """
+    #     is_many = isinstance(request.data, list)
+    #     if not is_many:
+    #         return super(BookViewSet, self).create(request, *args, **kwargs)
+    #     else:
+    #         serializer = self.get_serializer(data=request.data, many=True)
+    #         serializer.is_valid(raise_exception=True)
+    #         serializer.save()
+    #         return Response(serializer.data, status=201)
 
-        if len(edict) != 0:
-            return Response(data=edict, status=400)
 
-        # We have to convert the incoming usernames into their pk's
-        convertedGameData = convertToPK(request.data['game'])
-        serializedGame = GameSerializer(data=convertedGameData)
+class PointRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
+    """
+    Getting, updating, or deleting an individual point
+    """
+    permission_classes = (IsAuthenticated, )
+    authentication_classes = [authentication.TokenAuthentication]
+    serializer_class = PointSerializer
+    lookup_field = 'uuid'
 
-        points = []
+    def get_queryset(self):
+        return Point.objects.filter(scorer=self.request.user)
 
-        if serializedGame.is_valid():
-            game = serializedGame.save()
-        else:
-            return Response(data=serializedGame.errors, status=400)
 
-        for pointData in request.data['game']['points']:
-            convertedPoint = convertToPK(pointData)
-            serializedPoint = PointSerializer(data=convertedPoint)
-            if serializedPoint.is_valid():
-                serializedPoint.save(game=game)
-                points.append(serializedPoint.data)
-            else:
-                edict.update(serializedPoint.errors)
+class PointListAPIView(ListAPIView):
+    """
+    For getting all the points from a game
+    """
+    permission_classes = (IsAuthenticated, )
+    authentication_classes = [authentication.TokenAuthentication]
+    serializer_class = PointSerializer
 
-        if len(edict) != 0:
-            return Response(data=edict, status=400)
-        else:
-            tempDict = serializedGame.data
-            tempDict['points'] = points
-            returnData = {'game': tempDict}
-            return Response(data=returnData, status=201)
+    def get_queryset(self):
+        try:
+            print(self.kwargs)
+            game = Game.objects.get(uuid=self.kwargs['uuid'])
+        except Game.DoesNotExist:
+            return Response(data={'detail': "Game not found."}, status=404)
+        return Point.objects.filter(game=game)
