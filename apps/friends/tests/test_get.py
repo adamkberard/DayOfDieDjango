@@ -5,9 +5,10 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 
 from apps.my_auth.factories import CustomUserFactory
-from tools.helperFunctions.testHelperFuncs import friendsMatch, fullFriendMatch
 
 from ..factories import FriendFactory
+from ..serializers import FriendSerializer
+from .comparers import checkFriendMatch
 
 
 class Test_Friend_GET(TestCase):
@@ -17,32 +18,25 @@ class Test_Friend_GET(TestCase):
         friends. They only have one friend in this case.
         """
         player = CustomUserFactory()
-        friendModels = []
-
-        numPlayerOne = 1
-        numPlayerTwo = 0
-        totalFriends = numPlayerOne + numPlayerTwo
-
-        for i in range(0, numPlayerOne):
-            friendModels.append(FriendFactory(requester=player))
-        for i in range(0, numPlayerTwo):
-            friendModels.append(FriendFactory(requested=player))
+        friendModel = FriendFactory(requester=player)
+        friendModelData = FriendSerializer(friendModel).data
 
         client = APIClient()
         url = reverse('friend_list')
         client.force_authenticate(user=player)
         response = client.get(url)
+
+        self.assertEqual(response.status_code, 200)
         responseData = json.loads(response.content)
+        self.assertEqual(len(responseData), 1)
 
         self.assertTrue('friends' in responseData)
-        friendsData = responseData['friends']
+        self.assertEqual(len(responseData['friends']), 1)
+        friendSet = responseData['friends'][0]
 
-        # Make sure the number of friends is one
-        self.assertEqual(len(friendsData), totalFriends)
-
-        # Now I check all the things
-        # Starting with the friend username
-        self.assertTrue(friendsMatch(friendModels, friendsData))
+        friendMatched = checkFriendMatch(friendSet, friendModelData,
+                                         both=False)
+        self.assertEqual('valid', friendMatched)
 
     def test_get_friends_many(self):
         """
@@ -51,45 +45,56 @@ class Test_Friend_GET(TestCase):
         """
         player = CustomUserFactory()
         friendModels = []
+        friendModelDatas = []
 
-        numPlayerOne = 10
-        numPlayerTwo = 10
-        totalFriends = numPlayerOne + numPlayerTwo
+        numRequester = 10
+        numRequested = 10
+        totalFriends = numRequester + numRequested
 
-        for i in range(0, numPlayerOne):
-            friendModels.append(FriendFactory(requester=player))
-        for i in range(0, numPlayerTwo):
-            friendModels.append(FriendFactory(requested=player))
+        for i in range(0, numRequester):
+            tempModel = FriendFactory(requester=player)
+            friendModels.append(tempModel)
+            friendModelDatas.append(FriendSerializer(tempModel).data)
+        for i in range(0, numRequested):
+            tempModel = FriendFactory(requested=player)
+            friendModels.append(tempModel)
+            friendModelDatas.append(FriendSerializer(tempModel).data)
 
         client = APIClient()
         url = reverse('friend_list')
         client.force_authenticate(user=player)
         response = client.get(url)
+
+        self.assertEqual(response.status_code, 200)
         responseData = json.loads(response.content)
+        self.assertEqual(len(responseData), 1)
 
         self.assertTrue('friends' in responseData)
-        friendsData = responseData['friends']
-
-        # Make sure the number of friends is one
-        self.assertEqual(len(friendsData), totalFriends)
-
-        # Now I check all the things
-        # Starting with the friend username
-        self.assertTrue(friendsMatch(friendModels, friendsData))
+        self.assertEqual(len(responseData['friends']), totalFriends)
+        for i in range(0, totalFriends):
+            friendSet = responseData['friends'][i]
+            friendModelData = friendModelDatas[i]
+            friendMatched = checkFriendMatch(friendSet, friendModelData,
+                                             both=False)
+            self.assertEqual('valid', friendMatched)
 
     def test_get_no_friends(self):
         """
         Trying to get all the friends a person has logged which is none.
         """
-        user = CustomUserFactory()
+        player = CustomUserFactory()
 
         client = APIClient()
         url = reverse('friend_list')
-        client.force_authenticate(user=user)
+        client.force_authenticate(user=player)
         response = client.get(url)
-        responseData = json.loads(response.content)
 
-        self.assertEqual(responseData['friends'], [])
+        self.assertEqual(response.status_code, 200)
+        responseData = json.loads(response.content)
+        self.assertEqual(len(responseData), 1)
+
+        self.assertTrue('friends' in responseData)
+        self.assertEqual(len(responseData['friends']), 0)
 
     def test_no_authentication(self):
         """
@@ -107,20 +112,22 @@ class Test_Friend_GET_Detail(TestCase):
         """
         Trying to get a single friend based on their id
         """
-        friendModel = FriendFactory()
+        player = CustomUserFactory()
+        friendModel = FriendFactory(requester=player)
+        friendModelData = FriendSerializer(friendModel).data
 
         client = APIClient()
         url = reverse('friend_detail', kwargs={'friendId': friendModel.id})
-        client.force_authenticate(user=friendModel.requester)
+        client.force_authenticate(user=player)
         response = client.get(url)
+
+        self.assertEqual(response.status_code, 200)
         responseData = json.loads(response.content)
+        self.assertEqual(len(responseData), 1)
 
-        self.assertTrue('friend' in responseData)
-        friendData = responseData['friend']
-
-        # Now I check all the things
-        # Starting with the friend username
-        self.assertTrue(fullFriendMatch(friendModel, friendData))
+        friendMatched = checkFriendMatch(responseData, friendModelData,
+                                         both=True)
+        self.assertEqual('valid', friendMatched)
 
     def test_get_friend_many(self):
         """
@@ -129,28 +136,38 @@ class Test_Friend_GET_Detail(TestCase):
         """
         player = CustomUserFactory()
         friendModels = []
+        friendModelDatas = []
 
-        numPlayerOne = 10
-        numPlayerTwo = 10
+        numRequester = 10
+        numRequested = 10
+        totalFriends = numRequester + numRequested
 
-        for i in range(0, numPlayerOne):
-            friendModels.append(FriendFactory(requester=player))
-        for i in range(0, numPlayerTwo):
-            friendModels.append(FriendFactory(requested=player))
+        for i in range(0, numRequester):
+            tempModel = FriendFactory(requester=player)
+            friendModels.append(tempModel)
+            friendModelDatas.append(FriendSerializer(tempModel).data)
+        for i in range(0, numRequested):
+            tempModel = FriendFactory(requested=player)
+            friendModels.append(tempModel)
+            friendModelDatas.append(FriendSerializer(tempModel).data)
 
         client = APIClient()
         client.force_authenticate(user=player)
-        for friendModel in friendModels:
+
+        for i in range(0, totalFriends):
+            friendModel = friendModels[i]
+            friendModelData = friendModelDatas[i]
+
             url = reverse('friend_detail', kwargs={'friendId': friendModel.id})
             response = client.get(url)
+
+            self.assertEqual(response.status_code, 200)
             responseData = json.loads(response.content)
+            self.assertEqual(len(responseData), 1)
 
-            self.assertTrue('friend' in responseData)
-            friendData = responseData['friend']
-
-            # Now I check all the things
-            # Starting with the friend username
-            self.assertTrue(fullFriendMatch(friendModel, friendData))
+            friendMatched = checkFriendMatch(responseData, friendModelData,
+                                             both=True)
+            self.assertEqual('valid', friendMatched)
 
     def test_no_authentication(self):
         """

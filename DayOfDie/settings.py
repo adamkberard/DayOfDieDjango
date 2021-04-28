@@ -54,7 +54,7 @@ INSTALLED_APPS = [
     'apps.games',
     'apps.my_auth',
     'apps.friends',
-    'apps.teams',
+    'apps.core',
     'tools.ids_encoder',
 ]
 

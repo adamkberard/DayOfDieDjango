@@ -1,5 +1,7 @@
 from django.contrib.auth.base_user import BaseUserManager
 
+from apps.friends.models import Friend
+
 
 class GameManager(BaseUserManager):
     """
@@ -7,8 +9,8 @@ class GameManager(BaseUserManager):
     """
 
     def users_games(self, user):
-        p1 = super().get_queryset().filter(playerOne=user)
-        p2 = super().get_queryset().filter(playerTwo=user)
-        p3 = super().get_queryset().filter(playerThree=user)
-        p4 = super().get_queryset().filter(playerFour=user)
-        return p1 | p2 | p3 | p4
+        # First I get the teams the user in on
+        teams = Friend.objects.users_friends(user=user)
+        team_ones = super().get_queryset().filter(team_one__in=teams)
+        team_twos = super().get_queryset().filter(team_two__in=teams)
+        return team_ones | team_twos

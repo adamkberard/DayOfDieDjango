@@ -1,13 +1,17 @@
-from django.urls import path, register_converter
-
-from tools.ids_encoder import converters
-
-from .views import FriendDetailView, FriendView
-
-register_converter(converters.HashidsConverter, 'hashids')
+from django.urls import path
+from .views import FriendListCreateAPIView, FriendRetrieveUpdateAPIView
 
 urlpatterns = [
-    path('', FriendView.as_view(), name='friend_list'),
-    path('<hashids:friendId>/', FriendDetailView.as_view(),
-         name='friend_detail'),
+    # /flavors/api/
+    path(
+        route='',
+        view=FriendListCreateAPIView.as_view(),
+        name='friend_rest_api_1'
+    ),
+    # /flavors/api/:uuid/
+    path(
+        route='<uuid:uuid>/',
+        view=FriendRetrieveUpdateAPIView.as_view(),
+        name='friend_rest_api_2'
+    )
 ]

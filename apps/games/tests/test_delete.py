@@ -15,20 +15,18 @@ class Test_Game_DELETE(TestCase):
         """
         Testing a simple delete of a game and it's points
         """
-        plyr = CustomUserFactory.create_batch(size=4)
-        gameModel = GameFactory(playerOne=plyr[0], playerTwo=plyr[1],
-                                playerThree=plyr[2], playerFour=plyr[3])
-        PointFactory.create_batch(scorer=plyr[0],
+        gameModel = GameFactory()
+        PointFactory.create_batch(scorer=gameModel.playerOne,
                                   typeOfPoint='PT', size=3,
                                   game=gameModel)
 
         client = APIClient()
         url = reverse('game_detail', kwargs={'gameId': gameModel.id})
-        client.force_authenticate(user=plyr[0])
+        client.force_authenticate(user=gameModel.playerOne)
         response = client.delete(url)
-        responseData = json.loads(response.content)
 
-        self.assertEqual(responseData['status'], 'okay')
+        self.assertEqual(response.status_code, 200)
+
         self.assertEqual(Game.objects.filter(id=gameModel.id).count(), 0)
         self.assertEqual(Point.objects.filter(game=gameModel).count(), 0)
 
@@ -36,17 +34,19 @@ class Test_Game_DELETE(TestCase):
         """
         Testing a simple delete but on a game the user wasn't in
         """
-        plyr = CustomUserFactory.create_batch(size=5)
-        gameModel = GameFactory(playerOne=plyr[0], playerTwo=plyr[1],
-                                playerThree=plyr[2], playerFour=plyr[3])
+        otherPlayer = CustomUserFactory()
+        gameModel = GameFactory()
+
         client = APIClient()
         url = reverse('game_detail', kwargs={'gameId': gameModel.id})
-        client.force_authenticate(user=plyr[4])
+        client.force_authenticate(user=otherPlayer)
         response = client.delete(url)
+
+        self.assertEqual(response.status_code, 400)
         responseData = json.loads(response.content)
 
-        errStr = 'Game id not found: '
-        self.assertTrue(responseData['error'].startswith(errStr))
+        estr = 'Game id not found: {}'.format(gameModel.id)
+        self.assertEqual(responseData['gameId'], [estr])
 
     def test_bad_litter_id(self):
         """
@@ -57,10 +57,12 @@ class Test_Game_DELETE(TestCase):
         url = reverse('game_detail', kwargs={'gameId': 0})
         client.force_authenticate(user=user)
         response = client.delete(url)
+
+        self.assertEqual(response.status_code, 400)
         responseData = json.loads(response.content)
 
-        errStr = 'Game id not found: '
-        self.assertTrue(responseData['error'].startswith(errStr))
+        estr = 'Game id not found: {}'.format(0)
+        self.assertEqual(responseData['gameId'], [estr])
 
     def test_no_authentication(self):
         """
