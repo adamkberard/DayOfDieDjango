@@ -20,11 +20,11 @@ class FriendManager(BaseUserManager):
         if possibility is not None:
             return possibility
 
-        friend = super().create(status=Friend.STATUS_NOTHING,
+        friend = super().create(status='nt',
                                 team_captain=user1,
                                 teammate=user2,
                                 wins=0,
                                 losses=0,
-                                league=Friend.LEAGUE_UNRANKED)
+                                league='ur')
 
         return friend
