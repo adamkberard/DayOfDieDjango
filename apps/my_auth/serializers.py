@@ -7,7 +7,36 @@ from apps.games.models import Game
 from apps.friends.models import Friend
 
 
-class MyAuthSerializer(serializers.Serializer):
+class MyRegisterSerializer(serializers.Serializer):
+    class Meta:
+        module = CustomUser
+
+    email = serializers.EmailField()
+    password = serializers.CharField()
+
+    def create(self, validated_data):
+        user = CustomUser.objects.create_user(**validated_data)
+        return user
+
+    def to_representation(self, instance):
+        representation = {}
+
+        # First we get the user that we know exists because of validation
+        representation['user'] = CustomUserSerializer(instance).data
+
+        # Gotta check if there's a token and create it if not
+        # Then we send the token but in the user one cuz it's easier?
+        print("HERE 1")
+        token, _ = Token.objects.get_or_create(user=instance)
+        print("HERE 2")
+        representation['user']['token'] = str(token)
+
+        representation['games'] = []
+        representation['friends'] = []
+        return representation
+
+
+class MyLogInSerializer(serializers.Serializer):
     class Meta:
         module = CustomUser
 
@@ -49,6 +78,13 @@ class MyAuthSerializer(serializers.Serializer):
         # Now we get the friends
         friends = Friend.objects.users_friends(user=instance)
         representation['friends'] = FriendSerializer(friends, many=True).data
+
+        # All usernames in the system
+        usernames = CustomUser.objects.all().values('username')
+        formatted_usernames = []
+        for username in usernames:
+            formatted_usernames.append(username['username'])
+        representation['all_usernames'] = formatted_usernames
         return representation
 
 

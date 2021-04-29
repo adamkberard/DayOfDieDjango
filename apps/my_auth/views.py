@@ -9,46 +9,21 @@ from rest_framework.views import APIView
 from rest_framework.generics import CreateAPIView
 
 from .models import CustomUser
-from .serializers import CustomUserSerializer, MyAuthSerializer
+from .serializers import CustomUserSerializer, MyLogInSerializer, MyRegisterSerializer
 
 
 class LoginView(CreateAPIView):
     """
     View for authenticating users
     """
-    serializer_class = MyAuthSerializer
+    serializer_class = MyLogInSerializer
 
 
-class RegisterView(APIView):
+class RegisterView(CreateAPIView):
     """
     View for registering users
-
-    * Requires email, password
     """
-    serializer_class = MyAuthSerializer
-    renderer_classes = [JSONRenderer]
-
-    def post(self, request):
-        data = JSONParser().parse(request)
-        serializer = MyAuthSerializer(data=data)
-        if serializer.is_valid():
-            email = serializer.data['email']
-            password = serializer.data['password']
-
-            try:
-                user = CustomUser.objects.create_user(email, password=password)
-            except IntegrityError:
-                estr = 'Could not create an account with those credentials.'
-                returnData = {'errors': [estr]}
-                return Response(returnData, status=401)
-
-            # Gotta check if there's a token and create it if not
-            # Then we send the token
-            token, created = Token.objects.get_or_create(user=user)
-            returnData = {'token': str(token),
-                          'username': user.username}
-            return Response(returnData, status=201)
-        return Response(serializer.errors, status=400)
+    serializer_class = MyRegisterSerializer
 
 
 class UserView(APIView):
