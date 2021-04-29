@@ -33,6 +33,14 @@ class MyRegisterSerializer(serializers.Serializer):
 
         representation['games'] = []
         representation['friends'] = []
+
+        # All usernames in the system
+        usernames = CustomUser.objects.all().values('username')
+        formatted_usernames = []
+        for username in usernames:
+            formatted_usernames.append(username['username'])
+        representation['all_usernames'] = formatted_usernames
+
         return representation
 
 
