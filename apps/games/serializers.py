@@ -67,6 +67,16 @@ class GameWriteSerializer(serializers.Serializer):
         team_one = Friend.objects.get_or_create_friend(playerOne, playerTwo)
         team_two = Friend.objects.get_or_create_friend(playerThree, playerFour)
 
+        # Change the teams wins and losses
+        if validated_data['team_one_score'] > validated_data['team_two_score']:
+            team_one.wins += 1
+            team_two.losses += 1
+        else:
+            team_one.losses += 1
+            team_two.wins += 1
+        team_one.save()
+        team_two.save()
+
         # Created games are always unconfirmed
         game = Game.objects.create(**validated_data, team_one=team_one, team_two=team_two, confirmed=False)
 

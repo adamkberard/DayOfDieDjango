@@ -36,7 +36,8 @@ class Friend(TimeStampedModel):
 
     status = models.CharField(
         max_length=2,
-        choices=STATUS_CHOICES
+        choices=STATUS_CHOICES,
+        default=STATUS_PENDING
     )
 
     team_captain = models.ForeignKey(settings.AUTH_USER_MODEL,
@@ -47,15 +48,16 @@ class Friend(TimeStampedModel):
                                  related_name="teamTwo")
     team_name = models.CharField(max_length=50, blank=True, null=True)
 
-    wins = models.SmallIntegerField()
-    losses = models.SmallIntegerField()
+    wins = models.SmallIntegerField(default=0)
+    losses = models.SmallIntegerField(default=0)
 
     league = models.CharField(
         max_length=2,
-        choices=LEAGUE_CHOICES
+        choices=LEAGUE_CHOICES,
+        default=LEAGUE_UNRANKED
     )
 
     objects = FriendManager()
 
     def __str__(self):
-        return self.team_captain.email + " and " + self.teammate.email
+        return self.team_captain.username + " and " + self.teammate.username

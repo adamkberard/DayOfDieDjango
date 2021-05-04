@@ -26,9 +26,7 @@ class MyRegisterSerializer(serializers.Serializer):
 
         # Gotta check if there's a token and create it if not
         # Then we send the token but in the user one cuz it's easier?
-        print("HERE 1")
         token, _ = Token.objects.get_or_create(user=instance)
-        print("HERE 2")
         representation['user']['token'] = str(token)
 
         representation['games'] = []

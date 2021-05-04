@@ -7,17 +7,37 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from .models import Friend
-from .serializers import FriendSerializer
+from .serializers import FriendSerializer, FriendCreateSerializer
 
 
 class FriendListCreateAPIView(ListCreateAPIView):
     permission_classes = (IsAuthenticated, )
     authentication_classes = [authentication.TokenAuthentication]
-    serializer_class = FriendSerializer
+    read_serializer = FriendSerializer
+    write_serializer = FriendCreateSerializer
 
     def get_queryset(self):
         return Friend.objects.users_friends(user=self.request.user)
 
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return self.write_serializer
+        return self.read_serializer
+
+    def create(self, request, *args, **kwargs):
+        try:
+            request.data._mutable = True
+        except Exception:
+            pass
+        request.data['team_captain'] = request.user.username
+        if request.data.get('status') not in ['ac', 'dn']:
+            request.data['status'] = 'ac'
+
+        try:
+            request.data._mutable = False
+        except Exception:
+            pass
+        return super().create(request, *args, **kwargs)
 
 class FriendRetrieveUpdateAPIView(RetrieveUpdateAPIView):
     permission_classes = (IsAuthenticated, )
