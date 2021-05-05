@@ -19,27 +19,7 @@ class MyRegisterSerializer(serializers.Serializer):
         return user
 
     def to_representation(self, instance):
-        representation = {}
-
-        # First we get the user that we know exists because of validation
-        representation['user'] = CustomUserSerializer(instance).data
-
-        # Gotta check if there's a token and create it if not
-        # Then we send the token but in the user one cuz it's easier?
-        token, _ = Token.objects.get_or_create(user=instance)
-        representation['user']['token'] = str(token)
-
-        representation['games'] = []
-        representation['friends'] = []
-
-        # All usernames in the system
-        usernames = CustomUser.objects.all().values('username')
-        formatted_usernames = []
-        for username in usernames:
-            formatted_usernames.append(username['username'])
-        representation['all_usernames'] = formatted_usernames
-
-        return representation
+        return MyLogInSerializer(instance).data
 
 
 class MyLogInSerializer(serializers.Serializer):

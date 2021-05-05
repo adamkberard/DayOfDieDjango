@@ -13,9 +13,10 @@ class FriendFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Friend
 
-    requester = factory.SubFactory(CustomUserFactory)
-    requested = factory.SubFactory(CustomUserFactory)
-    status = Friend.PENDING
+    team_captain = factory.SubFactory(CustomUserFactory)
+    teammate = factory.SubFactory(CustomUserFactory)
+    status = Friend.STATUS_PENDING
+    confirmed = False
 
     timeRequested = factory.fuzzy.FuzzyDateTime(datetime.datetime(2021, 3, 12,
                                                 tzinfo=pytz.utc))
