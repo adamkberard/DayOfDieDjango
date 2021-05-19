@@ -1,10 +1,12 @@
+from django.contrib.auth import authenticate
+from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token
-from django.contrib.auth import authenticate
+
+from apps.friends.models import Friend
+from apps.games.models import Game
 
 from .models import CustomUser
-from apps.games.models import Game
-from apps.friends.models import Friend
 
 
 class MyRegisterSerializer(serializers.Serializer):
@@ -12,7 +14,7 @@ class MyRegisterSerializer(serializers.Serializer):
         module = CustomUser
 
     email = serializers.EmailField()
-    password = serializers.CharField()
+    password = serializers.CharField(validators=[validate_password])
 
     def create(self, validated_data):
         user = CustomUser.objects.create_user(**validated_data)
@@ -30,8 +32,8 @@ class MyLogInSerializer(serializers.Serializer):
     password = serializers.CharField()
 
     def save(self, **kwargs):
-        # I don't actually wanna save anything so I just return it. Not sure if this is a chill 
-        # way to do it. Odds are there's a better way to login people, but until I find it this 
+        # I don't actually wanna save anything so I just return it. Not sure if this is a chill
+        # way to do it. Odds are there's a better way to login people, but until I find it this
         # will suffice.
         return self.validated_data
 

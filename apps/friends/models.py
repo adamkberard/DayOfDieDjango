@@ -1,9 +1,9 @@
-from django.conf import settings
 import uuid as uuid_lib
 
-from ..core.models import TimeStampedModel
+from django.conf import settings
 from django.db import models
 
+from ..core.models import TimeStampedModel
 from .managers import FriendManager
 
 

@@ -1,15 +1,12 @@
-from django.db import IntegrityError
 from rest_framework import authentication
-from rest_framework.authtoken.models import Token
-from rest_framework.parsers import JSONParser
+from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.generics import CreateAPIView
 
-from .models import CustomUser
-from .serializers import CustomUserSerializer, MyLogInSerializer, MyRegisterSerializer
+from .serializers import (CustomUserSerializer, MyLogInSerializer,
+                          MyRegisterSerializer)
 
 
 class LoginView(CreateAPIView):

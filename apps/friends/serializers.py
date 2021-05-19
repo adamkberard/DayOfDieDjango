@@ -1,9 +1,9 @@
 from rest_framework import serializers
 
+from apps.my_auth.models import CustomUser
 from apps.my_auth.serializers import BasicCustomUserSerializer
 
 from .models import Friend
-from apps.my_auth.models import CustomUser
 
 
 class FriendSerializer(serializers.ModelSerializer):

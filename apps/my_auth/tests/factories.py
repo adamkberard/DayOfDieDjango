@@ -2,6 +2,9 @@ import factory
 
 from ..models import CustomUser
 
+# Common variable
+DEFAULT_PASSWORD = 'pass4user'
+
 
 class CustomUserFactory(factory.django.DjangoModelFactory):
 
@@ -9,7 +12,7 @@ class CustomUserFactory(factory.django.DjangoModelFactory):
         model = CustomUser
 
     email = factory.Sequence(lambda n: '%d@example.com' % n)
-    password = "pass4user"
+    password = DEFAULT_PASSWORD
 
     @classmethod
     def _create(cls, model_class, *args, **kwargs):

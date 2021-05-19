@@ -1,9 +1,8 @@
 from rest_framework import serializers
 
-from apps.friends.serializers import FriendSerializer
-from apps.my_auth.serializers import BasicCustomUserSerializer
-from apps.my_auth.models import CustomUser
 from apps.friends.models import Friend
+from apps.friends.serializers import FriendSerializer
+from apps.my_auth.models import CustomUser
 
 from .models import Game, Point
 
@@ -26,7 +25,6 @@ class GameSerializer(serializers.ModelSerializer):
     class Meta:
         model = Game
         exclude = ['id', 'created', 'modified']
-
 
     def to_representation(self, instance):
         instance.points = []
@@ -78,7 +76,8 @@ class GameWriteSerializer(serializers.Serializer):
         team_two.save()
 
         # Created games are always unconfirmed
-        game = Game.objects.create(**validated_data, team_one=team_one, team_two=team_two, confirmed=False)
+        game = Game.objects.create(**validated_data, team_one=team_one,
+                                   team_two=team_two, confirmed=False)
 
         for point_data in points_data:
             scorer = CustomUser.objects.get(uuid=point_data.pop('scorer')['uuid'])

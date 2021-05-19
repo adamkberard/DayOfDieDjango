@@ -1,11 +1,11 @@
-from django.conf import settings
 import uuid as uuid_lib
+
+from django.conf import settings
 from django.db import models
+
 from ..core.models import TimeStampedModel
-
-from .managers import GameManager
-
 from ..friends.models import Friend
+from .managers import GameManager
 
 
 # Create your models here.

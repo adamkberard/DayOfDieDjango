@@ -1,25 +1,28 @@
 import json
-import datetime
+from datetime import datetime, timedelta
 
+import pytz
 from django.test import TestCase
 from django.urls import reverse
-from rest_framework.test import APIClient
 from rest_framework.authtoken.models import Token
-
-from ..models import CustomUser
-from .factories import CustomUserFactory
+from rest_framework.test import APIClient
 
 from apps.friends.models import Friend
 from apps.friends.serializers import FriendSerializer
-from apps.games.models import Game, Point
-from apps.games.serializers import GameSerializer, PointSerializer
+from apps.games.models import Game
+from apps.games.serializers import GameSerializer
+
+from .checkers import Auth_Testing_Helpers
+from .factories import DEFAULT_PASSWORD, CustomUserFactory
 
 
 class Test_Login_View(TestCase):
+    helper = Auth_Testing_Helpers()
+
     def test_correct_login_no_data(self):
         """Testing a legitimate login with no games, friends, or other users."""
         userModel = CustomUserFactory()
-        data = {'email': userModel.email, 'password': "pass4user"}
+        data = {'email': userModel.email, 'password': DEFAULT_PASSWORD}
 
         client = APIClient()
         url = reverse('my_login')
@@ -42,19 +45,13 @@ class Test_Login_View(TestCase):
             'all_usernames': check_against_all_usernames
         }
 
-        # Make sure things went well first
-        self.assertEqual(response.status_code, 201)
-        responseData = json.loads(response.content)
-
-        # Make sure all the fields are there
-        self.checkLoginFields(responseData)
-
-        self.checkLoginData(responseData, check_against_dict)
+        # Check return
+        self.helper.checkLoginReturn(response, check_against_dict)
 
     def test_correct_login_one_other_user(self):
         """Testing a legitimate login with one other user, no friends or games."""
         userModel = CustomUserFactory()
-        data = {'email': userModel.email, 'password': "pass4user"}
+        data = {'email': userModel.email, 'password': DEFAULT_PASSWORD}
 
         otherUser = CustomUserFactory()
 
@@ -79,19 +76,13 @@ class Test_Login_View(TestCase):
             'all_usernames': check_against_all_usernames
         }
 
-        # Make sure things went well first
-        self.assertEqual(response.status_code, 201)
-        responseData = json.loads(response.content)
-
-        # Make sure all the fields are there
-        self.checkLoginFields(responseData)
-
-        self.checkLoginData(responseData, check_against_dict)
+        # Check return
+        self.helper.checkLoginReturn(response, check_against_dict)
 
     def test_correct_login_one_friend(self):
         """Testing a legitimate login with one other user, one friend and no games."""
         userModel = CustomUserFactory()
-        data = {'email': userModel.email, 'password': "pass4user"}
+        data = {'email': userModel.email, 'password': DEFAULT_PASSWORD}
 
         otherUser = CustomUserFactory()
         friendModel = Friend.objects.create(team_captain=userModel, teammate=otherUser)
@@ -121,19 +112,13 @@ class Test_Login_View(TestCase):
         url = reverse('my_login')
         response = client.post(url, data, format='json')
 
-        # Make sure things went well first
-        self.assertEqual(response.status_code, 201)
-        responseData = json.loads(response.content)
-
-        # Make sure all the fields are there
-        self.checkLoginFields(responseData)
-
-        self.checkLoginData(responseData, check_against_dict)
+        # Check return
+        self.helper.checkLoginReturn(response, check_against_dict)
 
     def test_correct_login_two_friend(self):
         """Testing a legitimate login with one other user, one friend and no games."""
         userModel = CustomUserFactory()
-        data = {'email': userModel.email, 'password': "pass4user"}
+        data = {'email': userModel.email, 'password': DEFAULT_PASSWORD}
 
         otherUser = CustomUserFactory()
         otherUserTwo = CustomUserFactory()
@@ -152,8 +137,15 @@ class Test_Login_View(TestCase):
             'token': str(Token.objects.get(user=userModel))
         }
         check_against_games = []
-        check_against_friends = [FriendSerializer(friendModel).data, FriendSerializer(friendModelTwo).data]
-        check_against_all_usernames = [userModel.username, otherUser.username, otherUserTwo.username]
+        check_against_friends = [
+            FriendSerializer(friendModel).data,
+            FriendSerializer(friendModelTwo).data
+        ]
+        check_against_all_usernames = [
+            userModel.username,
+            otherUser.username,
+            otherUserTwo.username
+        ]
         check_against_dict = {
             'user': check_against_user,
             'games': check_against_games,
@@ -165,19 +157,13 @@ class Test_Login_View(TestCase):
         url = reverse('my_login')
         response = client.post(url, data, format='json')
 
-        # Make sure things went well first
-        self.assertEqual(response.status_code, 201)
-        responseData = json.loads(response.content)
-
-        # Make sure all the fields are there
-        self.checkLoginFields(responseData)
-
-        self.checkLoginData(responseData, check_against_dict)
+        # Check return
+        self.helper.checkLoginReturn(response, check_against_dict)
 
     def test_correct_login_one_friend_many_users(self):
         """Testing a legitimate login with many other users, one friend and no games."""
         userModel = CustomUserFactory()
-        data = {'email': userModel.email, 'password': "pass4user"}
+        data = {'email': userModel.email, 'password': DEFAULT_PASSWORD}
 
         otherUser = CustomUserFactory()
         friendModel = Friend.objects.create(team_captain=userModel, teammate=otherUser)
@@ -190,13 +176,6 @@ class Test_Login_View(TestCase):
         client = APIClient()
         url = reverse('my_login')
         response = client.post(url, data, format='json')
-
-        # Make sure things went well first
-        self.assertEqual(response.status_code, 201)
-        responseData = json.loads(response.content)
-
-        # Make sure all the fields are there
-        self.checkLoginFields(responseData)
 
         # The response we want
         check_against_user = {
@@ -213,12 +192,14 @@ class Test_Login_View(TestCase):
             'friends': check_against_friends,
             'all_usernames': check_against_all_usernames
         }
-        self.checkLoginData(responseData, check_against_dict)
+
+        # Check return
+        self.helper.checkLoginReturn(response, check_against_dict)
 
     def test_correct_login_three_friends_one_game(self):
         """Testing a legitimate login with three friends and one game."""
         userModel = CustomUserFactory()
-        data = {'email': userModel.email, 'password': "pass4user"}
+        data = {'email': userModel.email, 'password': DEFAULT_PASSWORD}
 
         playerTwo = CustomUserFactory()
         playerThree = CustomUserFactory()
@@ -228,26 +209,24 @@ class Test_Login_View(TestCase):
         friendModelFour = Friend.objects.create(team_captain=userModel, teammate=playerFour)
         friendModelFive = Friend.objects.create(team_captain=playerThree, teammate=playerFour)
 
+        # Make times timezone aware
+        timezone = pytz.timezone('America/Los_Angeles')
+        time_started = timezone.localize(datetime.now() - timedelta(hours=1))
+        time_ended = timezone.localize(datetime.now())
+
         gameModel = Game.objects.create(
             team_one=friendModelTwo,
             team_two=friendModelFive,
             team_one_score=11,
             team_two_score=9,
-            time_started=datetime.datetime.now(),
-            time_ended=datetime.datetime.now(),
-            confirmed=
+            time_started=time_started,
+            time_ended=time_ended,
+            confirmed=False
         )
 
         client = APIClient()
         url = reverse('my_login')
         response = client.post(url, data, format='json')
-
-        # Make sure things went well first
-        self.assertEqual(response.status_code, 201)
-        responseData = json.loads(response.content)
-
-        # Make sure all the fields are there
-        self.checkLoginFields(responseData)
 
         # Check the data of the fields
         check_against_user = {
@@ -271,70 +250,77 @@ class Test_Login_View(TestCase):
             'friends': check_against_friends,
             'all_usernames': check_against_all_usernames
         }
-        self.checkLoginData(responseData, check_against_dict)
 
-    # Helper Functions
-    def checkUser(self, data, check_against_data):
-        fields = ['email', 'username', 'uuid', 'token']
+        # Check return
+        self.helper.checkLoginReturn(response, check_against_dict)
 
-        for field in fields:
-            self.assertTrue(field in data)
-            self.assertEqual(data.get(field), check_against_data.get(field))
+    def test_login_bad_email(self):
+        """Testing a bad login with bad email param."""
+        data = {'email': 'test', 'password': DEFAULT_PASSWORD}
 
-    def checkGames(self, data, check_against_data):
-        fields = [
-            'points', 'team_one', 'team_two', 'time_started', 'time_ended', 'uuid', 'type',
-            'team_one_score', 'team_two_score', 'confirmed'
-        ]
+        client = APIClient()
+        url = reverse('my_login')
+        response = client.post(url, data, format='json')
 
-        self.assertEqual(len(data), len(check_against_data))
-        for i in range(len(data)):
-            for field in fields:
-                self.assertTrue(field in data[i])
-                self.assertEqual(data[i].get(field), check_against_data[i].get(field))
+        # Make sure things went wrong first
+        self.assertEqual(response.status_code, 400)
+        responseData = json.loads(response.content)
 
-    def checkFriends(self, data, check_against_data):
-        fields = [
-            'uuid', 'status', 'team_name', 'wins', 'losses', 'league'
-        ]
+        # Make sure error exists
+        self.assertTrue('email' in responseData)
+        # Make sure it's the correct error
+        self.assertEqual(responseData['email'], ['Enter a valid email address.'])
 
-        self.assertEqual(len(data), len(check_against_data))
-        for i in range(len(data)):
-            for field in fields:
-                self.assertTrue(field in data[i])
-                self.assertEqual(data[i].get(field), check_against_data[i].get(field))
+    def test_login_no_email(self):
+        """Testing a bad login with no email param."""
+        data = {'password': DEFAULT_PASSWORD}
 
-                # Check the two users seperately
-                self.assertTrue('team_captain' in data[i])
-                self.assertTrue('teammate' in data[i])
+        client = APIClient()
+        url = reverse('my_login')
+        response = client.post(url, data, format='json')
 
-                team_captain = data[i].get('team_captain')
-                teammate = data[i].get('teammate')
+        # Make sure things went wrong first
+        self.assertEqual(response.status_code, 400)
+        responseData = json.loads(response.content)
 
-                self.assertEqual(team_captain['username'], check_against_data[i].get('team_captain')['username'])
-                self.assertEqual(team_captain['uuid'], check_against_data[i].get('team_captain')['uuid'])
-                self.assertEqual(teammate['username'], check_against_data[i].get('teammate')['username'])
-                self.assertEqual(teammate['uuid'], check_against_data[i].get('teammate')['uuid'])
+        # Make sure error exists
+        self.assertTrue('email' in responseData)
+        # Make sure it's the correct error
+        self.assertEqual(responseData['email'], ['This field is required.'])
 
+    def test_login_no_password(self):
+        """Testing a bad login with no password param."""
+        data = {'email': 'willFail@gmail.com'}
 
-    def checkAllUsernames(self, data, check_against_data):
-        self.assertEqual(len(data), len(check_against_data))
-        # Need to make sure they're the same someday
+        client = APIClient()
+        url = reverse('my_login')
+        response = client.post(url, data, format='json')
 
-        for username in check_against_data:
-            try:
-                data.remove(username)
-            except ValueError:
-                self.fail('Username list didnt match.')
+        # Make sure things went wrong first
+        self.assertEqual(response.status_code, 400)
+        responseData = json.loads(response.content)
 
-    def checkLoginFields(self, data):
-        self.assertTrue('user' in data)
-        self.assertTrue('games' in data)
-        self.assertTrue('friends' in data)
-        self.assertTrue('all_usernames' in data)
+        # Make sure error exists
+        self.assertTrue('password' in responseData)
+        # Make sure there's only one error
+        self.assertEqual(responseData['password'], ['This field is required.'])
 
-    def checkLoginData(self, data, check_against_data):
-        self.checkUser(data['user'], check_against_data['user'])
-        self.checkGames(data['games'], check_against_data['games'])
-        self.checkFriends(data['friends'], check_against_data['friends'])
-        self.checkAllUsernames(data['all_usernames'], check_against_data['all_usernames'])
+    def test_login_no_email_or_password(self):
+        """Testing a bad login with no email or password params."""
+        data = {}
+
+        client = APIClient()
+        url = reverse('my_login')
+        response = client.post(url, data, format='json')
+
+        # Make sure things went wrong first
+        self.assertEqual(response.status_code, 400)
+        responseData = json.loads(response.content)
+
+        # Make sure error exists
+        self.assertTrue('email' in responseData)
+        self.assertTrue('password' in responseData)
+
+        # Make sure it's the correct error
+        self.assertEqual(responseData['email'], ['This field is required.'])
+        self.assertEqual(responseData['password'], ['This field is required.'])

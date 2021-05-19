@@ -1,15 +1,10 @@
-from rest_framework.generics import (
-    ListCreateAPIView,
-    ListAPIView,
-    RetrieveUpdateDestroyAPIView,
-    RetrieveAPIView,
-)
 from rest_framework import authentication
-from rest_framework.response import Response
+from rest_framework.generics import (ListCreateAPIView,
+                                     RetrieveUpdateDestroyAPIView)
 from rest_framework.permissions import IsAuthenticated
 
-from .models import Game, Point
-from .serializers import GameWriteSerializer, GameSerializer, PointSerializer
+from .models import Game
+from .serializers import GameSerializer, GameWriteSerializer
 
 
 class GameListCreateAPIView(ListCreateAPIView):
