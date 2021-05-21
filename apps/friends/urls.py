@@ -1,18 +1,12 @@
 from django.urls import path
 
-from .views import FriendListCreateAPIView, FriendRetrieveUpdateAPIView
+from .views import FriendListCreateAPIView
 
 urlpatterns = [
     # /flavors/api/
     path(
         route='',
         view=FriendListCreateAPIView.as_view(),
-        name='friend_rest_api_1'
+        name='friend_request_create'
     ),
-    # /flavors/api/:uuid/
-    path(
-        route='<uuid:uuid>/',
-        view=FriendRetrieveUpdateAPIView.as_view(),
-        name='friend_rest_api_2'
-    )
 ]

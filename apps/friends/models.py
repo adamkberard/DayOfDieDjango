@@ -21,15 +21,15 @@ class Friend(TimeStampedModel):
         (LEAGUE_GOLD, 'Gold'),
         (LEAGUE_DIAMOND, 'Diamond'))
 
+    STATUS_BLOCKED = 'bl'
     STATUS_PENDING = 'pd'
     STATUS_ACCEPTED = 'ac'
-    STATUS_DENIED = 'dn'
     STATUS_NOTHING = 'nt'
 
     STATUS_CHOICES = (
+        (STATUS_BLOCKED, 'Blocked'),
         (STATUS_PENDING, 'Pending'),
         (STATUS_ACCEPTED, 'Accepted'),
-        (STATUS_DENIED, 'Denied'),
         (STATUS_NOTHING, 'Nothing'))
 
     uuid = models.UUIDField(db_index=True, default=uuid_lib.uuid4, editable=False)
@@ -61,3 +61,6 @@ class Friend(TimeStampedModel):
 
     def __str__(self):
         return self.team_captain.username + " and " + self.teammate.username
+
+    def is_captain(self, user):
+        return self.team_captain == user
