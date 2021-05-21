@@ -7,7 +7,7 @@ urlpatterns = [
     path(
         route='',
         view=FriendListCreateAPIView.as_view(),
-        name='friend_rest_api_1'
+        name='friend_request_create'
     ),
     # /flavors/api/:uuid/
     path(

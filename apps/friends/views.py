@@ -27,8 +27,6 @@ class FriendListCreateAPIView(ListCreateAPIView):
         except Exception:
             pass
         request.data['team_captain'] = request.user.username
-        if request.data.get('status') not in ['ac', 'dn']:
-            request.data['status'] = 'ac'
 
         try:
             request.data._mutable = False

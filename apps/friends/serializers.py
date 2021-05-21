@@ -32,46 +32,131 @@ class FriendCreateSerializer(serializers.ModelSerializer):
         model = Friend
         fields = ['team_captain', 'teammate', 'status']
 
-    def create(self, validated_data):
-        # First I will check if a friend request already exists
-        team_captain = CustomUser.objects.get(username=validated_data['team_captain'])
-        teammate = CustomUser.objects.get(username=validated_data['teammate'])
+    def validate_team_captain(self, value):
+        """Just have to convert from username to Customer User."""
+        team_captain = CustomUser.objects.get(username=value)
+        return team_captain
 
-        friend = Friend.objects.get_or_create_friend(team_captain, teammate)
+    def validate_teammate(self, value):
+        try:
+            teammate = CustomUser.objects.get(username=value)
+        except CustomUser.DoesNotExist:
+            raise serializers.ValidationError('Teammate not a user.')
+        return teammate
 
-        # Check to make sure it's the teammate answering the request
-        if friend.status == friend.STATUS_NOTHING:
-            if validated_data['status'] == 'ac':
-                friend.team_captain = team_captain
-                friend.teammate = teammate
-                friend.status = friend.STATUS_PENDING
-        elif friend.status == friend.STATUS_PENDING:
-            if team_captain == friend.teammate:
-                if validated_data['status'] == friend.STATUS_DENIED:
-                    friend.status = friend.STATUS_DENIED
-                elif validated_data['status'] == friend.STATUS_ACCEPTED:
-                    friend.status = friend.STATUS_ACCEPTED
-            else:
-                if validated_data['status'] == 'dn':
-                    print("GOT HERE")
-                    friend.status = friend.STATUS_NOTHING
-
-        friend.save()
-        print(friend.status)
-        return friend
-
-    def validate_action(self, value):
-        if value not in ['ac', 'dn']:
-            raise serializers.ValidationError('Action not valid.')
+    def validate_status(self, value):
+        if value not in [item[0] for item in Friend.STATUS_CHOICES]:
+            raise serializers.ValidationError('Status not valid.')
+        return value
 
     def validate(self, data):
         """
         Makes sure the friends is okay
         """
+        team_captain = data['team_captain']
+        teammate = data['teammate']
+
         # This is making sure the two users are different
-        if data['team_captain'] == data['teammate']:
+        if team_captain == teammate:
             raise serializers.ValidationError("Users must be different.")
+
+        if not Friend.objects.friendship_exists(data['team_captain'], data['teammate']):
+            # If the friendship doesn't exist, then the status cannot be nothing
+            if data['status'] == Friend.STATUS_NOTHING:
+                raise serializers.ValidationError('Cannot create a "Nothing" friend request.')
+            return data
+
+        # Since we know it exists
+        friendship = Friend.objects.get_friendship(data['team_captain'], data['teammate'])
+
+        # Now I have to check a lot of things.
+        if friendship.status == Friend.STATUS_BLOCKED:
+            if friendship.is_captain(team_captain):
+                if data['status'] in [Friend.STATUS_PENDING, Friend.STATUS_ACCEPTED]:
+                    raise serializers.ValidationError('This action is not allowed when blocking.')
+            else:
+                raise serializers.ValidationError('This action is not allowed when blocked.')
+        elif friendship.status == Friend.STATUS_ACCEPTED:
+            if data['status'] == Friend.STATUS_PENDING:
+                raise serializers.ValidationError('Cannot go from accepted frieend request to pending.')
         return data
+
+    def create(self, validated_data):
+        # First I will check if a friend request already exists
+        team_captain = validated_data.pop('team_captain')
+        teammate = validated_data.pop('teammate')
+
+        created, friend = Friend.objects.get_or_create_friend(team_captain, teammate)
+
+        if created:
+            if validated_data['status'] == Friend.STATUS_BLOCKED:
+                friend.status = Friend.STATUS_BLOCKED
+            elif validated_data['status'] == Friend.STATUS_NOTHING:
+                friend.status = Friend.STATUS_NOTHING
+            elif validated_data['status'] == Friend.STATUS_PENDING:
+                friend.status = Friend.STATUS_PENDING
+            elif validated_data['status'] == Friend.STATUS_ACCEPTED:
+                friend.status = Friend.STATUS_PENDING
+        else:
+            # This is when the team_captain is the one sending the request
+            if friend.team_captain == team_captain:
+                if friend.status == Friend.STATUS_BLOCKED:
+                    if validated_data['status'] == Friend.STATUS_NOTHING:
+                        friend.status = Friend.STATUS_NOTHING
+                elif friend.status == Friend.STATUS_NOTHING:
+                    if validated_data['status'] == Friend.STATUS_BLOCKED:
+                        friend.status = Friend.STATUS_BLOCKED
+                    elif validated_data['status'] in [Friend.STATUS_PENDING, Friend.STATUS_ACCEPTED]:
+                        friend.status = Friend.STATUS_PENDING
+                elif friend.status == Friend.STATUS_PENDING:
+                    if validated_data['status'] == Friend.STATUS_BLOCKED:
+                        friend.status = Friend.STATUS_BLOCKED
+                    elif validated_data['status'] == Friend.STATUS_NOTHING:
+                        friend.status = Friend.STATUS_NOTHING
+                elif friend.status == Friend.STATUS_ACCEPTED:
+                    if validated_data['status'] == Friend.STATUS_BLOCKED:
+                        friend.status = Friend.STATUS_BLOCKED
+                    elif validated_data['status'] == Friend.STATUS_NOTHING:
+                        friend.status = Friend.STATUS_NOTHING
+            # This is when the teammate is the one sending the request
+            else:
+                if friend.status == Friend.STATUS_NOTHING:
+                    if validated_data['status'] == Friend.STATUS_BLOCKED:
+                        # Since the requester is always the team_captain, this reverses them since we know the
+                        # requester needs to become the team captain
+                        friend.team_captain = team_captain
+                        friend.teammate = teammate
+                        friend.status = Friend.STATUS_BLOCKED
+                    elif validated_data['status'] in [Friend.STATUS_PENDING, Friend.STATUS_ACCEPTED]:
+                        # Since the requester is always the team_captain, this reverses them since we know the
+                        # requester needs to become the team captain
+                        friend.team_captain = team_captain
+                        friend.teammate = teammate
+                        friend.status = Friend.STATUS_PENDING
+                elif friend.status == Friend.STATUS_PENDING:
+                    if validated_data['status'] == Friend.STATUS_BLOCKED:
+                        # Since the requester is always the team_captain, this reverses them since we know the
+                        # requester needs to become the team captain
+                        friend.team_captain = team_captain
+                        friend.teammate = teammate
+                        friend.status = Friend.STATUS_BLOCKED
+                    elif validated_data['status'] == Friend.STATUS_NOTHING:
+                        friend.status = Friend.STATUS_NOTHING
+                    elif validated_data['status'] == Friend.STATUS_ACCEPTED:
+                        friend.status = Friend.STATUS_ACCEPTED
+                elif friend.status == Friend.STATUS_ACCEPTED:
+                    if validated_data['status'] == Friend.STATUS_BLOCKED:
+                        # Since the requester is always the team_captain, this reverses them since we know the
+                        # requester needs to become the team captain
+                        friend.team_captain = team_captain
+                        friend.teammate = teammate
+                        friend.status = Friend.STATUS_BLOCKED
+                    elif validated_data['status'] == Friend.STATUS_NOTHING:
+                        friend.status = Friend.STATUS_NOTHING
+
+        friend.save()
+        return friend
+
 
     def to_representation(self, instance):
         return FriendSerializer(instance).data
