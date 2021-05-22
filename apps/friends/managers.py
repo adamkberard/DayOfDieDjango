@@ -33,7 +33,6 @@ class FriendManager(BaseUserManager):
 
         return False
 
-
     def get_or_create_friend(self, user1, user2):
         if(self.friendship_exists(user1, user2)):
             return False, self.get_friendship(user1, user2)
