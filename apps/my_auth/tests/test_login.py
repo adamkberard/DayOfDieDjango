@@ -2,7 +2,6 @@ import json
 from datetime import datetime, timedelta
 
 import pytz
-from django.test import TestCase
 from django.urls import reverse
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
@@ -12,12 +11,11 @@ from apps.friends.serializers import FriendSerializer
 from apps.games.models import Game
 from apps.games.serializers import GameSerializer
 
-from .checkers import Auth_Testing_Helpers
+from .checkers import AuthTesting
 from .factories import DEFAULT_PASSWORD, CustomUserFactory
 
 
-class Test_Login_View(TestCase):
-    helper = Auth_Testing_Helpers()
+class Test_Login_View(AuthTesting):
 
     def test_correct_login_no_data(self):
         """Testing a legitimate login with no games, friends, or other users."""
@@ -46,7 +44,7 @@ class Test_Login_View(TestCase):
         }
 
         # Check return
-        self.helper.checkLoginReturn(response, check_against_dict)
+        self.assertLoginResponseSuccess(response, check_against_dict)
 
     def test_correct_login_one_other_user(self):
         """Testing a legitimate login with one other user, no friends or games."""
@@ -77,7 +75,7 @@ class Test_Login_View(TestCase):
         }
 
         # Check return
-        self.helper.checkLoginReturn(response, check_against_dict)
+        self.assertLoginResponseSuccess(response, check_against_dict)
 
     def test_correct_login_one_friend(self):
         """Testing a legitimate login with one other user, one friend and no games."""
@@ -113,7 +111,7 @@ class Test_Login_View(TestCase):
         response = client.post(url, data, format='json')
 
         # Check return
-        self.helper.checkLoginReturn(response, check_against_dict)
+        self.assertLoginResponseSuccess(response, check_against_dict)
 
     def test_correct_login_two_friend(self):
         """Testing a legitimate login with one other user, one friend and no games."""
@@ -158,7 +156,7 @@ class Test_Login_View(TestCase):
         response = client.post(url, data, format='json')
 
         # Check return
-        self.helper.checkLoginReturn(response, check_against_dict)
+        self.assertLoginResponseSuccess(response, check_against_dict)
 
     def test_correct_login_one_friend_many_users(self):
         """Testing a legitimate login with many other users, one friend and no games."""
@@ -194,7 +192,7 @@ class Test_Login_View(TestCase):
         }
 
         # Check return
-        self.helper.checkLoginReturn(response, check_against_dict)
+        self.assertLoginResponseSuccess(response, check_against_dict)
 
     def test_correct_login_three_friends_one_game(self):
         """Testing a legitimate login with three friends and one game."""
@@ -252,7 +250,7 @@ class Test_Login_View(TestCase):
         }
 
         # Check return
-        self.helper.checkLoginReturn(response, check_against_dict)
+        self.assertLoginResponseSuccess(response, check_against_dict)
 
     def test_login_bad_email(self):
         """Testing a bad login with bad email param."""

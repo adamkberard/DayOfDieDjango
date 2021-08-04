@@ -7,7 +7,7 @@ urlpatterns = [
     path(
         route='',
         view=GameListCreateAPIView.as_view(),
-        name='game_rest_api_1'
+        name='game_request_create'
     ),
     # /games/:uuid/
     path(
