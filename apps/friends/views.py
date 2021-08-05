@@ -1,7 +1,6 @@
 from rest_framework import authentication
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateAPIView
+from rest_framework.generics import ListCreateAPIView
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
 
 from .models import Friend
 from .serializers import FriendCreateSerializer, FriendSerializer

@@ -8,7 +8,6 @@ from ..friends.models import Friend
 from .managers import GameManager
 
 
-# Create your models here.
 class Game(TimeStampedModel):
     TYPE_PICKUP = 'pu'
     TYPE_MARATHON = 'ma'
@@ -24,12 +23,6 @@ class Game(TimeStampedModel):
     time_ended = models.DateTimeField()
 
     uuid = models.UUIDField(db_index=True, default=uuid_lib.uuid4, editable=False)
-
-    type = models.CharField(
-        max_length=2,
-        choices=TYPE_CHOICES,
-        default=TYPE_PICKUP
-    )
 
     team_one = models.ForeignKey(Friend,
                                  on_delete=models.CASCADE,
@@ -76,10 +69,6 @@ class Point(TimeStampedModel):
 
     scorer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
                                related_name="scorer")
-    scored_on = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
-                                  related_name="scored_on", blank=True, null=True)
-
-    scored_on_position = models.SmallIntegerField(null=True, blank=True)
 
     game = models.ForeignKey(Game, on_delete=models.CASCADE, related_name="game")
 

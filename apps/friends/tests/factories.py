@@ -1,8 +1,5 @@
-import datetime
-
 import factory
 import factory.fuzzy
-import pytz
 
 from apps.my_auth.tests.factories import CustomUserFactory
 

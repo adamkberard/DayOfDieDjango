@@ -1,19 +1,17 @@
 import json
 
-from django.test import TestCase
 from django.urls import reverse
 from rest_framework.test import APIClient
 
 from apps.friends.models import Friend
-
-from ..serializers import FriendSerializer
-from .checkers import Friend_Testing_Helpers
-from .factories import FriendFactory
 from apps.my_auth.tests.factories import CustomUserFactory
 
+from ..serializers import FriendSerializer
+from .checkers import FriendTesting
+from .factories import FriendFactory
 
-class Test_Friend_URL_Params(TestCase):
-    helper = Friend_Testing_Helpers()
+
+class Test_Friend_URL_Params(FriendTesting):
 
     def test_friend_request_no_params(self):
         """Testing a bad friend request with no params."""
@@ -25,15 +23,7 @@ class Test_Friend_URL_Params(TestCase):
         url = reverse('friend_request_create')
         response = client.post(url, data, format='json')
 
-        # Make sure things went wrong first
-        self.assertEqual(response.status_code, 400)
-        responseData = json.loads(response.content)
-
-        # Make sure error exists
-        self.assertTrue('teammate' in responseData)
-
-        # Make sure it's the correct error
-        self.assertEqual(responseData['teammate'], ['This field is required.'])
+        self.assertFieldsMissing(response, ['teammate'])
 
     def test_friend_request_no_teammate_but_status(self):
         """Testing a bad friend request with only the status param."""
@@ -45,15 +35,7 @@ class Test_Friend_URL_Params(TestCase):
         url = reverse('friend_request_create')
         response = client.post(url, data, format='json')
 
-        # Make sure things went wrong first
-        self.assertEqual(response.status_code, 400)
-        responseData = json.loads(response.content)
-
-        # Make sure error exists
-        self.assertTrue('teammate' in responseData)
-
-        # Make sure it's the correct error
-        self.assertEqual(responseData['teammate'], ['This field is required.'])
+        self.assertFieldsMissing(response, ['teammate'])
 
     def test_friend_request_invalid_status(self):
         """Testing a bad friend request with only the status param that is invalid."""
@@ -68,7 +50,7 @@ class Test_Friend_URL_Params(TestCase):
 
         # Make sure things went wrong first
         self.assertEqual(response.status_code, 400)
-        responseData = json.loads(response.content)
+        responseData = self.loadJSONSafely(response)
 
         # Make sure error exists
         self.assertTrue('status' in responseData)
@@ -77,8 +59,7 @@ class Test_Friend_URL_Params(TestCase):
         self.assertEqual(responseData['status'], ['"invalid" is not a valid choice.'])
 
 
-class Test_Create_Nonexistent_Friend(TestCase):
-    helper = Friend_Testing_Helpers()
+class Test_Create_Nonexistent_Friend(FriendTesting):
 
     def test_nonexistent_friend_block(self):
         """Testing a friend request that is a block on a nonexistent friendship."""
@@ -106,7 +87,7 @@ class Test_Create_Nonexistent_Friend(TestCase):
         check_against_friend = FriendSerializer(friendModel).data
 
         # Check return
-        self.helper.checkFriend(response, check_against_friend)
+        self.assertFriendResponseValid(response, check_against_friend)
 
     def test_nonexistent_friend_nothing(self):
         """Testing a friend request that is a nothing on a nonexistent friendship.
@@ -122,13 +103,13 @@ class Test_Create_Nonexistent_Friend(TestCase):
 
         # The response we want
         self.assertEqual(response.status_code, 400)
-        responseData = json.loads(response.content)
+        responseData = self.loadJSONSafely(response)
 
         # Make sure error exists
         self.assertTrue('non_field_errors' in responseData)
 
         # Make sure it's the correct error
-        self.assertEqual(responseData['non_field_errors'], 
+        self.assertEqual(responseData['non_field_errors'],
                          ['Cannot create a "Nothing" friend request.'])
 
     def test_nonexistent_friend_pending(self):
@@ -157,7 +138,7 @@ class Test_Create_Nonexistent_Friend(TestCase):
         check_against_friend = FriendSerializer(friendModel).data
 
         # Check return
-        self.helper.checkFriend(response, check_against_friend)
+        self.assertFriendResponseValid(response, check_against_friend)
 
     def test_nonexistent_friend_accept(self):
         """Testing a friend request that is an accept on a nonexistent friendship."""
@@ -185,14 +166,14 @@ class Test_Create_Nonexistent_Friend(TestCase):
         check_against_friend = FriendSerializer(friendModel).data
 
         # Check return
-        self.helper.checkFriend(response, check_against_friend)
+        self.assertFriendResponseValid(response, check_against_friend)
 
 
-class Test_Create_Existent_Friend_Blocked(TestCase):
-    helper = Friend_Testing_Helpers()
+class Test_Create_Existent_Friend_Blocked(FriendTesting):
 
     def test_blocking_existing_blocked_friend_as_team_captain(self):
-        """Testing re-blocking an existing blocked friend request as the team captain aka the blocker."""
+        """Testing re-blocking an existing blocked friend request as
+           the team captain aka the blocker."""
         friendship = FriendFactory(status=Friend.STATUS_BLOCKED)
         data = {'teammate': friendship.teammate.username, 'status': Friend.STATUS_BLOCKED}
 
@@ -207,8 +188,15 @@ class Test_Create_Existent_Friend_Blocked(TestCase):
         # Make sure friend model is okay
         self.assertEqual(friendModel, friendship)
 
+        # Make the dict to compare return to
+        check_against_friend = FriendSerializer(friendModel).data
+
+        # Check return
+        self.assertFriendResponseValid(response, check_against_friend)
+
     def test_nothinging_an_existing_blocked_friend_as_team_captain(self):
-        """Testing changing an existing blocked friend request to nothing as the team captain aka the blocker."""
+        """Testing changing an existing blocked friend request to nothing
+           as the team captain aka the blocker."""
         friendship = FriendFactory(status=Friend.STATUS_BLOCKED)
         data = {'teammate': friendship.teammate.username, 'status': Friend.STATUS_NOTHING}
 
@@ -232,11 +220,11 @@ class Test_Create_Existent_Friend_Blocked(TestCase):
         check_against_friend = FriendSerializer(friendModel).data
 
         # Check return
-        self.helper.checkFriend(response, check_against_friend)
+        self.assertFriendResponseValid(response, check_against_friend)
 
     def test_pendinging_an_existing_blocked_friend_as_team_captain(self):
-        """Testing changing an existing blocked friend request to pending as the team captain aka the blocker.
-           This is not allowed."""
+        """Testing changing an existing blocked friend request to pending as
+           the team captain aka the blocker. This is not allowed."""
         friendship = FriendFactory(status=Friend.STATUS_BLOCKED)
         data = {'teammate': friendship.teammate.username, 'status': Friend.STATUS_PENDING}
 
@@ -244,18 +232,19 @@ class Test_Create_Existent_Friend_Blocked(TestCase):
         client.force_authenticate(user=friendship.team_captain)
         url = reverse('friend_request_create')
         response = client.post(url, data, format='json')
-        responseData = json.loads(response.content)
+        responseData = self.loadJSONSafely(response)
 
         # The response we want
         self.assertEqual(response.status_code, 400)
         # Make sure error exists
         self.assertTrue('non_field_errors' in responseData)
         # Make sure it's the correct error
-        self.assertEqual(responseData['non_field_errors'], ['This action is not allowed when blocking.'])
+        self.assertEqual(responseData['non_field_errors'],
+                         ['This action is not allowed when blocking.'])
 
     def test_accepting_an_existing_blocked_friend_as_team_captain(self):
-        """Testing changing an existing blocked friend request to accepted as the team captain aka the blocker.
-           This is not allowed."""
+        """Testing changing an existing blocked friend request to accepted as
+           the team captain aka the blocker. This is not allowed."""
         friendship = FriendFactory(status=Friend.STATUS_BLOCKED)
         data = {'teammate': friendship.teammate.username, 'status': Friend.STATUS_ACCEPTED}
 
@@ -263,17 +252,19 @@ class Test_Create_Existent_Friend_Blocked(TestCase):
         client.force_authenticate(user=friendship.team_captain)
         url = reverse('friend_request_create')
         response = client.post(url, data, format='json')
-        responseData = json.loads(response.content)
+        responseData = self.loadJSONSafely(response)
 
         # The response we want
         self.assertEqual(response.status_code, 400)
         # Make sure error exists
         self.assertTrue('non_field_errors' in responseData)
         # Make sure it's the correct error
-        self.assertEqual(responseData['non_field_errors'], ['This action is not allowed when blocking.'])
+        self.assertEqual(responseData['non_field_errors'],
+                         ['This action is not allowed when blocking.'])
 
     def test_doing_everything_to_existing_blocked_friend_as_teammate(self):
-        """Testing doing anything to an existing blocked friend request as the teammate aka the blockee."""
+        """Testing doing anything to an existing blocked friend request
+           as the teammate aka the blockee."""
         friendship = FriendFactory(status=Friend.STATUS_BLOCKED)
 
         client = APIClient()
@@ -284,18 +275,18 @@ class Test_Create_Existent_Friend_Blocked(TestCase):
             data = {'teammate': friendship.team_captain.username, 'status': status}
 
             response = client.post(url, data, format='json')
-            responseData = json.loads(response.content)
+            responseData = self.loadJSONSafely(response)
 
             # The response we want
             self.assertEqual(response.status_code, 400)
             # Make sure error exists
             self.assertTrue('non_field_errors' in responseData)
             # Make sure it's the correct error
-            self.assertEqual(responseData['non_field_errors'], ['This action is not allowed when blocked.'])
+            self.assertEqual(responseData['non_field_errors'],
+                             ['This action is not allowed when blocked.'])
 
 
-class Test_Create_Existent_Friend_Nothing(TestCase):
-    helper = Friend_Testing_Helpers()
+class Test_Create_Existent_Friend_Nothing(FriendTesting):
 
     def test_blocking_an_existing_nothing_friend_as_team_captain(self):
         """Testing blocking an existing nothing friend request as the team captain."""
@@ -322,7 +313,7 @@ class Test_Create_Existent_Friend_Nothing(TestCase):
         check_against_friend = FriendSerializer(friendModel).data
 
         # Check return
-        self.helper.checkFriend(response, check_against_friend)
+        self.assertFriendResponseValid(response, check_against_friend)
 
     def test_blocking_an_existing_nothing_friend_as_teammate(self):
         """Testing blocking an existing nothing friend request as the teammate."""
@@ -349,7 +340,7 @@ class Test_Create_Existent_Friend_Nothing(TestCase):
         check_against_friend = FriendSerializer(friendModel).data
 
         # Check return
-        self.helper.checkFriend(response, check_against_friend)
+        self.assertFriendResponseValid(response, check_against_friend)
 
     def test_nothinging_an_existing_nothing_friend_as_team_captain(self):
         """Testing nothinging an existing nothing friend request as the team captain."""
@@ -371,7 +362,7 @@ class Test_Create_Existent_Friend_Nothing(TestCase):
         check_against_friend = FriendSerializer(friendModel).data
 
         # Check return
-        self.helper.checkFriend(response, check_against_friend)
+        self.assertFriendResponseValid(response, check_against_friend)
 
     def test_nothinging_an_existing_nothing_friend_as_teammate(self):
         """Testing nothinging an existing nothing friend request as the teammate."""
@@ -393,7 +384,7 @@ class Test_Create_Existent_Friend_Nothing(TestCase):
         check_against_friend = FriendSerializer(friendModel).data
 
         # Check return
-        self.helper.checkFriend(response, check_against_friend)
+        self.assertFriendResponseValid(response, check_against_friend)
 
     def test_pendinging_an_existing_nothing_friend_as_team_captain(self):
         """Testing pendinging an existing nothing friend request as the team captain."""
@@ -420,7 +411,7 @@ class Test_Create_Existent_Friend_Nothing(TestCase):
         check_against_friend = FriendSerializer(friendModel).data
 
         # Check return
-        self.helper.checkFriend(response, check_against_friend)
+        self.assertFriendResponseValid(response, check_against_friend)
 
     def test_pendinging_an_existing_nothing_friend_as_teammate(self):
         """Testing pendinging an existing nothing friend request as the teammate."""
@@ -447,7 +438,7 @@ class Test_Create_Existent_Friend_Nothing(TestCase):
         check_against_friend = FriendSerializer(friendModel).data
 
         # Check return
-        self.helper.checkFriend(response, check_against_friend)
+        self.assertFriendResponseValid(response, check_against_friend)
 
     def test_accepting_an_existing_nothing_friend_as_team_captain(self):
         """Testing accepting an existing nothing friend request as the team captain."""
@@ -474,7 +465,7 @@ class Test_Create_Existent_Friend_Nothing(TestCase):
         check_against_friend = FriendSerializer(friendModel).data
 
         # Check return
-        self.helper.checkFriend(response, check_against_friend)
+        self.assertFriendResponseValid(response, check_against_friend)
 
     def test_accepting_an_existing_nothing_friend_as_teammate(self):
         """Testing accepting an existing nothing friend request as the teammate."""
@@ -501,11 +492,10 @@ class Test_Create_Existent_Friend_Nothing(TestCase):
         check_against_friend = FriendSerializer(friendModel).data
 
         # Check return
-        self.helper.checkFriend(response, check_against_friend)
+        self.assertFriendResponseValid(response, check_against_friend)
 
 
-class Test_Create_Existent_Friend_Pending(TestCase):
-    helper = Friend_Testing_Helpers()
+class Test_Create_Existent_Friend_Pending(FriendTesting):
 
     def test_blocking_an_existing_pending_friend_as_team_captain(self):
         """Testing blocking an existing pending friend request as the team captain."""
@@ -532,7 +522,7 @@ class Test_Create_Existent_Friend_Pending(TestCase):
         check_against_friend = FriendSerializer(friendModel).data
 
         # Check return
-        self.helper.checkFriend(response, check_against_friend)
+        self.assertFriendResponseValid(response, check_against_friend)
 
     def test_blocking_an_existing_pending_friend_as_teammate(self):
         """Testing blocking an existing pending friend request as the teammate."""
@@ -559,7 +549,7 @@ class Test_Create_Existent_Friend_Pending(TestCase):
         check_against_friend = FriendSerializer(friendModel).data
 
         # Check return
-        self.helper.checkFriend(response, check_against_friend)
+        self.assertFriendResponseValid(response, check_against_friend)
 
     def test_nothinging_an_existing_pending_friend_as_team_captain(self):
         """Testing nothinging an existing pending friend request as the team captain."""
@@ -586,7 +576,7 @@ class Test_Create_Existent_Friend_Pending(TestCase):
         check_against_friend = FriendSerializer(friendModel).data
 
         # Check return
-        self.helper.checkFriend(response, check_against_friend)
+        self.assertFriendResponseValid(response, check_against_friend)
 
     def test_nothinging_an_existing_pending_friend_as_teammate(self):
         """Testing nothinging an existing pending friend request as the teammate."""
@@ -613,7 +603,7 @@ class Test_Create_Existent_Friend_Pending(TestCase):
         check_against_friend = FriendSerializer(friendModel).data
 
         # Check return
-        self.helper.checkFriend(response, check_against_friend)
+        self.assertFriendResponseValid(response, check_against_friend)
 
     def test_pendinging_an_existing_pending_friend_as_team_captain(self):
         """Testing pendinging an existing pending friend request as the team captain."""
@@ -635,7 +625,7 @@ class Test_Create_Existent_Friend_Pending(TestCase):
         check_against_friend = FriendSerializer(friendModel).data
 
         # Check return
-        self.helper.checkFriend(response, check_against_friend)
+        self.assertFriendResponseValid(response, check_against_friend)
 
     def test_pendinging_an_existing_pending_friend_as_teammate(self):
         """Testing pendinging an existing pending friend request as the teammate."""
@@ -657,7 +647,7 @@ class Test_Create_Existent_Friend_Pending(TestCase):
         check_against_friend = FriendSerializer(friendModel).data
 
         # Check return
-        self.helper.checkFriend(response, check_against_friend)
+        self.assertFriendResponseValid(response, check_against_friend)
 
     def test_accepting_an_existing_pending_friend_as_team_captain(self):
         """Testing accepting an existing pending friend request as the team captain."""
@@ -684,7 +674,7 @@ class Test_Create_Existent_Friend_Pending(TestCase):
         check_against_friend = FriendSerializer(friendModel).data
 
         # Check return
-        self.helper.checkFriend(response, check_against_friend)
+        self.assertFriendResponseValid(response, check_against_friend)
 
     def test_accepting_an_existing_pending_friend_as_teammate(self):
         """Testing accepting an existing pending friend request as the teammate."""
@@ -711,11 +701,10 @@ class Test_Create_Existent_Friend_Pending(TestCase):
         check_against_friend = FriendSerializer(friendModel).data
 
         # Check return
-        self.helper.checkFriend(response, check_against_friend)
+        self.assertFriendResponseValid(response, check_against_friend)
 
 
-class Test_Create_Existent_Friend_Accepted(TestCase):
-    helper = Friend_Testing_Helpers()
+class Test_Create_Existent_Friend_Accepted(FriendTesting):
 
     def test_blocking_an_existing_accepted_friend_as_team_captain(self):
         """Testing blocking an existing accepted friend request as the team captain."""
@@ -742,7 +731,7 @@ class Test_Create_Existent_Friend_Accepted(TestCase):
         check_against_friend = FriendSerializer(friendModel).data
 
         # Check return
-        self.helper.checkFriend(response, check_against_friend)
+        self.assertFriendResponseValid(response, check_against_friend)
 
     def test_blocking_an_existing_accepted_friend_as_teammate(self):
         """Testing blocking an existing accepted friend request as the teammate."""
@@ -769,7 +758,7 @@ class Test_Create_Existent_Friend_Accepted(TestCase):
         check_against_friend = FriendSerializer(friendModel).data
 
         # Check return
-        self.helper.checkFriend(response, check_against_friend)
+        self.assertFriendResponseValid(response, check_against_friend)
 
     def test_nothinging_an_existing_accepted_friend_as_team_captain(self):
         """Testing nothinging an existing accepted friend request as the team captain."""
@@ -796,7 +785,7 @@ class Test_Create_Existent_Friend_Accepted(TestCase):
         check_against_friend = FriendSerializer(friendModel).data
 
         # Check return
-        self.helper.checkFriend(response, check_against_friend)
+        self.assertFriendResponseValid(response, check_against_friend)
 
     def test_nothinging_an_existing_accepted_friend_as_teammate(self):
         """Testing nothinging an existing accepted friend request as the teammate."""
@@ -823,7 +812,7 @@ class Test_Create_Existent_Friend_Accepted(TestCase):
         check_against_friend = FriendSerializer(friendModel).data
 
         # Check return
-        self.helper.checkFriend(response, check_against_friend)
+        self.assertFriendResponseValid(response, check_against_friend)
 
     def test_pendinging_an_existing_accepted_friend_as_team_captain(self):
         """Testing pendinging an existing accepted friend request as the team captain."""
@@ -837,13 +826,14 @@ class Test_Create_Existent_Friend_Accepted(TestCase):
 
         # Make sure things went wrong first
         self.assertEqual(response.status_code, 400)
-        responseData = json.loads(response.content)
+        responseData = self.loadJSONSafely(response)
 
         # Make sure error exists
         self.assertTrue('non_field_errors' in responseData)
 
         # Make sure it's the correct error
-        self.assertEqual(responseData['non_field_errors'], ['Cannot go from accepted frieend request to pending.'])
+        self.assertEqual(responseData['non_field_errors'],
+                         ['Cannot go from accepted frieend request to pending.'])
 
     def test_pendinging_an_existing_accepted_friend_as_teammate(self):
         """Testing pendinging an existing accepted friend request as the teammate."""
@@ -857,13 +847,14 @@ class Test_Create_Existent_Friend_Accepted(TestCase):
 
         # Make sure things went wrong first
         self.assertEqual(response.status_code, 400)
-        responseData = json.loads(response.content)
+        responseData = self.loadJSONSafely(response)
 
         # Make sure error exists
         self.assertTrue('non_field_errors' in responseData)
 
         # Make sure it's the correct error
-        self.assertEqual(responseData['non_field_errors'], ['Cannot go from accepted frieend request to pending.'])
+        self.assertEqual(responseData['non_field_errors'],
+                         ['Cannot go from accepted frieend request to pending.'])
 
     def test_accepting_an_existing_accepted_friend_as_team_captain(self):
         """Testing accepting an existing accepted friend request as the team captain."""
@@ -885,7 +876,7 @@ class Test_Create_Existent_Friend_Accepted(TestCase):
         check_against_friend = FriendSerializer(friendModel).data
 
         # Check return
-        self.helper.checkFriend(response, check_against_friend)
+        self.assertFriendResponseValid(response, check_against_friend)
 
     def test_accepting_an_existing_accepted_friend_as_teammate(self):
         """Testing accepting an existing accepted friend request as the teammate."""
@@ -907,5 +898,4 @@ class Test_Create_Existent_Friend_Accepted(TestCase):
         check_against_friend = FriendSerializer(friendModel).data
 
         # Check return
-        self.helper.checkFriend(response, check_against_friend)
-
+        self.assertFriendResponseValid(response, check_against_friend)

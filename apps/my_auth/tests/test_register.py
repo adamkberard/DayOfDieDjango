@@ -1,17 +1,15 @@
 import json
 
-from django.test import TestCase
 from django.urls import reverse
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
 from ..models import CustomUser
-from .checkers import Auth_Testing_Helpers
+from .checkers import AuthTesting
 from .factories import DEFAULT_PASSWORD, CustomUserFactory
 
 
-class Test_Register_View(TestCase):
-    helper = Auth_Testing_Helpers()
+class Test_Register_View(AuthTesting):
 
     def test_correct_register(self):
         """Testing a legitimate registration."""
@@ -40,7 +38,7 @@ class Test_Register_View(TestCase):
         }
 
         # Check return
-        self.helper.checkLoginReturn(response, check_against_dict)
+        self.assertLoginResponseSuccess(response, check_against_dict)
 
     def test_correct_register_one_other_user(self):
         """Testing a legitimate registration with one other user."""
@@ -71,7 +69,7 @@ class Test_Register_View(TestCase):
         }
 
         # Check return
-        self.helper.checkLoginReturn(response, check_against_dict)
+        self.assertLoginResponseSuccess(response, check_against_dict)
 
     def test_correct_register_four_other_users(self):
         """Testing a legitimate registration with four other users."""
@@ -111,7 +109,7 @@ class Test_Register_View(TestCase):
         }
 
         # Check return
-        self.helper.checkLoginReturn(response, check_against_dict)
+        self.assertLoginResponseSuccess(response, check_against_dict)
 
     def test_register_bad_email(self):
         """Testing a bad register with bad email param."""

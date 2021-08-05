@@ -78,85 +78,86 @@ class FriendCreateSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError('This action is not allowed when blocked.')
         elif friendship.status == Friend.STATUS_ACCEPTED:
             if data['status'] == Friend.STATUS_PENDING:
-                raise serializers.ValidationError('Cannot go from accepted frieend request to pending.')
+                estr = 'Cannot go from accepted frieend request to pending.'
+                raise serializers.ValidationError(estr)
         return data
 
     def create(self, validated_data):
         # First I will check if a friend request already exists
         team_captain = validated_data.pop('team_captain')
         teammate = validated_data.pop('teammate')
+        status = validated_data.pop('status')
 
         created, friend = Friend.objects.get_or_create_friend(team_captain, teammate)
 
         if created:
-            if validated_data['status'] == Friend.STATUS_BLOCKED:
+            if status == Friend.STATUS_BLOCKED:
                 friend.status = Friend.STATUS_BLOCKED
-            elif validated_data['status'] == Friend.STATUS_NOTHING:
+            elif status == Friend.STATUS_NOTHING:
                 friend.status = Friend.STATUS_NOTHING
-            elif validated_data['status'] == Friend.STATUS_PENDING:
+            elif status == Friend.STATUS_PENDING:
                 friend.status = Friend.STATUS_PENDING
-            elif validated_data['status'] == Friend.STATUS_ACCEPTED:
+            elif status == Friend.STATUS_ACCEPTED:
                 friend.status = Friend.STATUS_PENDING
         else:
             # This is when the team_captain is the one sending the request
             if friend.team_captain == team_captain:
                 if friend.status == Friend.STATUS_BLOCKED:
-                    if validated_data['status'] == Friend.STATUS_NOTHING:
+                    if status == Friend.STATUS_NOTHING:
                         friend.status = Friend.STATUS_NOTHING
                 elif friend.status == Friend.STATUS_NOTHING:
-                    if validated_data['status'] == Friend.STATUS_BLOCKED:
+                    if status == Friend.STATUS_BLOCKED:
                         friend.status = Friend.STATUS_BLOCKED
-                    elif validated_data['status'] in [Friend.STATUS_PENDING, Friend.STATUS_ACCEPTED]:
+                    elif status in [Friend.STATUS_PENDING, Friend.STATUS_ACCEPTED]:
                         friend.status = Friend.STATUS_PENDING
                 elif friend.status == Friend.STATUS_PENDING:
-                    if validated_data['status'] == Friend.STATUS_BLOCKED:
+                    if status == Friend.STATUS_BLOCKED:
                         friend.status = Friend.STATUS_BLOCKED
-                    elif validated_data['status'] == Friend.STATUS_NOTHING:
+                    elif status == Friend.STATUS_NOTHING:
                         friend.status = Friend.STATUS_NOTHING
                 elif friend.status == Friend.STATUS_ACCEPTED:
-                    if validated_data['status'] == Friend.STATUS_BLOCKED:
+                    if status == Friend.STATUS_BLOCKED:
                         friend.status = Friend.STATUS_BLOCKED
-                    elif validated_data['status'] == Friend.STATUS_NOTHING:
+                    elif status == Friend.STATUS_NOTHING:
                         friend.status = Friend.STATUS_NOTHING
             # This is when the teammate is the one sending the request
             else:
                 if friend.status == Friend.STATUS_NOTHING:
-                    if validated_data['status'] == Friend.STATUS_BLOCKED:
-                        # Since the requester is always the team_captain, this reverses them since we know the
-                        # requester needs to become the team captain
+                    if status == Friend.STATUS_BLOCKED:
+                        # Since the requester is always the team_captain, this reverses them
+                        # since we know the requester needs to become the team captain
                         friend.team_captain = team_captain
                         friend.teammate = teammate
                         friend.status = Friend.STATUS_BLOCKED
-                    elif validated_data['status'] in [Friend.STATUS_PENDING, Friend.STATUS_ACCEPTED]:
-                        # Since the requester is always the team_captain, this reverses them since we know the
-                        # requester needs to become the team captain
+                    elif status in [Friend.STATUS_PENDING, Friend.STATUS_ACCEPTED]:
+                        # Since the requester is always the team_captain, this reverses them
+                        # since we know the requester needs to become the team captain
                         friend.team_captain = team_captain
                         friend.teammate = teammate
                         friend.status = Friend.STATUS_PENDING
                 elif friend.status == Friend.STATUS_PENDING:
-                    if validated_data['status'] == Friend.STATUS_BLOCKED:
-                        # Since the requester is always the team_captain, this reverses them since we know the
-                        # requester needs to become the team captain
+                    if status == Friend.STATUS_BLOCKED:
+                        # Since the requester is always the team_captain, this reverses them
+                        # since we know the requester needs to become the team captain
                         friend.team_captain = team_captain
                         friend.teammate = teammate
                         friend.status = Friend.STATUS_BLOCKED
-                    elif validated_data['status'] == Friend.STATUS_NOTHING:
+                    elif status == Friend.STATUS_NOTHING:
                         friend.status = Friend.STATUS_NOTHING
-                    elif validated_data['status'] == Friend.STATUS_ACCEPTED:
+                    elif status == Friend.STATUS_ACCEPTED:
                         friend.status = Friend.STATUS_ACCEPTED
                 elif friend.status == Friend.STATUS_ACCEPTED:
-                    if validated_data['status'] == Friend.STATUS_BLOCKED:
-                        # Since the requester is always the team_captain, this reverses them since we know the
-                        # requester needs to become the team captain
+                    if status == Friend.STATUS_BLOCKED:
+                        # Since the requester is always the team_captain, this reverses them
+                        # since we know the requester needs to become the team captain
                         friend.team_captain = team_captain
                         friend.teammate = teammate
                         friend.status = Friend.STATUS_BLOCKED
-                    elif validated_data['status'] == Friend.STATUS_NOTHING:
+                    elif status == Friend.STATUS_NOTHING:
                         friend.status = Friend.STATUS_NOTHING
 
         friend.save()
         return friend
-
 
     def to_representation(self, instance):
         return FriendSerializer(instance).data

@@ -1,46 +1,28 @@
-import json
+from apps.core.checker import BaseChecker
+from apps.my_auth.tests.checkers import AuthTesting
 
-from django.test import TestCase
 
+class FriendTesting(BaseChecker):
 
-class Friend_Testing_Helpers(TestCase):
-    def checkFriendMatch(self, data, check_against_data):
+    def assertFriendEqual(self, data1, data2):
+        userTester = AuthTesting()
         fields = [
             'uuid', 'status', 'team_name', 'wins', 'losses', 'league'
         ]
-        self.assertEqual(len(data), len(check_against_data))
+        self.assertDictEqual(data1, data2, fields)
 
-        for field in fields:
-            self.assertTrue(field in data)
-            self.assertEqual(data.get(field), check_against_data.get(field))
+        # Now we check the two users
+        userTester.assertBasicUserEqual(data1.get('team_captain'), data2.get('team_captain'))
+        userTester.assertBasicUserEqual(data1.get('teammate'), data2.get('teammate'))
 
-            # Check the two users seperately
-            self.assertTrue('team_captain' in data)
-            self.assertTrue('teammate' in data)
+    def assertFriendsEqual(self, data1, data2):
+        self.assertEqual(len(data1), len(data2))
 
-            team_captain = data.get('team_captain')
-            teammate = data.get('teammate')
+        for i in range(len(data1)):
+            self.assertFriendEqual(data1[i], data2[i])
 
-            self.assertEqual(team_captain['username'],
-                             check_against_data.get('team_captain')['username'])
-            self.assertEqual(team_captain['uuid'],
-                             check_against_data.get('team_captain')['uuid'])
-            self.assertEqual(teammate['username'],
-                             check_against_data.get('teammate')['username'])
-            self.assertEqual(teammate['uuid'],
-                             check_against_data.get('teammate')['uuid'])
+    def assertFriendResponseValid(self, response, check_against_data):
+        self.assertResponse201(response)
+        responseData = self.loadJSONSafely(response)
 
-    def checkFriend(self, response, check_against_data):
-        self.assertEqual(response.status_code, 201)
-        responseData = json.loads(response.content)
-
-        self.checkFriendMatch(responseData, check_against_data)
-
-    def checkFriends(self, response, check_against_data):
-        self.assertEqual(response.status_code, 201)
-        responseData = json.loads(response.content)
-
-        self.assertEqual(len(responseData), len(check_against_data))
-
-        for i in range(len(responseData)):
-            self.checkFriendMatch(responseData[i], check_against_data[i])
+        self.assertFriendEqual(responseData, check_against_data)

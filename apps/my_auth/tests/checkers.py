@@ -1,58 +1,19 @@
-import json
-
-from django.test import TestCase
+from apps.core.checker import BaseChecker
 
 
-class Auth_Testing_Helpers(TestCase):
-    def checkUser(self, data, check_against_data):
+class AuthTesting(BaseChecker):
+
+    def assertBasicUserEqual(self, data1, data2):
+        fields = ['username', 'uuid']
+        self.assertDictEqual(data1, data2, fields)
+
+    def assertFullUserEqual(self, data1, data2):
         fields = ['email', 'username', 'uuid', 'token']
+        self.assertDictEqual(data1, data2, fields)
 
-        for field in fields:
-            self.assertTrue(field in data)
-            self.assertEqual(data.get(field), check_against_data.get(field))
-
-    def checkGames(self, data, check_against_data):
-        fields = [
-            'points', 'team_one', 'team_two', 'time_started', 'time_ended', 'uuid', 'type',
-            'team_one_score', 'team_two_score', 'confirmed'
-        ]
-
+    def assertUsernameListsEqual(self, data, check_against_data):
         self.assertEqual(len(data), len(check_against_data))
-        for i in range(len(data)):
-            for field in fields:
-                self.assertTrue(field in data[i])
-                self.assertEqual(data[i].get(field), check_against_data[i].get(field))
-
-    def checkFriends(self, data, check_against_data):
-        fields = [
-            'uuid', 'status', 'team_name', 'wins', 'losses', 'league'
-        ]
-
-        self.assertEqual(len(data), len(check_against_data))
-        for i in range(len(data)):
-            for field in fields:
-                self.assertTrue(field in data[i])
-                self.assertEqual(data[i].get(field), check_against_data[i].get(field))
-
-                # Check the two users seperately
-                self.assertTrue('team_captain' in data[i])
-                self.assertTrue('teammate' in data[i])
-
-                team_captain = data[i].get('team_captain')
-                teammate = data[i].get('teammate')
-
-                self.assertEqual(team_captain['username'],
-                                 check_against_data[i].get('team_captain')['username'])
-                self.assertEqual(team_captain['uuid'],
-                                 check_against_data[i].get('team_captain')['uuid'])
-                self.assertEqual(teammate['username'],
-                                 check_against_data[i].get('teammate')['username'])
-                self.assertEqual(teammate['uuid'],
-                                 check_against_data[i].get('teammate')['uuid'])
-
-    def checkAllUsernames(self, data, check_against_data):
-        self.assertEqual(len(data), len(check_against_data))
-        # Need to make sure they're the same someday
+        # Need to make sure they're the same order someday
 
         for username in check_against_data:
             try:
@@ -60,20 +21,25 @@ class Auth_Testing_Helpers(TestCase):
             except ValueError:
                 self.fail('Username list didnt match.')
 
-    def checkLoginReturn(self, response, check_against_data):
-        self.assertEqual(response.status_code, 201)
-        responseData = json.loads(response.content)
-        self.checkLoginFields(responseData)
-        self.checkLoginData(responseData, check_against_data)
+    def assertLoginResponseSuccess(self, response, check_against_data):
+        self.assertResponse201(response)
+        responseData = self.loadJSONSafely(response)
+        self.assertLoginDictEqual(responseData, check_against_data)
 
-    def checkLoginFields(self, data):
-        self.assertTrue('user' in data)
-        self.assertTrue('games' in data)
-        self.assertTrue('friends' in data)
-        self.assertTrue('all_usernames' in data)
+    def assertLoginDictEqual(self, data, check_against_data):
+        # I do some stuff early
+        from apps.friends.tests.checkers import FriendTesting
+        from apps.games.tests.checkers import GameTesting
+        gameTester = GameTesting()
+        friendTester = FriendTesting()
 
-    def checkLoginData(self, data, check_against_data):
-        self.checkUser(data['user'], check_against_data['user'])
-        self.checkGames(data['games'], check_against_data['games'])
-        self.checkFriends(data['friends'], check_against_data['friends'])
-        self.checkAllUsernames(data['all_usernames'], check_against_data['all_usernames'])
+        self.assertFullUserEqual(data.get('user'), check_against_data.get('user'))
+
+        # Now check the games
+        gameTester.assertGamesEqual(data.get('games'), check_against_data.get('games'))
+
+        # Now check the friends
+        friendTester.assertFriendsEqual(data.get('friends'), check_against_data.get('friends'))
+
+        # Now make sure all the usernames are here
+        self.assertUsernameListsEqual(data['all_usernames'], check_against_data['all_usernames'])
