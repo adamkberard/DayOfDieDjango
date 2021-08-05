@@ -1,5 +1,6 @@
 from apps.core.checker import BaseChecker
 
+
 class GameTesting(BaseChecker):
     def assertPointEqual(self, data1, data2):
         fields = [
@@ -17,7 +18,7 @@ class GameTesting(BaseChecker):
             'team_one', 'team_two', 'time_started', 'time_ended', 'uuid',
             'team_one_score', 'team_two_score', 'confirmed'
         ]
-        
+
         self.assertEqual(len(data1), len(data2))
 
         for field in fields:
@@ -31,7 +32,7 @@ class GameTesting(BaseChecker):
 
         # Now we check the points
         self.assertEqual(len(points1), len(points2))
-        
+
         # If they have the same number of points but that's zero just return
         if len(data1.get('points')) == 0:
             return
@@ -40,10 +41,10 @@ class GameTesting(BaseChecker):
         # exact same amount of each point. There's gotta be a better way to do it, but that's
         # a later thing.
         # Need to implement this later
-        
-        #for point1 in points1:
-        #    self.assertTrue(point1 in points2)
-        #    points2.remove(point1)
+
+        # for point1 in points1:
+        #     self.assertTrue(point1 in points2)
+        #     points2.remove(point1)
 
     def assertGamesEqual(self, data1, data2):
         self.assertEqual(len(data1), len(data2))

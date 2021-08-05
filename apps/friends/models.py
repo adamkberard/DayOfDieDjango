@@ -32,7 +32,12 @@ class Friend(TimeStampedModel):
         (STATUS_ACCEPTED, 'Accepted'),
         (STATUS_NOTHING, 'Nothing'))
 
-    uuid = models.UUIDField(db_index=True, default=uuid_lib.uuid4, editable=False)
+    uuid = models.UUIDField(
+        db_index=True,
+        default=uuid_lib.uuid4,
+        editable=False,
+        primary_key=True
+    )
 
     status = models.CharField(
         max_length=2,
@@ -66,5 +71,5 @@ class Friend(TimeStampedModel):
         return self.team_captain == user
 
     def __eq__(self, other):
-        return (self.team_captain == other.team_captain and self.teammate == other.teammate or 
+        return (self.team_captain == other.team_captain and self.teammate == other.teammate or
                 self.team_captain == other.teammate and self.teammate == other.team_captain)

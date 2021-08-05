@@ -1,7 +1,4 @@
-from apps.games.tests.factories import PointFactory
-from apps.my_auth.tests.factories import CustomUserFactory
 from rest_framework import serializers
-from datetime import datetime
 
 from apps.friends.models import Friend
 from apps.friends.serializers import FriendSerializer
@@ -10,7 +7,7 @@ from apps.my_auth.models import CustomUser
 from .models import Game, Point
 
 
-class PointWriteSerializer(serializers.Serializer):  
+class PointWriteSerializer(serializers.Serializer):
     scorer = serializers.UUIDField()
     type = serializers.ChoiceField(choices=[x[0] for x in Point.TYPE_CHOICES])
 
@@ -70,7 +67,7 @@ class GameWriteSerializer(serializers.Serializer):
 class PointSerializer(serializers.ModelSerializer):
     class Meta:
         model = Point
-        exclude = ['id', 'created', 'modified', 'game']
+        exclude = ['created', 'modified', 'game']
 
 
 class GameSerializer(serializers.ModelSerializer):
@@ -80,7 +77,7 @@ class GameSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Game
-        exclude = ['id', 'created', 'modified']
+        exclude = ['created', 'modified']
 
     def to_representation(self, instance):
         instance.points = []

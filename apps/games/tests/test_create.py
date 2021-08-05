@@ -1,15 +1,14 @@
-import json
-import pytz
-
 from datetime import datetime, timedelta
+
+import pytz
 from django.urls import reverse
 from rest_framework.test import APIClient
 
-from apps.my_auth.tests.factories import CustomUserFactory
 from apps.friends.models import Friend
+from apps.my_auth.tests.factories import CustomUserFactory
 
 from ..models import Game, Point
-from ..serializers import GameSerializer, PointSerializer
+from ..serializers import GameSerializer
 from .checkers import GameTesting
 from .factories import GameFactory
 
@@ -186,7 +185,7 @@ class Test_Game_URL_Params(GameTesting):
         url = reverse('game_request_create')
         response = client.post(url, data, format='json')
 
-        errorFields = ['time_started', 'time_ended', 'playerOne', 'playerTwo', 
+        errorFields = ['time_started', 'time_ended', 'playerOne', 'playerTwo',
                        'playerThree', 'playerFour', 'team_one_score', 'team_two_score']
 
         self.assertFieldsMissing(response, errorFields)
@@ -213,16 +212,22 @@ class Test_Create_Game(GameTesting):
         time_started_iso = time_started.isoformat()
         time_ended_iso = time_ended.isoformat()
 
-        players = [CustomUserFactory(), CustomUserFactory(), CustomUserFactory(), CustomUserFactory()]
-        data = {'time_started': time_started_iso,
-                'time_ended': time_ended_iso,
-                'playerOne': players[0].uuid,
-                'playerTwo': players[1].uuid,
-                'playerThree': players[2].uuid,
-                'playerFour': players[3].uuid,
-                'team_one_score': 11,
-                'team_two_score': 9
-               }
+        players = [
+            CustomUserFactory(),
+            CustomUserFactory(),
+            CustomUserFactory(),
+            CustomUserFactory()
+        ]
+        data = {
+            'time_started': time_started_iso,
+            'time_ended': time_ended_iso,
+            'playerOne': players[0].uuid,
+            'playerTwo': players[1].uuid,
+            'playerThree': players[2].uuid,
+            'playerFour': players[3].uuid,
+            'team_one_score': 11,
+            'team_two_score': 9
+        }
 
         client = APIClient()
         client.force_authenticate(user=players[0])
@@ -245,7 +250,7 @@ class Test_Create_Game(GameTesting):
 
         # Make the dict to compare return to
         check_against_game = GameSerializer(gameModel).data
-        
+
         # I have to manually add an empty points field since we have no full points in this
         check_against_game['points'] = []
 
@@ -254,7 +259,7 @@ class Test_Create_Game(GameTesting):
 
     def test_success_different_player_order_no_points(self):
         """Testing creating a game with the players in the opposite order and no points.
-            I do this because of how teams are searched for and created. Not sure if it 
+            I do this because of how teams are searched for and created. Not sure if it
             actually matters now tbh."""
         time_started = datetime.now(pytz.timezone('America/Los_Angeles'))
         time_ended = time_started + timedelta(minutes=25)
@@ -262,16 +267,22 @@ class Test_Create_Game(GameTesting):
         time_started_iso = time_started.isoformat()
         time_ended_iso = time_ended.isoformat()
 
-        players = [CustomUserFactory(), CustomUserFactory(), CustomUserFactory(), CustomUserFactory()]
-        data = {'time_started': time_started_iso,
-                'time_ended': time_ended_iso,
-                'playerOne': players[1].uuid,
-                'playerTwo': players[0].uuid,
-                'playerThree': players[3].uuid,
-                'playerFour': players[2].uuid,
-                'team_one_score': 11,
-                'team_two_score': 9
-               }
+        players = [
+            CustomUserFactory(),
+            CustomUserFactory(),
+            CustomUserFactory(),
+            CustomUserFactory()
+        ]
+        data = {
+            'time_started': time_started_iso,
+            'time_ended': time_ended_iso,
+            'playerOne': players[1].uuid,
+            'playerTwo': players[0].uuid,
+            'playerThree': players[3].uuid,
+            'playerFour': players[2].uuid,
+            'team_one_score': 11,
+            'team_two_score': 9
+        }
 
         client = APIClient()
         client.force_authenticate(user=players[0])
@@ -294,7 +305,7 @@ class Test_Create_Game(GameTesting):
 
         # Make the dict to compare return to
         check_against_game = GameSerializer(gameModel).data
-        
+
         # I have to manually add an empty points field since we have no full points in this
         check_against_game['points'] = []
 
@@ -314,25 +325,35 @@ class Test_Create_Game(GameTesting):
         team_one_score = 11
         team_two_score = 9
 
-        players = [CustomUserFactory(), CustomUserFactory(), CustomUserFactory(), CustomUserFactory()]
+        players = [
+            CustomUserFactory(),
+            CustomUserFactory(),
+            CustomUserFactory(),
+            CustomUserFactory()
+            ]
         points = []
         for i in range(0, team_one_score):
-            points.append({'type': 'sg',
-                            'scorer': players[0].uuid,})
+            points.append({
+                'type': 'sg',
+                'scorer': players[0].uuid
+            })
         for i in range(0, team_two_score):
-            points.append({'type': 'sg',
-                            'scorer': players[3].uuid,})
+            points.append({
+                'type': 'sg',
+                'scorer': players[3].uuid
+            })
 
-        data = {'time_started': time_started_iso,
-                'time_ended': time_ended_iso,
-                'playerOne': players[1].uuid,
-                'playerTwo': players[0].uuid,
-                'playerThree': players[3].uuid,
-                'playerFour': players[2].uuid,
-                'team_one_score': team_one_score,
-                'team_two_score': team_two_score,
-                'points': points
-               }
+        data = {
+            'time_started': time_started_iso,
+            'time_ended': time_ended_iso,
+            'playerOne': players[1].uuid,
+            'playerTwo': players[0].uuid,
+            'playerThree': players[3].uuid,
+            'playerFour': players[2].uuid,
+            'team_one_score': team_one_score,
+            'team_two_score': team_two_score,
+            'points': points
+        }
 
         client = APIClient()
         client.force_authenticate(user=players[0])
@@ -363,8 +384,8 @@ class Test_Create_Game(GameTesting):
         # Check return
         self.assertGameResponseValid(response, check_against_game)
 
-    #def test_invalid_score_no_points
-    #def test_invalid_score
-    #def test_points_do_not_match_score
-    #def test_team_one_points_do_not_match_score
-    #def test_team_two_points_do_not_match_score
+    # def test_invalid_score_no_points
+    # def test_invalid_score
+    # def test_points_do_not_match_score
+    # def test_team_one_points_do_not_match_score
+    # def test_team_two_points_do_not_match_score

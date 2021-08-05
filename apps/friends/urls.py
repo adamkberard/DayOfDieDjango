@@ -1,9 +1,13 @@
 from django.urls import path
 
-from .views import FriendListCreateAPIView
+from .views import AllUsersAPIView, FriendListCreateAPIView
 
 urlpatterns = [
-    # /flavors/api/
+    path(
+        route='all_users',
+        view=AllUsersAPIView.as_view(),
+        name='get_all_users'
+    ),
     path(
         route='',
         view=FriendListCreateAPIView.as_view(),

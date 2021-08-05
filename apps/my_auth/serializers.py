@@ -9,6 +9,14 @@ from apps.games.models import Game
 from .models import CustomUser
 
 
+class BasicCustomUserSerializer(serializers.Serializer):
+    class Meta:
+        module = CustomUser
+
+    username = serializers.CharField()
+    uuid = serializers.UUIDField()
+
+
 class MyRegisterSerializer(serializers.Serializer):
     class Meta:
         module = CustomUser
@@ -68,11 +76,8 @@ class MyLogInSerializer(serializers.Serializer):
         representation['friends'] = FriendSerializer(friends, many=True).data
 
         # All usernames in the system
-        usernames = CustomUser.objects.all().values('username')
-        formatted_usernames = []
-        for username in usernames:
-            formatted_usernames.append(username['username'])
-        representation['all_usernames'] = formatted_usernames
+        usernames = BasicCustomUserSerializer(CustomUser.objects.all(), many=True).data
+        representation['all_users'] = usernames
         return representation
 
 
@@ -93,11 +98,3 @@ class CustomUserSerializer(serializers.Serializer):
         instance.save()
 
         return instance
-
-
-class BasicCustomUserSerializer(serializers.Serializer):
-    class Meta:
-        module = CustomUser
-
-    username = serializers.CharField()
-    uuid = serializers.UUIDField()

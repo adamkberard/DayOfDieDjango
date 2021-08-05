@@ -5,6 +5,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
 from ..models import CustomUser
+from ..serializers import BasicCustomUserSerializer
 from .checkers import AuthTesting
 from .factories import DEFAULT_PASSWORD, CustomUserFactory
 
@@ -29,12 +30,12 @@ class Test_Register_View(AuthTesting):
         }
         check_against_games = []
         check_against_friends = []
-        check_against_all_usernames = [userModel.username]
+        check_against_all_usernames = [BasicCustomUserSerializer(userModel).data]
         check_against_dict = {
             'user': check_against_user,
             'games': check_against_games,
             'friends': check_against_friends,
-            'all_usernames': check_against_all_usernames
+            'all_users': check_against_all_usernames
         }
 
         # Check return
@@ -60,12 +61,15 @@ class Test_Register_View(AuthTesting):
         }
         check_against_games = []
         check_against_friends = []
-        check_against_all_usernames = [userModel.username, otherUser.username]
+        check_against_all_usernames = [
+            BasicCustomUserSerializer(userModel).data,
+            BasicCustomUserSerializer(otherUser).data,
+        ]
         check_against_dict = {
             'user': check_against_user,
             'games': check_against_games,
             'friends': check_against_friends,
-            'all_usernames': check_against_all_usernames
+            'all_users': check_against_all_usernames
         }
 
         # Check return
@@ -95,17 +99,17 @@ class Test_Register_View(AuthTesting):
         check_against_games = []
         check_against_friends = []
         check_against_all_usernames = [
-            userModel.username,
-            otherUserOne.username,
-            otherUserTwo.username,
-            otherUserThree.username,
-            otherUserFour.username
+            BasicCustomUserSerializer(userModel).data,
+            BasicCustomUserSerializer(otherUserOne).data,
+            BasicCustomUserSerializer(otherUserTwo).data,
+            BasicCustomUserSerializer(otherUserThree).data,
+            BasicCustomUserSerializer(otherUserFour).data,
         ]
         check_against_dict = {
             'user': check_against_user,
             'games': check_against_games,
             'friends': check_against_friends,
-            'all_usernames': check_against_all_usernames
+            'all_users': check_against_all_usernames
         }
 
         # Check return

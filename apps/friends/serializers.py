@@ -12,7 +12,7 @@ class FriendSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Friend
-        exclude = ['id', 'created', 'modified']
+        exclude = ['created', 'modified']
 
     def validate(self, data):
         """

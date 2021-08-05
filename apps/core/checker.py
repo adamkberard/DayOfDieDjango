@@ -34,5 +34,5 @@ class BaseChecker(TestCase):
         errorDict = {}
         for field in fields:
             errorDict[field] = ['This field is required.']
-        
+
         self.assertDictEqual(responseData, errorDict, fields)

@@ -11,7 +11,7 @@ class AuthTesting(BaseChecker):
         fields = ['email', 'username', 'uuid', 'token']
         self.assertDictEqual(data1, data2, fields)
 
-    def assertUsernameListsEqual(self, data, check_against_data):
+    def assertAllUsersEqual(self, data, check_against_data):
         self.assertEqual(len(data), len(check_against_data))
         # Need to make sure they're the same order someday
 
@@ -19,7 +19,7 @@ class AuthTesting(BaseChecker):
             try:
                 data.remove(username)
             except ValueError:
-                self.fail('Username list didnt match.')
+                self.fail('All user list didnt match.')
 
     def assertLoginResponseSuccess(self, response, check_against_data):
         self.assertResponse201(response)
@@ -42,4 +42,4 @@ class AuthTesting(BaseChecker):
         friendTester.assertFriendsEqual(data.get('friends'), check_against_data.get('friends'))
 
         # Now make sure all the usernames are here
-        self.assertUsernameListsEqual(data['all_usernames'], check_against_data['all_usernames'])
+        self.assertAllUsersEqual(data['all_users'], check_against_data['all_users'])

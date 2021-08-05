@@ -22,7 +22,12 @@ class Game(TimeStampedModel):
     time_started = models.DateTimeField()
     time_ended = models.DateTimeField()
 
-    uuid = models.UUIDField(db_index=True, default=uuid_lib.uuid4, editable=False)
+    uuid = models.UUIDField(
+        db_index=True,
+        default=uuid_lib.uuid4,
+        editable=False,
+        primary_key=True
+    )
 
     team_one = models.ForeignKey(Friend,
                                  on_delete=models.CASCADE,
@@ -51,6 +56,7 @@ class Point(TimeStampedModel):
     TYPE_SELF_SINK = 'ss'
     TYPE_FIFA = 'ff'
     TYPE_FIELD_GOAL = 'fg'
+    TYPE_FIVE = 'fv'
 
     TYPE_CHOICES = (
         (TYPE_SINGLE, 'Single Point'),
@@ -61,9 +67,15 @@ class Point(TimeStampedModel):
         (TYPE_SELF_SINK, 'Self Sink'),
         (TYPE_FIFA, 'Fifa'),
         (TYPE_FIELD_GOAL, 'Field Goal'),
+        (TYPE_FIVE, 'Five'),
     )
 
-    uuid = models.UUIDField(db_index=True, default=uuid_lib.uuid4, editable=False)
+    uuid = models.UUIDField(
+        db_index=True,
+        default=uuid_lib.uuid4,
+        editable=False,
+        primary_key=True
+    )
 
     type = models.CharField(max_length=2, choices=TYPE_CHOICES, default=TYPE_SINGLE)
 
