@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from apps.games.models import Game
 from apps.my_auth.models import CustomUser
 from apps.my_auth.serializers import BasicCustomUserSerializer
 
@@ -21,7 +22,23 @@ class FriendSerializer(serializers.ModelSerializer):
         # This is making sure the two users are different
         if data['team_captain'] == data['teammate']:
             raise serializers.ValidationError("Users must be different.")
+
         return data
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        wins = 0
+        losses = 0
+
+        for game in Game.objects.friends_games(instance):
+            if game.didWin(instance):
+                wins += 1
+            else:
+                losses += 1
+        representation['wins'] = wins
+        representation['losses'] = losses
+
+        return representation
 
 
 class FriendCreateSerializer(serializers.ModelSerializer):
@@ -48,8 +65,6 @@ class FriendCreateSerializer(serializers.ModelSerializer):
     # TODO
     # Can def replace this with a choices field... later lol
     def validate_status(self, value):
-        print("AGINA")
-        print([item[0] for item in Friend.STATUS_CHOICES])
         if value not in [item[0] for item in Friend.STATUS_CHOICES]:
             raise serializers.ValidationError('Status not valid.')
         return value

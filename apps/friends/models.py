@@ -53,15 +53,6 @@ class Friend(TimeStampedModel):
                                  related_name="teamTwo")
     team_name = models.CharField(max_length=50, blank=True, null=True)
 
-    wins = models.SmallIntegerField(default=0)
-    losses = models.SmallIntegerField(default=0)
-
-    league = models.CharField(
-        max_length=2,
-        choices=LEAGUE_CHOICES,
-        default=LEAGUE_UNRANKED
-    )
-
     objects = FriendManager()
 
     def __str__(self):

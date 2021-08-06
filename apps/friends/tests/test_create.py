@@ -21,7 +21,7 @@ class Test_Friend_URL_Params(FriendTesting):
         url = reverse('friend_request_create')
         response = client.post(url, data, format='json')
 
-        self.assertFieldsMissing(response, ['teammate'])
+        self.assertFieldsMissing(response, ['teammate', 'status'])
 
     def test_friend_request_no_teammate_but_status(self):
         """Testing a bad friend request with only the status param."""
@@ -54,7 +54,7 @@ class Test_Friend_URL_Params(FriendTesting):
         self.assertTrue('status' in responseData)
 
         # Make sure it's the correct error
-        self.assertEqual(responseData['status'], ['"invalid" is not a valid choice.'])
+        self.assertEqual(responseData['status'], ['Status not valid.'])
 
 
 class Test_Create_Nonexistent_Friend(FriendTesting):
@@ -77,12 +77,11 @@ class Test_Create_Nonexistent_Friend(FriendTesting):
         self.assertEqual(friendModel.status, Friend.STATUS_BLOCKED)
         self.assertEqual(friendModel.team_captain, requester)
         self.assertEqual(friendModel.teammate, requested)
-        self.assertEqual(friendModel.wins, 0)
-        self.assertEqual(friendModel.losses, 0)
-        self.assertEqual(friendModel.league, Friend.LEAGUE_UNRANKED)
 
         # Make the dict to compare return to
         check_against_friend = FriendSerializer(friendModel).data
+        check_against_friend['wins'] = 0
+        check_against_friend['losses'] = 0
 
         # Check return
         self.assertFriendResponseValid(response, check_against_friend)
@@ -128,12 +127,11 @@ class Test_Create_Nonexistent_Friend(FriendTesting):
         self.assertEqual(friendModel.status, Friend.STATUS_PENDING)
         self.assertEqual(friendModel.team_captain, requester)
         self.assertEqual(friendModel.teammate, requested)
-        self.assertEqual(friendModel.wins, 0)
-        self.assertEqual(friendModel.losses, 0)
-        self.assertEqual(friendModel.league, Friend.LEAGUE_UNRANKED)
 
         # Make the dict to compare return to
         check_against_friend = FriendSerializer(friendModel).data
+        check_against_friend['wins'] = 0
+        check_against_friend['losses'] = 0
 
         # Check return
         self.assertFriendResponseValid(response, check_against_friend)
@@ -156,12 +154,11 @@ class Test_Create_Nonexistent_Friend(FriendTesting):
         self.assertEqual(friendModel.status, Friend.STATUS_PENDING)
         self.assertEqual(friendModel.team_captain, requester)
         self.assertEqual(friendModel.teammate, requested)
-        self.assertEqual(friendModel.wins, 0)
-        self.assertEqual(friendModel.losses, 0)
-        self.assertEqual(friendModel.league, Friend.LEAGUE_UNRANKED)
 
         # Make the dict to compare return to
         check_against_friend = FriendSerializer(friendModel).data
+        check_against_friend['wins'] = 0
+        check_against_friend['losses'] = 0
 
         # Check return
         self.assertFriendResponseValid(response, check_against_friend)
@@ -210,12 +207,11 @@ class Test_Create_Existent_Friend_Blocked(FriendTesting):
         self.assertEqual(friendModel.status, Friend.STATUS_NOTHING)
         self.assertEqual(friendModel.team_captain, friendship.team_captain)
         self.assertEqual(friendModel.teammate, friendship.teammate)
-        self.assertEqual(friendModel.wins, 0)
-        self.assertEqual(friendModel.losses, 0)
-        self.assertEqual(friendModel.league, Friend.LEAGUE_UNRANKED)
 
         # Make the dict to compare return to
         check_against_friend = FriendSerializer(friendModel).data
+        check_against_friend['wins'] = 0
+        check_against_friend['losses'] = 0
 
         # Check return
         self.assertFriendResponseValid(response, check_against_friend)
@@ -303,12 +299,11 @@ class Test_Create_Existent_Friend_Nothing(FriendTesting):
         self.assertEqual(friendModel.status, Friend.STATUS_BLOCKED)
         self.assertEqual(friendModel.team_captain, friendship.team_captain)
         self.assertEqual(friendModel.teammate, friendship.teammate)
-        self.assertEqual(friendModel.wins, 0)
-        self.assertEqual(friendModel.losses, 0)
-        self.assertEqual(friendModel.league, Friend.LEAGUE_UNRANKED)
 
         # Make the dict to compare return to
         check_against_friend = FriendSerializer(friendModel).data
+        check_against_friend['wins'] = 0
+        check_against_friend['losses'] = 0
 
         # Check return
         self.assertFriendResponseValid(response, check_against_friend)
@@ -330,12 +325,11 @@ class Test_Create_Existent_Friend_Nothing(FriendTesting):
         self.assertEqual(friendModel.status, Friend.STATUS_BLOCKED)
         self.assertEqual(friendModel.team_captain, friendship.teammate)
         self.assertEqual(friendModel.teammate, friendship.team_captain)
-        self.assertEqual(friendModel.wins, 0)
-        self.assertEqual(friendModel.losses, 0)
-        self.assertEqual(friendModel.league, Friend.LEAGUE_UNRANKED)
 
         # Make the dict to compare return to
         check_against_friend = FriendSerializer(friendModel).data
+        check_against_friend['wins'] = 0
+        check_against_friend['losses'] = 0
 
         # Check return
         self.assertFriendResponseValid(response, check_against_friend)
@@ -401,12 +395,11 @@ class Test_Create_Existent_Friend_Nothing(FriendTesting):
         self.assertEqual(friendModel.status, Friend.STATUS_PENDING)
         self.assertEqual(friendModel.team_captain, friendship.team_captain)
         self.assertEqual(friendModel.teammate, friendship.teammate)
-        self.assertEqual(friendModel.wins, 0)
-        self.assertEqual(friendModel.losses, 0)
-        self.assertEqual(friendModel.league, Friend.LEAGUE_UNRANKED)
 
         # Make the dict to compare return to
         check_against_friend = FriendSerializer(friendModel).data
+        check_against_friend['wins'] = 0
+        check_against_friend['losses'] = 0
 
         # Check return
         self.assertFriendResponseValid(response, check_against_friend)
@@ -428,12 +421,11 @@ class Test_Create_Existent_Friend_Nothing(FriendTesting):
         self.assertEqual(friendModel.status, Friend.STATUS_PENDING)
         self.assertEqual(friendModel.team_captain, friendship.teammate)
         self.assertEqual(friendModel.teammate, friendship.team_captain)
-        self.assertEqual(friendModel.wins, 0)
-        self.assertEqual(friendModel.losses, 0)
-        self.assertEqual(friendModel.league, Friend.LEAGUE_UNRANKED)
 
         # Make the dict to compare return to
         check_against_friend = FriendSerializer(friendModel).data
+        check_against_friend['wins'] = 0
+        check_against_friend['losses'] = 0
 
         # Check return
         self.assertFriendResponseValid(response, check_against_friend)
@@ -455,12 +447,11 @@ class Test_Create_Existent_Friend_Nothing(FriendTesting):
         self.assertEqual(friendModel.status, Friend.STATUS_PENDING)
         self.assertEqual(friendModel.team_captain, friendship.team_captain)
         self.assertEqual(friendModel.teammate, friendship.teammate)
-        self.assertEqual(friendModel.wins, 0)
-        self.assertEqual(friendModel.losses, 0)
-        self.assertEqual(friendModel.league, Friend.LEAGUE_UNRANKED)
 
         # Make the dict to compare return to
         check_against_friend = FriendSerializer(friendModel).data
+        check_against_friend['wins'] = 0
+        check_against_friend['losses'] = 0
 
         # Check return
         self.assertFriendResponseValid(response, check_against_friend)
@@ -482,12 +473,11 @@ class Test_Create_Existent_Friend_Nothing(FriendTesting):
         self.assertEqual(friendModel.status, Friend.STATUS_PENDING)
         self.assertEqual(friendModel.team_captain, friendship.teammate)
         self.assertEqual(friendModel.teammate, friendship.team_captain)
-        self.assertEqual(friendModel.wins, 0)
-        self.assertEqual(friendModel.losses, 0)
-        self.assertEqual(friendModel.league, Friend.LEAGUE_UNRANKED)
 
         # Make the dict to compare return to
         check_against_friend = FriendSerializer(friendModel).data
+        check_against_friend['wins'] = 0
+        check_against_friend['losses'] = 0
 
         # Check return
         self.assertFriendResponseValid(response, check_against_friend)
@@ -512,12 +502,11 @@ class Test_Create_Existent_Friend_Pending(FriendTesting):
         self.assertEqual(friendModel.status, Friend.STATUS_BLOCKED)
         self.assertEqual(friendModel.team_captain, friendship.team_captain)
         self.assertEqual(friendModel.teammate, friendship.teammate)
-        self.assertEqual(friendModel.wins, 0)
-        self.assertEqual(friendModel.losses, 0)
-        self.assertEqual(friendModel.league, Friend.LEAGUE_UNRANKED)
 
         # Make the dict to compare return to
         check_against_friend = FriendSerializer(friendModel).data
+        check_against_friend['wins'] = 0
+        check_against_friend['losses'] = 0
 
         # Check return
         self.assertFriendResponseValid(response, check_against_friend)
@@ -539,12 +528,11 @@ class Test_Create_Existent_Friend_Pending(FriendTesting):
         self.assertEqual(friendModel.status, Friend.STATUS_BLOCKED)
         self.assertEqual(friendModel.team_captain, friendship.teammate)
         self.assertEqual(friendModel.teammate, friendship.team_captain)
-        self.assertEqual(friendModel.wins, 0)
-        self.assertEqual(friendModel.losses, 0)
-        self.assertEqual(friendModel.league, Friend.LEAGUE_UNRANKED)
 
         # Make the dict to compare return to
         check_against_friend = FriendSerializer(friendModel).data
+        check_against_friend['wins'] = 0
+        check_against_friend['losses'] = 0
 
         # Check return
         self.assertFriendResponseValid(response, check_against_friend)
@@ -566,12 +554,11 @@ class Test_Create_Existent_Friend_Pending(FriendTesting):
         self.assertEqual(friendModel.status, Friend.STATUS_NOTHING)
         self.assertEqual(friendModel.team_captain, friendship.team_captain)
         self.assertEqual(friendModel.teammate, friendship.teammate)
-        self.assertEqual(friendModel.wins, 0)
-        self.assertEqual(friendModel.losses, 0)
-        self.assertEqual(friendModel.league, Friend.LEAGUE_UNRANKED)
 
         # Make the dict to compare return to
         check_against_friend = FriendSerializer(friendModel).data
+        check_against_friend['wins'] = 0
+        check_against_friend['losses'] = 0
 
         # Check return
         self.assertFriendResponseValid(response, check_against_friend)
@@ -593,12 +580,11 @@ class Test_Create_Existent_Friend_Pending(FriendTesting):
         self.assertEqual(friendModel.status, Friend.STATUS_NOTHING)
         self.assertEqual(friendModel.team_captain, friendship.team_captain)
         self.assertEqual(friendModel.teammate, friendship.teammate)
-        self.assertEqual(friendModel.wins, 0)
-        self.assertEqual(friendModel.losses, 0)
-        self.assertEqual(friendModel.league, Friend.LEAGUE_UNRANKED)
 
         # Make the dict to compare return to
         check_against_friend = FriendSerializer(friendModel).data
+        check_against_friend['wins'] = 0
+        check_against_friend['losses'] = 0
 
         # Check return
         self.assertFriendResponseValid(response, check_against_friend)
@@ -664,12 +650,11 @@ class Test_Create_Existent_Friend_Pending(FriendTesting):
         self.assertEqual(friendModel.status, Friend.STATUS_PENDING)
         self.assertEqual(friendModel.team_captain, friendship.team_captain)
         self.assertEqual(friendModel.teammate, friendship.teammate)
-        self.assertEqual(friendModel.wins, 0)
-        self.assertEqual(friendModel.losses, 0)
-        self.assertEqual(friendModel.league, Friend.LEAGUE_UNRANKED)
 
         # Make the dict to compare return to
         check_against_friend = FriendSerializer(friendModel).data
+        check_against_friend['wins'] = 0
+        check_against_friend['losses'] = 0
 
         # Check return
         self.assertFriendResponseValid(response, check_against_friend)
@@ -691,12 +676,11 @@ class Test_Create_Existent_Friend_Pending(FriendTesting):
         self.assertEqual(friendModel.status, Friend.STATUS_ACCEPTED)
         self.assertEqual(friendModel.team_captain, friendship.team_captain)
         self.assertEqual(friendModel.teammate, friendship.teammate)
-        self.assertEqual(friendModel.wins, 0)
-        self.assertEqual(friendModel.losses, 0)
-        self.assertEqual(friendModel.league, Friend.LEAGUE_UNRANKED)
 
         # Make the dict to compare return to
         check_against_friend = FriendSerializer(friendModel).data
+        check_against_friend['wins'] = 0
+        check_against_friend['losses'] = 0
 
         # Check return
         self.assertFriendResponseValid(response, check_against_friend)
@@ -721,12 +705,11 @@ class Test_Create_Existent_Friend_Accepted(FriendTesting):
         self.assertEqual(friendModel.status, Friend.STATUS_BLOCKED)
         self.assertEqual(friendModel.team_captain, friendship.team_captain)
         self.assertEqual(friendModel.teammate, friendship.teammate)
-        self.assertEqual(friendModel.wins, 0)
-        self.assertEqual(friendModel.losses, 0)
-        self.assertEqual(friendModel.league, Friend.LEAGUE_UNRANKED)
 
         # Make the dict to compare return to
         check_against_friend = FriendSerializer(friendModel).data
+        check_against_friend['wins'] = 0
+        check_against_friend['losses'] = 0
 
         # Check return
         self.assertFriendResponseValid(response, check_against_friend)
@@ -748,12 +731,11 @@ class Test_Create_Existent_Friend_Accepted(FriendTesting):
         self.assertEqual(friendModel.status, Friend.STATUS_BLOCKED)
         self.assertEqual(friendModel.team_captain, friendship.teammate)
         self.assertEqual(friendModel.teammate, friendship.team_captain)
-        self.assertEqual(friendModel.wins, 0)
-        self.assertEqual(friendModel.losses, 0)
-        self.assertEqual(friendModel.league, Friend.LEAGUE_UNRANKED)
 
         # Make the dict to compare return to
         check_against_friend = FriendSerializer(friendModel).data
+        check_against_friend['wins'] = 0
+        check_against_friend['losses'] = 0
 
         # Check return
         self.assertFriendResponseValid(response, check_against_friend)
@@ -775,12 +757,11 @@ class Test_Create_Existent_Friend_Accepted(FriendTesting):
         self.assertEqual(friendModel.status, Friend.STATUS_NOTHING)
         self.assertEqual(friendModel.team_captain, friendship.team_captain)
         self.assertEqual(friendModel.teammate, friendship.teammate)
-        self.assertEqual(friendModel.wins, 0)
-        self.assertEqual(friendModel.losses, 0)
-        self.assertEqual(friendModel.league, Friend.LEAGUE_UNRANKED)
 
         # Make the dict to compare return to
         check_against_friend = FriendSerializer(friendModel).data
+        check_against_friend['wins'] = 0
+        check_against_friend['losses'] = 0
 
         # Check return
         self.assertFriendResponseValid(response, check_against_friend)
@@ -802,12 +783,11 @@ class Test_Create_Existent_Friend_Accepted(FriendTesting):
         self.assertEqual(friendModel.status, Friend.STATUS_NOTHING)
         self.assertEqual(friendModel.team_captain, friendship.team_captain)
         self.assertEqual(friendModel.teammate, friendship.teammate)
-        self.assertEqual(friendModel.wins, 0)
-        self.assertEqual(friendModel.losses, 0)
-        self.assertEqual(friendModel.league, Friend.LEAGUE_UNRANKED)
 
         # Make the dict to compare return to
         check_against_friend = FriendSerializer(friendModel).data
+        check_against_friend['wins'] = 0
+        check_against_friend['losses'] = 0
 
         # Check return
         self.assertFriendResponseValid(response, check_against_friend)

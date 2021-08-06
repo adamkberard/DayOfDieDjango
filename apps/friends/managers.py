@@ -39,10 +39,8 @@ class FriendManager(BaseUserManager):
 
         friend = super().create(status='nt',
                                 team_captain=user1,
-                                teammate=user2,
-                                wins=0,
-                                losses=0,
-                                league='ur')
+                                teammate=user2
+                                )
 
         # Returning whether or not the friendship was created, and the friendship
         return True, friend
