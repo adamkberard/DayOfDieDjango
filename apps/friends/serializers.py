@@ -27,6 +27,7 @@ class FriendSerializer(serializers.ModelSerializer):
 class FriendCreateSerializer(serializers.ModelSerializer):
     team_captain = serializers.CharField()
     teammate = serializers.CharField()
+    status = serializers.CharField()
 
     class Meta:
         model = Friend
@@ -44,7 +45,11 @@ class FriendCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Teammate not a user.')
         return teammate
 
+    # TODO
+    # Can def replace this with a choices field... later lol
     def validate_status(self, value):
+        print("AGINA")
+        print([item[0] for item in Friend.STATUS_CHOICES])
         if value not in [item[0] for item in Friend.STATUS_CHOICES]:
             raise serializers.ValidationError('Status not valid.')
         return value
