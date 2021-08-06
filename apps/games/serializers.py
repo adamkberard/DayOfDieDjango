@@ -3,6 +3,7 @@ from rest_framework import serializers
 from apps.friends.models import Friend
 from apps.friends.serializers import FriendSerializer
 from apps.my_auth.models import CustomUser
+from apps.my_auth.serializers import BasicCustomUserSerializer
 
 from .models import Game, Point
 
@@ -42,13 +43,6 @@ class GameWriteSerializer(serializers.Serializer):
         _, team_one = Friend.objects.get_or_create_friend(playerOne, playerTwo)
         _, team_two = Friend.objects.get_or_create_friend(playerThree, playerFour)
 
-        # Change the teams wins and losses
-        if validated_data['team_one_score'] > validated_data['team_two_score']:
-            team_one.wins += 1
-            team_two.losses += 1
-        else:
-            team_one.losses += 1
-            team_two.wins += 1
         team_one.save()
         team_two.save()
 
@@ -65,6 +59,8 @@ class GameWriteSerializer(serializers.Serializer):
 
 
 class PointSerializer(serializers.ModelSerializer):
+    scorer = BasicCustomUserSerializer()
+
     class Meta:
         model = Point
         exclude = ['created', 'modified', 'game']

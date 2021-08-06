@@ -43,6 +43,14 @@ class Game(TimeStampedModel):
 
     objects = GameManager()
 
+    # TODO
+    def didWin(self, friend):
+        if self.team_one == friend:
+            return self.team_one_score > self.team_two_score
+        if self.team_two == friend:
+            return self.team_two_score > self.team_one_score
+        return False
+
     def __str__(self):
         return str(self.time_started)
 
@@ -87,8 +95,4 @@ class Point(TimeStampedModel):
     objects = GameManager()
 
     def __str__(self):
-        if self.scored_on is None:
-            scored_on_email = ""
-        else:
-            scored_on_email = self.scored_on.email
-        return str('{} scored on {}: {}'.format(self.scorer.email, scored_on_email, self.type))
+        return str('{} scored a {}'.format(self.scorer.username, self.type))

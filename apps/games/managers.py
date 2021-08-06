@@ -14,3 +14,8 @@ class GameManager(BaseUserManager):
         team_ones = super().get_queryset().filter(team_one__in=teams)
         team_twos = super().get_queryset().filter(team_two__in=teams)
         return team_ones | team_twos
+
+    def friends_games(self, friends):
+        team_ones = super().get_queryset().filter(team_one=friends)
+        team_twos = super().get_queryset().filter(team_two=friends)
+        return team_ones | team_twos
