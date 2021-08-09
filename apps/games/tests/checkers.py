@@ -18,7 +18,7 @@ class GameTesting(BaseChecker):
             'team_one', 'team_two', 'time_started', 'time_ended', 'uuid',
             'team_one_score', 'team_two_score', 'confirmed'
         ]
-
+        
         self.assertEqual(len(data1), len(data2))
 
         for field in fields:
@@ -52,8 +52,8 @@ class GameTesting(BaseChecker):
         for i in range(len(data1)):
             self.assertGameEqual(data1[i], data2[i])
 
-    def assertGameResponseValid(self, response, check_against_data):
-        self.assertResponse201(response)
-        responseData = self.loadJSONSafely(response)
+    def assertGameResponseEqual(self):
+        self.assertResponse201()
+        self.loadJSONSafely()
 
-        self.assertGameEqual(responseData, check_against_data)
+        self.assertGameEqual(self.responseData, self.check_against_data)

@@ -1,12 +1,16 @@
+from apps.my_auth.tests.factories import CustomUserFactory
+from django.utils.translation import deactivate_all
 from rest_framework import authentication
-from rest_framework.generics import CreateAPIView
+from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from .models import CustomUser
+
 from .serializers import (CustomUserSerializer, MyLogInSerializer,
-                          MyRegisterSerializer)
+                          MyRegisterSerializer, CustomUserPageSerializer)
 
 
 class LoginView(CreateAPIView):
@@ -23,35 +27,33 @@ class RegisterView(CreateAPIView):
     serializer_class = MyRegisterSerializer
 
 
-class UserView(APIView):
+class UserView(ListAPIView):
     """
     View for getting and setting usernames
 
     * Requires username
     * Requres token auth
     """
-    serializer_class = CustomUserSerializer
-
+    serializer_class = CustomUserPageSerializer
     permission_classes = (IsAuthenticated,)
     authentication_classes = [authentication.TokenAuthentication]
     renderer_classes = [JSONRenderer]
 
-    def get(self, request):
-        """
-        Returns the user data, what that is is TBD
-        """
-        userSerialized = CustomUserSerializer(request.user)
-        return Response(userSerialized.data, status=200)
+    queryset = CustomUser.objects.all()
+    lookup_field = 'username'
 
-    def post(self, request):
-        """
-        Updates an old litter
-        """
-        serialized = CustomUserSerializer(request.user, data=request.data,
-                                          partial=True)
 
-        if serialized.is_valid():
-            serialized.save()
-            return Response(serialized.data, status=200)
-        else:
-            return Response(serialized.errors, status=400)
+class DetailUserView(RetrieveUpdateAPIView):
+    """
+    View for getting and setting usernames
+
+    * Requires username
+    * Requres token auth
+    """
+    serializer_class = CustomUserPageSerializer
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = [authentication.TokenAuthentication]
+    renderer_classes = [JSONRenderer]
+
+    queryset = CustomUser.objects.all()
+    lookup_field = 'username'

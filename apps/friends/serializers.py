@@ -1,6 +1,5 @@
 from rest_framework import serializers
 
-from apps.games.models import Game
 from apps.my_auth.models import CustomUser
 from apps.my_auth.serializers import BasicCustomUserSerializer
 
@@ -26,6 +25,8 @@ class FriendSerializer(serializers.ModelSerializer):
         return data
 
     def to_representation(self, instance):
+        from apps.games.models import Game
+        
         representation = super().to_representation(instance)
         wins = 0
         losses = 0
@@ -98,7 +99,7 @@ class FriendCreateSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError('This action is not allowed when blocked.')
         elif friendship.status == Friend.STATUS_ACCEPTED:
             if data['status'] == Friend.STATUS_PENDING:
-                estr = 'Cannot go from accepted frieend request to pending.'
+                estr = 'Cannot go from accepted friend request to pending.'
                 raise serializers.ValidationError(estr)
         return data
 

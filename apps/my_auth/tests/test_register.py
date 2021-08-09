@@ -18,7 +18,7 @@ class Test_Register_View(AuthTesting):
 
         client = APIClient()
         url = reverse('my_register')
-        response = client.post(url, data, format='json')
+        self.response = client.post(url, data, format='json')
         userModel = CustomUser.objects.get(email='testEmail@gmail.com')
 
         # The response we want
@@ -28,18 +28,17 @@ class Test_Register_View(AuthTesting):
             'uuid': str(userModel.uuid),
             'token': str(Token.objects.get(user=userModel))
         }
-        check_against_games = []
-        check_against_friends = []
-        check_against_all_usernames = [BasicCustomUserSerializer(userModel).data]
-        check_against_dict = {
+        self.check_against_data = {
             'user': check_against_user,
-            'games': check_against_games,
-            'friends': check_against_friends,
-            'all_users': check_against_all_usernames
+            'games': [],
+            'friends': [],
+            'all_users': [BasicCustomUserSerializer(userModel).data]
         }
 
         # Check return
-        self.assertLoginResponseSuccess(response, check_against_dict)
+        self.assertResponse201()
+        self.loadJSONSafely()
+        self.assertLoginDataEqual()
 
     def test_correct_register_one_other_user(self):
         """Testing a legitimate registration with one other user."""
@@ -49,7 +48,7 @@ class Test_Register_View(AuthTesting):
 
         client = APIClient()
         url = reverse('my_register')
-        response = client.post(url, data, format='json')
+        self.response = client.post(url, data, format='json')
         userModel = CustomUser.objects.get(email='testEmail@gmail.com')
 
         # The response we want
@@ -59,21 +58,21 @@ class Test_Register_View(AuthTesting):
             'uuid': str(userModel.uuid),
             'token': str(Token.objects.get(user=userModel))
         }
-        check_against_games = []
-        check_against_friends = []
         check_against_all_usernames = [
             BasicCustomUserSerializer(userModel).data,
             BasicCustomUserSerializer(otherUser).data,
         ]
-        check_against_dict = {
+        self.check_against_data = {
             'user': check_against_user,
-            'games': check_against_games,
-            'friends': check_against_friends,
+            'games': [],
+            'friends': [],
             'all_users': check_against_all_usernames
         }
 
         # Check return
-        self.assertLoginResponseSuccess(response, check_against_dict)
+        self.assertResponse201()
+        self.loadJSONSafely()
+        self.assertLoginDataEqual()
 
     def test_correct_register_four_other_users(self):
         """Testing a legitimate registration with four other users."""
@@ -86,7 +85,7 @@ class Test_Register_View(AuthTesting):
 
         client = APIClient()
         url = reverse('my_register')
-        response = client.post(url, data, format='json')
+        self.response = client.post(url, data, format='json')
         userModel = CustomUser.objects.get(email='testEmail@gmail.com')
 
         # The response we want
@@ -96,8 +95,6 @@ class Test_Register_View(AuthTesting):
             'uuid': str(userModel.uuid),
             'token': str(Token.objects.get(user=userModel))
         }
-        check_against_games = []
-        check_against_friends = []
         check_against_all_usernames = [
             BasicCustomUserSerializer(userModel).data,
             BasicCustomUserSerializer(otherUserOne).data,
@@ -105,15 +102,17 @@ class Test_Register_View(AuthTesting):
             BasicCustomUserSerializer(otherUserThree).data,
             BasicCustomUserSerializer(otherUserFour).data,
         ]
-        check_against_dict = {
+        self.check_against_data = {
             'user': check_against_user,
-            'games': check_against_games,
-            'friends': check_against_friends,
+            'games': [],
+            'friends': [],
             'all_users': check_against_all_usernames
         }
 
         # Check return
-        self.assertLoginResponseSuccess(response, check_against_dict)
+        self.assertResponse201()
+        self.loadJSONSafely()
+        self.assertLoginDataEqual()
 
     def test_register_bad_email(self):
         """Testing a bad register with bad email param."""
@@ -121,16 +120,14 @@ class Test_Register_View(AuthTesting):
 
         client = APIClient()
         url = reverse('my_register')
-        response = client.post(url, data, format='json')
+        self.response = client.post(url, data, format='json')
 
         # Make sure things went wrong first
-        self.assertEqual(response.status_code, 400)
-        responseData = json.loads(response.content)
+        self.assertResponse400()
 
-        # Make sure error exists
-        self.assertTrue('email' in responseData)
-        # Make sure it's the correct error
-        self.assertEqual(responseData['email'], ['Enter a valid email address.'])
+        self.check_against_data = {'email' : ['Enter a valid email address.']}
+        self.fields = ['email']
+        self.assertResponseEqual()
 
     def test_register_no_email(self):
         """Testing a bad register with no email param."""
@@ -138,16 +135,11 @@ class Test_Register_View(AuthTesting):
 
         client = APIClient()
         url = reverse('my_register')
-        response = client.post(url, data, format='json')
+        self.response = client.post(url, data, format='json')
 
         # Make sure things went wrong first
-        self.assertEqual(response.status_code, 400)
-        responseData = json.loads(response.content)
-
-        # Make sure error exists
-        self.assertTrue('email' in responseData)
-        # Make sure it's the correct error
-        self.assertEqual(responseData['email'], ['This field is required.'])
+        self.assertResponse400()
+        self.assertFieldsMissing(['email'])
 
     def test_register_bad_password_length(self):
         """Testing a bad register with bad password length."""
@@ -155,18 +147,16 @@ class Test_Register_View(AuthTesting):
 
         client = APIClient()
         url = reverse('my_register')
-        response = client.post(url, data, format='json')
-
+        self.response = client.post(url, data, format='json')
+        
         # Make sure things went wrong first
-        self.assertEqual(response.status_code, 400)
-        responseData = json.loads(response.content)
+        self.assertResponse400()
 
-        # Make sure error exists
-        self.assertTrue('password' in responseData)
-        # Make sure it's the correct error
-        self.assertEqual(responseData['password'],
-                         ['This password is too short. It must contain at least 8 characters.',
-                          'This password is too common.'])
+        self.check_against_data = {
+            'password' : ['This password is too short. It must contain at least 8 characters.',
+                          'This password is too common.']}
+        self.fields = ['password']
+        self.assertResponseEqual()
 
     def test_register_bad_password_common(self):
         """Testing a bad register with bad password too common."""
@@ -174,16 +164,15 @@ class Test_Register_View(AuthTesting):
 
         client = APIClient()
         url = reverse('my_register')
-        response = client.post(url, data, format='json')
+        self.response = client.post(url, data, format='json')
 
         # Make sure things went wrong first
-        self.assertEqual(response.status_code, 400)
-        responseData = json.loads(response.content)
+        self.assertResponse400()
 
-        # Make sure error exists
-        self.assertTrue('password' in responseData)
-        # Make sure it's the correct error
-        self.assertEqual(responseData['password'], ['This password is too common.'])
+        self.check_against_data = {
+            'password' : ['This password is too common.']}
+        self.fields = ['password']
+        self.assertResponseEqual()
 
     def test_register_bad_password_numeric(self):
         """Testing a bad register with bad password that's only numbers."""
@@ -191,16 +180,15 @@ class Test_Register_View(AuthTesting):
 
         client = APIClient()
         url = reverse('my_register')
-        response = client.post(url, data, format='json')
+        self.response = client.post(url, data, format='json')
 
         # Make sure things went wrong first
-        self.assertEqual(response.status_code, 400)
-        responseData = json.loads(response.content)
+        self.assertResponse400()
 
-        # Make sure error exists
-        self.assertTrue('password' in responseData)
-        # Make sure it's the correct error
-        self.assertEqual(responseData['password'], ['This password is entirely numeric.'])
+        self.check_against_data = {
+            'password' : ['This password is entirely numeric.']}
+        self.fields = ['password']
+        self.assertResponseEqual()
 
     def test_register_no_password(self):
         """Testing a bad register with no password param."""
@@ -208,16 +196,11 @@ class Test_Register_View(AuthTesting):
 
         client = APIClient()
         url = reverse('my_register')
-        response = client.post(url, data, format='json')
+        self.response = client.post(url, data, format='json')
 
         # Make sure things went wrong first
-        self.assertEqual(response.status_code, 400)
-        responseData = json.loads(response.content)
-
-        # Make sure error exists
-        self.assertTrue('password' in responseData)
-        # Make sure there's only one error
-        self.assertEqual(responseData['password'], ['This field is required.'])
+        self.assertResponse400()
+        self.assertFieldsMissing(['password'])
 
     def test_register_no_email_or_password(self):
         """Testing a bad register with no email or password params."""
@@ -229,12 +212,8 @@ class Test_Register_View(AuthTesting):
 
         # Make sure things went wrong first
         self.assertEqual(response.status_code, 400)
-        responseData = json.loads(response.content)
+        self.response = client.post(url, data, format='json')
 
-        # Make sure error exists
-        self.assertTrue('email' in responseData)
-        self.assertTrue('password' in responseData)
-
-        # Make sure it's the correct error
-        self.assertEqual(responseData['email'], ['This field is required.'])
-        self.assertEqual(responseData['password'], ['This field is required.'])
+        # Make sure things went wrong first
+        self.assertResponse400()
+        self.assertFieldsMissing(['password', 'email'])

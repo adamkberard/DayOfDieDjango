@@ -3,11 +3,7 @@ from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token
 
-from apps.friends.models import Friend
-from apps.games.models import Game
-
 from .models import CustomUser
-
 
 class BasicCustomUserSerializer(serializers.Serializer):
     class Meta:
@@ -43,6 +39,7 @@ class MyLogInSerializer(serializers.Serializer):
         # I don't actually wanna save anything so I just return it. Not sure if this is a chill
         # way to do it. Odds are there's a better way to login people, but until I find it this
         # will suffice.
+        # TODO change this view to a different kind so it doesn't call save...
         return self.validated_data
 
     def validate(self, data):
@@ -57,6 +54,9 @@ class MyLogInSerializer(serializers.Serializer):
     def to_representation(self, instance):
         from apps.friends.serializers import FriendSerializer
         from apps.games.serializers import GameSerializer
+        from apps.friends.models import Friend
+        from apps.games.models import Game
+
         representation = {}
 
         # First we get the user that we know exists because of validation
@@ -98,3 +98,17 @@ class CustomUserSerializer(serializers.Serializer):
         instance.save()
 
         return instance
+
+class CustomUserPageSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = CustomUser
+        fields = ['username', 'uuid']
+
+    def to_representation(self, instance):
+        from apps.games.models import Game
+        rep = super().to_representation(instance)
+        wins, losses = Game.objects.users_wins_losses(instance)
+        rep['wins'] = wins
+        rep['losses'] = losses
+        return rep

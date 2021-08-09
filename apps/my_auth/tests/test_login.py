@@ -25,7 +25,7 @@ class Test_Login_View(AuthTesting):
 
         client = APIClient()
         url = reverse('my_login')
-        response = client.post(url, data, format='json')
+        self.response = client.post(url, data, format='json')
 
         # The response we want
         check_against_user = {
@@ -34,18 +34,18 @@ class Test_Login_View(AuthTesting):
             'uuid': str(userModel.uuid),
             'token': str(Token.objects.get(user=userModel))
         }
-        check_against_games = []
-        check_against_friends = []
         check_against_all_usernames = [BasicCustomUserSerializer(userModel).data]
-        check_against_dict = {
+        self.check_against_data = {
             'user': check_against_user,
-            'games': check_against_games,
-            'friends': check_against_friends,
+            'games': [],
+            'friends': [],
             'all_users': check_against_all_usernames
         }
 
         # Check return
-        self.assertLoginResponseSuccess(response, check_against_dict)
+        self.assertResponse201()
+        self.loadJSONSafely()
+        self.assertLoginDataEqual()
 
     def test_correct_login_one_other_user(self):
         """Testing a legitimate login with one other user, no friends or games."""
@@ -56,7 +56,7 @@ class Test_Login_View(AuthTesting):
 
         client = APIClient()
         url = reverse('my_login')
-        response = client.post(url, data, format='json')
+        self.response = client.post(url, data, format='json')
 
         # The response we want
         check_against_user = {
@@ -65,21 +65,21 @@ class Test_Login_View(AuthTesting):
             'uuid': str(userModel.uuid),
             'token': str(Token.objects.get(user=userModel))
         }
-        check_against_games = []
-        check_against_friends = []
         check_against_all_usernames = [
             BasicCustomUserSerializer(userModel).data,
             BasicCustomUserSerializer(otherUser).data
         ]
-        check_against_dict = {
+        self.check_against_data = {
             'user': check_against_user,
-            'games': check_against_games,
-            'friends': check_against_friends,
+            'games': [],
+            'friends': [],
             'all_users': check_against_all_usernames
         }
 
         # Check return
-        self.assertLoginResponseSuccess(response, check_against_dict)
+        self.assertResponse201()
+        self.loadJSONSafely()
+        self.assertLoginDataEqual()
 
     def test_correct_login_one_friend(self):
         """Testing a legitimate login with one other user, one friend and no games."""
@@ -91,7 +91,7 @@ class Test_Login_View(AuthTesting):
 
         client = APIClient()
         url = reverse('my_login')
-        response = client.post(url, data, format='json')
+        self.response = client.post(url, data, format='json')
 
         # The response we want
         check_against_user = {
@@ -100,25 +100,26 @@ class Test_Login_View(AuthTesting):
             'uuid': str(userModel.uuid),
             'token': str(Token.objects.get(user=userModel))
         }
-        check_against_games = []
         check_against_friends = [FriendSerializer(friendModel).data]
         check_against_all_usernames = [
             BasicCustomUserSerializer(userModel).data,
             BasicCustomUserSerializer(otherUser).data
         ]
-        check_against_dict = {
+        self.check_against_data = {
             'user': check_against_user,
-            'games': check_against_games,
+            'games': [],
             'friends': check_against_friends,
             'all_users': check_against_all_usernames
         }
 
         client = APIClient()
         url = reverse('my_login')
-        response = client.post(url, data, format='json')
+        self.response = client.post(url, data, format='json')
 
         # Check return
-        self.assertLoginResponseSuccess(response, check_against_dict)
+        self.assertResponse201()
+        self.loadJSONSafely()
+        self.assertLoginDataEqual()
 
     def test_correct_login_two_friend(self):
         """Testing a legitimate login with one other user, one friend and no games."""
@@ -132,7 +133,7 @@ class Test_Login_View(AuthTesting):
 
         client = APIClient()
         url = reverse('my_login')
-        response = client.post(url, data, format='json')
+        self.response = client.post(url, data, format='json')
 
         # The response we want
         check_against_user = {
@@ -141,7 +142,6 @@ class Test_Login_View(AuthTesting):
             'uuid': str(userModel.uuid),
             'token': str(Token.objects.get(user=userModel))
         }
-        check_against_games = []
         check_against_friends = [
             FriendSerializer(friendModel).data,
             FriendSerializer(friendModelTwo).data
@@ -151,19 +151,21 @@ class Test_Login_View(AuthTesting):
             BasicCustomUserSerializer(otherUser).data,
             BasicCustomUserSerializer(otherUserTwo).data,
         ]
-        check_against_dict = {
+        self.check_against_data = {
             'user': check_against_user,
-            'games': check_against_games,
+            'games': [],
             'friends': check_against_friends,
             'all_users': check_against_all_usernames
         }
 
         client = APIClient()
         url = reverse('my_login')
-        response = client.post(url, data, format='json')
+        self.response = client.post(url, data, format='json')
 
         # Check return
-        self.assertLoginResponseSuccess(response, check_against_dict)
+        self.assertResponse201()
+        self.loadJSONSafely()
+        self.assertLoginDataEqual()
 
     def test_correct_login_one_friend_many_users(self):
         """Testing a legitimate login with many other users, one friend and no games."""
@@ -183,7 +185,7 @@ class Test_Login_View(AuthTesting):
 
         client = APIClient()
         url = reverse('my_login')
-        response = client.post(url, data, format='json')
+        self.response = client.post(url, data, format='json')
 
         # The response we want
         check_against_user = {
@@ -192,17 +194,18 @@ class Test_Login_View(AuthTesting):
             'uuid': str(userModel.uuid),
             'token': str(Token.objects.get(user=userModel))
         }
-        check_against_games = []
         check_against_friends = [FriendSerializer(friendModel).data]
-        check_against_dict = {
+        self.check_against_data = {
             'user': check_against_user,
-            'games': check_against_games,
+            'games': [],
             'friends': check_against_friends,
             'all_users': check_against_all_usernames
         }
 
         # Check return
-        self.assertLoginResponseSuccess(response, check_against_dict)
+        self.assertResponse201()
+        self.loadJSONSafely()
+        self.assertLoginDataEqual()
 
     def test_correct_login_three_friends_one_game(self):
         """Testing a legitimate login with three friends and one game."""
@@ -234,7 +237,7 @@ class Test_Login_View(AuthTesting):
 
         client = APIClient()
         url = reverse('my_login')
-        response = client.post(url, data, format='json')
+        self.response = client.post(url, data, format='json')
 
         # Check the data of the fields
         check_against_user = {
@@ -255,7 +258,7 @@ class Test_Login_View(AuthTesting):
             BasicCustomUserSerializer(playerThree).data,
             BasicCustomUserSerializer(playerFour).data,
         ]
-        check_against_dict = {
+        self.check_against_data = {
             'user': check_against_user,
             'games': check_against_games,
             'friends': check_against_friends,
@@ -263,7 +266,9 @@ class Test_Login_View(AuthTesting):
         }
 
         # Check return
-        self.assertLoginResponseSuccess(response, check_against_dict)
+        self.assertResponse201()
+        self.loadJSONSafely()
+        self.assertLoginDataEqual()
 
     def test_login_bad_email(self):
         """Testing a bad login with bad email param."""
@@ -271,16 +276,12 @@ class Test_Login_View(AuthTesting):
 
         client = APIClient()
         url = reverse('my_login')
-        response = client.post(url, data, format='json')
+        self.response = client.post(url, data, format='json')
 
-        # Make sure things went wrong first
-        self.assertEqual(response.status_code, 400)
-        responseData = json.loads(response.content)
-
-        # Make sure error exists
-        self.assertTrue('email' in responseData)
-        # Make sure it's the correct error
-        self.assertEqual(responseData['email'], ['Enter a valid email address.'])
+        self.assertResponse400()
+        self.check_against_data = {'email': ['Enter a valid email address.']}
+        self.fields = ['email']
+        self.assertResponseEqual()
 
     def test_login_no_email(self):
         """Testing a bad login with no email param."""

@@ -6,10 +6,10 @@ class FriendTesting(BaseChecker):
 
     def assertFriendEqual(self, data1, data2):
         userTester = AuthTesting()
-        fields = [
+        self.fields = [
             'uuid', 'status', 'team_name', 'wins', 'losses', 'league'
         ]
-        self.assertDictEqual(data1, data2, fields)
+        self.assertDictEqual(data1, data2)
 
         # Now we check the two users
         userTester.assertBasicUserEqual(data1.get('team_captain'), data2.get('team_captain'))
@@ -21,8 +21,7 @@ class FriendTesting(BaseChecker):
         for i in range(len(data1)):
             self.assertFriendEqual(data1[i], data2[i])
 
-    def assertFriendResponseValid(self, response, check_against_data):
-        self.assertResponse201(response)
-        responseData = self.loadJSONSafely(response)
+    def assertFriendDataEqual(self):
+        self.loadJSONSafely()
 
-        self.assertFriendEqual(responseData, check_against_data)
+        self.assertFriendEqual(self.responseData, self.check_against_data)
