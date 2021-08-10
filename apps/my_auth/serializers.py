@@ -89,6 +89,12 @@ class CustomUserSerializer(serializers.Serializer):
     username = serializers.CharField()
     uuid = serializers.UUIDField()
 
+    def validate(self, data):
+        # Gotta make sure the person is the right person
+        if self.context.get('requester') != self.instance.uuid:
+            raise serializers.ValidationError("Can't edit a user that isn't you.")
+        return data
+
     def create(self, validated_data):
         return CustomUser.objects.create_user(**validated_data)
 
@@ -100,7 +106,6 @@ class CustomUserSerializer(serializers.Serializer):
         return instance
 
 class CustomUserPageSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = CustomUser
         fields = ['username', 'uuid']
