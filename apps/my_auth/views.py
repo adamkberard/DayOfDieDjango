@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework import status
 
 from .models import CustomUser
 
@@ -50,10 +51,21 @@ class DetailUserView(RetrieveUpdateAPIView):
     * Requires username
     * Requres token auth
     """
-    serializer_class = CustomUserPageSerializer
+    read_serializer = CustomUserPageSerializer
+    write_serializer = CustomUserSerializer
     permission_classes = (IsAuthenticated,)
     authentication_classes = [authentication.TokenAuthentication]
     renderer_classes = [JSONRenderer]
-
-    queryset = CustomUser.objects.all()
     lookup_field = 'username'
+    queryset = CustomUser.objects.all()
+
+    def get_serializer_class(self):
+        if self.request.method == 'PUT':
+            return self.write_serializer
+        return self.read_serializer
+
+    def get_serializer_context(self):
+        return {'requester': self.request.user.uuid}
+
+    def put(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)

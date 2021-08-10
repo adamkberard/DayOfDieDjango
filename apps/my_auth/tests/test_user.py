@@ -10,6 +10,7 @@ from .checkers import BasicUserTesting
 from .factories import CustomUserFactory
 
 class Test_Get_User_Data(BasicUserTesting):
+
     def test_get_user_data_other_user(self):
         """Testing retriving a regular user's data from a different user."""
         userModel = CustomUserFactory()
@@ -76,3 +77,59 @@ class Test_Get_User_Data(BasicUserTesting):
         self.response = client.get(url)
 
         self.assertResponse404()
+
+class Test_Edit_User_Data(BasicUserTesting):
+
+    def test_edit_username(self):
+        """Testing changing my username."""
+        authModel = CustomUserFactory()
+
+        data = {'username' : 'newUsername'}
+
+        client = APIClient()
+        url = 'http://testserver/users/' + authModel.username + '/'
+        client.force_authenticate(user=authModel)
+        self.response = client.put(url, data, format='json')
+
+        self.check_against_data = {
+            'username': 'newUsername',
+            'uuid': str(authModel.uuid),
+            'wins': 0,
+            'losses': 0
+        }
+        self.assertResponse200()
+        self.assertResponseEqual()
+
+    def test_edit_username_already_existing(self):
+        """Testing changing my username to something that already exists."""
+        authModel = CustomUserFactory()
+        otherModel = CustomUserFactory()
+
+        data = {'username' : otherModel.username}
+
+        client = APIClient()
+        url = 'http://testserver/users/' + authModel.username + '/'
+        client.force_authenticate(user=authModel)
+        self.response = client.put(url, data, format='json')
+
+        self.assertResponse400()
+        self.loadJSONSafely()
+        self.check_against_data = {'username': ["Username is not available."]}
+        self.assertResponseEqual()
+
+    def test_edit_other_users_username(self):
+        """Testing changing somebody else's username."""
+        authModel = CustomUserFactory()
+        otherModel = CustomUserFactory()
+
+        data = {'username' : 'newUsername'}
+
+        client = APIClient()
+        url = 'http://testserver/users/' + otherModel.username + '/'
+        client.force_authenticate(user=authModel)
+        self.response = client.put(url, data, format='json')
+
+        self.assertResponse400()
+        self.loadJSONSafely()
+        self.check_against_data = {'non_field_errors': ["Can't edit a user that isn't you."]}
+        self.assertResponseEqual()

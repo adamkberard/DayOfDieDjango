@@ -81,26 +81,7 @@ class MyLogInSerializer(serializers.Serializer):
         return representation
 
 
-class CustomUserSerializer(serializers.Serializer):
-    class Meta:
-        module = CustomUser
-
-    email = serializers.EmailField()
-    username = serializers.CharField()
-    uuid = serializers.UUIDField()
-
-    def create(self, validated_data):
-        return CustomUser.objects.create_user(**validated_data)
-
-    def update(self, instance, validated_data):
-        instance.email = validated_data.get('email', instance.email)
-        instance.username = validated_data.get('username', instance.username)
-        instance.save()
-
-        return instance
-
 class CustomUserPageSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = CustomUser
         fields = ['username', 'uuid']
@@ -112,3 +93,38 @@ class CustomUserPageSerializer(serializers.ModelSerializer):
         rep['wins'] = wins
         rep['losses'] = losses
         return rep
+
+
+class CustomUserSerializer(serializers.Serializer):
+    class Meta:
+        module = CustomUser
+
+    email = serializers.EmailField()
+    username = serializers.CharField()
+    uuid = serializers.UUIDField()
+
+    # Gotta be sure it doesn't exist already...
+    def validate_username(self, data):
+        if CustomUser.objects.filter(username=data).exists():
+            # If the person is us, then whatever who cares
+            if self.context.get('requester') != data:
+                raise serializers.ValidationError('Username is not available.')
+        return data
+
+    def validate(self, data):
+        # Gotta make sure the person is the right person
+        if self.context.get('requester') != self.instance.uuid:
+            raise serializers.ValidationError("Can't edit a user that isn't you.")
+        return data
+
+    def create(self, validated_data):
+        return CustomUser.objects.create_user(**validated_data)
+
+    def update(self, instance, validated_data):
+        instance.email = validated_data.get('email', instance.email)
+        instance.username = validated_data.get('username', instance.username)
+        instance.save()
+        return instance
+
+    def to_representation(self, instance):
+        return CustomUserPageSerializer(instance).data
