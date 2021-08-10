@@ -81,6 +81,20 @@ class MyLogInSerializer(serializers.Serializer):
         return representation
 
 
+class CustomUserPageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['username', 'uuid']
+
+    def to_representation(self, instance):
+        from apps.games.models import Game
+        rep = super().to_representation(instance)
+        wins, losses = Game.objects.users_wins_losses(instance)
+        rep['wins'] = wins
+        rep['losses'] = losses
+        return rep
+
+
 class CustomUserSerializer(serializers.Serializer):
     class Meta:
         module = CustomUser
@@ -88,6 +102,14 @@ class CustomUserSerializer(serializers.Serializer):
     email = serializers.EmailField()
     username = serializers.CharField()
     uuid = serializers.UUIDField()
+
+    # Gotta be sure it doesn't exist already...
+    def validate_username(self, data):
+        if CustomUser.objects.filter(username=data).exists():
+            # If the person is us, then whatever who cares
+            if self.context.get('requester') != data:
+                raise serializers.ValidationError('Username is not available.')
+        return data
 
     def validate(self, data):
         # Gotta make sure the person is the right person
@@ -102,18 +124,7 @@ class CustomUserSerializer(serializers.Serializer):
         instance.email = validated_data.get('email', instance.email)
         instance.username = validated_data.get('username', instance.username)
         instance.save()
-
         return instance
 
-class CustomUserPageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CustomUser
-        fields = ['username', 'uuid']
-
     def to_representation(self, instance):
-        from apps.games.models import Game
-        rep = super().to_representation(instance)
-        wins, losses = Game.objects.users_wins_losses(instance)
-        rep['wins'] = wins
-        rep['losses'] = losses
-        return rep
+        return CustomUserPageSerializer(instance).data

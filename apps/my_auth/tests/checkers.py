@@ -5,6 +5,9 @@ from apps.core.checker import BaseChecker
 class BasicUserTesting(BaseChecker):
     fields = ['username', 'uuid', 'wins', 'losses']
 
+class CustomUserTesting(BaseChecker):
+    fields = ['email', 'username', 'uuid', 'wins', 'losses']
+
 class AuthTesting(BaseChecker):
     fields = ['user', 'games', 'friends', 'all_users']
     auth_user_fields = ['email', 'username', 'uuid', 'token']
