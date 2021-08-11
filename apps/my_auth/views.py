@@ -60,12 +60,9 @@ class DetailUserView(RetrieveUpdateAPIView):
     queryset = CustomUser.objects.all()
 
     def get_serializer_class(self):
-        if self.request.method == 'PUT':
+        if self.request.method == 'PATCH':
             return self.write_serializer
         return self.read_serializer
 
     def get_serializer_context(self):
         return {'requester': self.request.user.uuid}
-
-    def put(self, request, *args, **kwargs):
-        return self.partial_update(request, *args, **kwargs)

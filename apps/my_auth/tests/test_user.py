@@ -89,7 +89,7 @@ class Test_Edit_User_Data(BasicUserTesting):
         client = APIClient()
         url = 'http://testserver/users/' + authModel.username + '/'
         client.force_authenticate(user=authModel)
-        self.response = client.put(url, data, format='json')
+        self.response = client.patch(url, data, format='json')
 
         self.check_against_data = {
             'username': 'newUsername',
@@ -110,7 +110,7 @@ class Test_Edit_User_Data(BasicUserTesting):
         client = APIClient()
         url = 'http://testserver/users/' + authModel.username + '/'
         client.force_authenticate(user=authModel)
-        self.response = client.put(url, data, format='json')
+        self.response = client.patch(url, data, format='json')
 
         self.assertResponse400()
         self.loadJSONSafely()
@@ -127,7 +127,7 @@ class Test_Edit_User_Data(BasicUserTesting):
         client = APIClient()
         url = 'http://testserver/users/' + otherModel.username + '/'
         client.force_authenticate(user=authModel)
-        self.response = client.put(url, data, format='json')
+        self.response = client.patch(url, data, format='json')
 
         self.assertResponse400()
         self.loadJSONSafely()
