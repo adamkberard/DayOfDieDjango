@@ -1,5 +1,4 @@
 import json
-from django.forms import fields
 
 from django.test import TestCase
 
@@ -46,7 +45,7 @@ class BaseChecker(TestCase):
             fields_to_check = self.fields
 
         self.assertTrue(self.checkDictEqual(data1, data2, fields_to_check))
-        
+
     # Ok
     def assertResponse200(self):
         self.assertEqual(self.response.status_code, 200)

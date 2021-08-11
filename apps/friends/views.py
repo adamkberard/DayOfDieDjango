@@ -23,18 +23,8 @@ class FriendListCreateAPIView(ListCreateAPIView):
             return self.write_serializer
         return self.read_serializer
 
-    def create(self, request, *args, **kwargs):
-        try:
-            request.data._mutable = True
-        except Exception:
-            pass
-        request.data['team_captain'] = request.user.username
-
-        try:
-            request.data._mutable = False
-        except Exception:
-            pass
-        return super().create(request, *args, **kwargs)
+    def get_serializer_context(self):
+        return {'team_captain': self.request.user}
 
 
 class AllUsersAPIView(ListAPIView):

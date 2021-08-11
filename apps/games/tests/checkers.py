@@ -18,7 +18,7 @@ class GameTesting(BaseChecker):
             'team_one', 'team_two', 'time_started', 'time_ended', 'uuid',
             'team_one_score', 'team_two_score', 'confirmed'
         ]
-        
+
         self.assertEqual(len(data1), len(data2))
 
         for field in fields:

@@ -1,17 +1,12 @@
-from apps.my_auth.tests.factories import CustomUserFactory
-from django.utils.translation import deactivate_all
 from rest_framework import authentication
-from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateAPIView
+from rest_framework.generics import (CreateAPIView, ListAPIView,
+                                     RetrieveUpdateAPIView)
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.renderers import JSONRenderer
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from rest_framework import status
 
 from .models import CustomUser
-
-from .serializers import (CustomUserSerializer, MyLogInSerializer,
-                          MyRegisterSerializer, CustomUserPageSerializer)
+from .serializers import (CustomUserPageSerializer, CustomUserSerializer,
+                          MyLogInSerializer, MyRegisterSerializer)
 
 
 class LoginView(CreateAPIView):

@@ -51,8 +51,9 @@ class Test_Friend_URL_Params(FriendTesting):
 
         self.assertResponse400()
         self.fields = ['status']
-        self.check_against_data = {'status': ['Status not valid.']}
+        self.check_against_data = {'status': ['"invalid" is not a valid choice.']}
         self.assertResponseEqual()
+
 
 class Test_Create_Nonexistent_Friend(FriendTesting):
 
@@ -96,7 +97,9 @@ class Test_Create_Nonexistent_Friend(FriendTesting):
         self.response = client.post(url, data, format='json')
 
         self.assertResponse400()
-        self.check_against_data = {'non_field_errors': ['Cannot create a "Nothing" friend request.']}
+        self.check_against_data = {
+            'non_field_errors': ['Cannot create a "Nothing" friend request.']
+        }
         self.assertResponseEqual()
 
     def test_nonexistent_friend_pending(self):
@@ -221,7 +224,9 @@ class Test_Create_Existent_Friend_Blocked(FriendTesting):
 
         # The response we want
         self.assertResponse400()
-        self.check_against_data = {'non_field_errors': ['This action is not allowed when blocking.']}
+        self.check_against_data = {
+            'non_field_errors': ['This action is not allowed when blocking.']
+        }
         self.assertResponseEqual()
 
     def test_accepting_an_existing_blocked_friend_as_team_captain(self):
@@ -237,7 +242,9 @@ class Test_Create_Existent_Friend_Blocked(FriendTesting):
 
         # The response we want
         self.assertResponse400()
-        self.check_against_data = {'non_field_errors': ['This action is not allowed when blocking.']}
+        self.check_against_data = {
+            'non_field_errors': ['This action is not allowed when blocking.']
+        }
         self.assertResponseEqual()
 
     def test_doing_everything_to_existing_blocked_friend_as_teammate(self):
@@ -256,7 +263,9 @@ class Test_Create_Existent_Friend_Blocked(FriendTesting):
 
             # The response we want
             self.assertResponse400()
-            self.check_against_data = {'non_field_errors': ['This action is not allowed when blocking.']}
+            self.check_against_data = {
+                'non_field_errors': ['This action is not allowed when blocking.']
+            }
             self.assertResponseEqual()
 
 
@@ -784,7 +793,9 @@ class Test_Create_Existent_Friend_Accepted(FriendTesting):
 
         # The response we want
         self.assertResponse400()
-        self.check_against_data = {'non_field_errors': ['Cannot go from accepted friend request to pending.']}
+        self.check_against_data = {
+            'non_field_errors': ['Cannot go from accepted friend request to pending.']
+        }
         self.assertResponseEqual()
 
     def test_pendinging_an_existing_accepted_friend_as_teammate(self):
@@ -799,7 +810,9 @@ class Test_Create_Existent_Friend_Accepted(FriendTesting):
 
         # The response we want
         self.assertResponse400()
-        self.check_against_data = {'non_field_errors': ['Cannot go from accepted frieend request to pending.']}
+        self.check_against_data = {
+            'non_field_errors': ['Cannot go from accepted frieend request to pending.']
+        }
         self.assertResponseEqual()
 
     def test_accepting_an_existing_accepted_friend_as_team_captain(self):

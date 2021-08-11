@@ -1,12 +1,13 @@
-from django.http.response import ResponseHeaders
 from apps.core.checker import BaseChecker
 
 
 class BasicUserTesting(BaseChecker):
     fields = ['username', 'uuid', 'wins', 'losses']
 
+
 class CustomUserTesting(BaseChecker):
     fields = ['email', 'username', 'uuid', 'wins', 'losses']
+
 
 class AuthTesting(BaseChecker):
     fields = ['user', 'games', 'friends', 'all_users']
@@ -34,7 +35,7 @@ class AuthTesting(BaseChecker):
         # First make sure we got the right fields back
         for field in self.fields:
             self.assertTrue(field in self.responseData)
-    
+
         # Now we gotta import the other testers
         from apps.friends.tests.checkers import FriendTesting
         from apps.games.tests.checkers import GameTesting
@@ -43,13 +44,19 @@ class AuthTesting(BaseChecker):
         friendTester = FriendTesting()
 
         # First we check the user dict. Fairly simple
-        self.assertDictEqual(self.responseData.get('user'), self.check_against_data.get('user'), self.auth_user_fields)
+        self.assertDictEqual(self.responseData.get('user'),
+                             self.check_against_data.get('user'),
+                             self.auth_user_fields)
 
         # Now check the games
-        gameTester.assertGamesEqual(self.responseData.get('games'), self.check_against_data.get('games'))
+        gameTester.assertGamesEqual(self.responseData.get('games'),
+                                    self.check_against_data.get('games'))
 
         # Now check the friends
-        friendTester.assertFriendsEqual(self.responseData.get('friends'), self.check_against_data.get('friends'))
+        friendTester.assertFriendsEqual(self.responseData.get('friends'),
+                                        self.check_against_data.get('friends'))
 
         # Now make sure all the users are there
-        self.assertDictListSame(self.responseData.get('all_users'), self.check_against_data.get('all_users'), self.basic_user_fields)
+        self.assertDictListSame(self.responseData.get('all_users'),
+                                self.check_against_data.get('all_users'),
+                                self.basic_user_fields)

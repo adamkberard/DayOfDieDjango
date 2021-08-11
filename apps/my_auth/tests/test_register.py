@@ -1,5 +1,3 @@
-import json
-
 from django.urls import reverse
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
@@ -125,7 +123,7 @@ class Test_Register_View(AuthTesting):
         # Make sure things went wrong first
         self.assertResponse400()
 
-        self.check_against_data = {'email' : ['Enter a valid email address.']}
+        self.check_against_data = {'email': ['Enter a valid email address.']}
         self.fields = ['email']
         self.assertResponseEqual()
 
@@ -148,13 +146,13 @@ class Test_Register_View(AuthTesting):
         client = APIClient()
         url = reverse('my_register')
         self.response = client.post(url, data, format='json')
-        
+
         # Make sure things went wrong first
         self.assertResponse400()
 
         self.check_against_data = {
-            'password' : ['This password is too short. It must contain at least 8 characters.',
-                          'This password is too common.']}
+            'password': ['This password is too short. It must contain at least 8 characters.',
+                         'This password is too common.']}
         self.fields = ['password']
         self.assertResponseEqual()
 
@@ -170,7 +168,7 @@ class Test_Register_View(AuthTesting):
         self.assertResponse400()
 
         self.check_against_data = {
-            'password' : ['This password is too common.']}
+            'password': ['This password is too common.']}
         self.fields = ['password']
         self.assertResponseEqual()
 
@@ -186,7 +184,8 @@ class Test_Register_View(AuthTesting):
         self.assertResponse400()
 
         self.check_against_data = {
-            'password' : ['This password is entirely numeric.']}
+            'password': ['This password is entirely numeric.']
+        }
         self.fields = ['password']
         self.assertResponseEqual()
 

@@ -1,4 +1,3 @@
-from apps.friends.serializers import FriendSerializer
 from django.contrib.auth.base_user import BaseUserManager
 
 from apps.friends.models import Friend
@@ -20,7 +19,7 @@ class GameManager(BaseUserManager):
         friends_ones = super().get_queryset().filter(team_one=friends)
         friends_twos = super().get_queryset().filter(team_two=friends)
         return friends_ones | friends_twos
-    
+
     def users_wins_losses(self, user):
         # First I get the teams the user in on
         friends = Friend.objects.users_friends(user=user)

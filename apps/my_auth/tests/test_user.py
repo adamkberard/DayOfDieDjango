@@ -1,13 +1,9 @@
-import json
-from datetime import datetime, timedelta
-
-import pytz
 from django.urls import reverse
-from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
 from .checkers import BasicUserTesting
 from .factories import CustomUserFactory
+
 
 class Test_Get_User_Data(BasicUserTesting):
 
@@ -45,7 +41,7 @@ class Test_Get_User_Data(BasicUserTesting):
             'wins': 0,
             'losses': 0
         }
-        
+
         self.assertResponse200()
         self.assertResponseEqual()
 
@@ -78,13 +74,14 @@ class Test_Get_User_Data(BasicUserTesting):
 
         self.assertResponse404()
 
+
 class Test_Edit_User_Data(BasicUserTesting):
 
     def test_edit_username(self):
         """Testing changing my username."""
         authModel = CustomUserFactory()
 
-        data = {'username' : 'newUsername'}
+        data = {'username': 'newUsername'}
 
         client = APIClient()
         url = 'http://testserver/users/' + authModel.username + '/'
@@ -104,7 +101,7 @@ class Test_Edit_User_Data(BasicUserTesting):
         """Testing changing my username to what it already is."""
         authModel = CustomUserFactory()
 
-        data = {'username' : authModel.username}
+        data = {'username': authModel.username}
 
         client = APIClient()
         url = 'http://testserver/users/' + authModel.username + '/'
@@ -125,7 +122,7 @@ class Test_Edit_User_Data(BasicUserTesting):
         authModel = CustomUserFactory()
         otherModel = CustomUserFactory()
 
-        data = {'username' : otherModel.username}
+        data = {'username': otherModel.username}
 
         client = APIClient()
         url = 'http://testserver/users/' + authModel.username + '/'
@@ -142,7 +139,7 @@ class Test_Edit_User_Data(BasicUserTesting):
         authModel = CustomUserFactory()
         otherModel = CustomUserFactory()
 
-        data = {'username' : 'newUsername'}
+        data = {'username': 'newUsername'}
 
         client = APIClient()
         url = 'http://testserver/users/' + otherModel.username + '/'

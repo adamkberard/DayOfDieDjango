@@ -184,9 +184,10 @@ class Test_Game_URL_Params(GameTesting):
         client.force_authenticate(user=gameModel.team_one.team_captain)
         url = reverse('game_request_create')
         self.response = client.post(url, data, format='json')
-
-        self.assertFieldsMissing(['time_started', 'time_ended', 'playerOne', 'playerTwo',
-                       'playerThree', 'playerFour', 'team_one_score', 'team_two_score'])
+        missingFields = [
+            'time_started', 'time_ended', 'playerOne', 'playerTwo', 'playerThree',
+            'playerFour', 'team_one_score', 'team_two_score']
+        self.assertFieldsMissing(missingFields)
 
 
 class Test_Create_Game(GameTesting):

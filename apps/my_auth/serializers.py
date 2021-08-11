@@ -5,6 +5,7 @@ from rest_framework.authtoken.models import Token
 
 from .models import CustomUser
 
+
 class BasicCustomUserSerializer(serializers.Serializer):
     class Meta:
         module = CustomUser
@@ -52,10 +53,10 @@ class MyLogInSerializer(serializers.Serializer):
         return user
 
     def to_representation(self, instance):
-        from apps.friends.serializers import FriendSerializer
-        from apps.games.serializers import GameSerializer
         from apps.friends.models import Friend
+        from apps.friends.serializers import FriendSerializer
         from apps.games.models import Game
+        from apps.games.serializers import GameSerializer
 
         representation = {}
 

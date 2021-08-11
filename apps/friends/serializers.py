@@ -26,7 +26,7 @@ class FriendSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         from apps.games.models import Game
-        
+
         representation = super().to_representation(instance)
         wins = 0
         losses = 0
@@ -43,52 +43,38 @@ class FriendSerializer(serializers.ModelSerializer):
 
 
 class FriendCreateSerializer(serializers.ModelSerializer):
-    team_captain = serializers.CharField()
     teammate = serializers.CharField()
-    status = serializers.CharField()
+    status = serializers.ChoiceField([item[0] for item in Friend.STATUS_CHOICES])
 
     class Meta:
         model = Friend
-        fields = ['team_captain', 'teammate', 'status']
-
-    def validate_team_captain(self, value):
-        """Just have to convert from username to Customer User."""
-        team_captain = CustomUser.objects.get(username=value)
-        return team_captain
+        fields = ['teammate', 'status']
 
     def validate_teammate(self, value):
-        try:
-            teammate = CustomUser.objects.get(username=value)
-        except CustomUser.DoesNotExist:
+        teammate = CustomUser.objects.filter(username=value)
+        if not teammate.exists():
             raise serializers.ValidationError('Teammate not a user.')
-        return teammate
-
-    # TODO
-    # Can def replace this with a choices field... later lol
-    def validate_status(self, value):
-        if value not in [item[0] for item in Friend.STATUS_CHOICES]:
-            raise serializers.ValidationError('Status not valid.')
-        return value
+        return teammate.first()
 
     def validate(self, data):
         """
         Makes sure the friends is okay
         """
-        team_captain = data['team_captain']
+        team_captain = self.context.get('team_captain')
         teammate = data['teammate']
 
         # This is making sure the two users are different
         if team_captain == teammate:
             raise serializers.ValidationError("Users must be different.")
 
-        if not Friend.objects.friendship_exists(data['team_captain'], data['teammate']):
+        if not Friend.objects.friendship_exists(team_captain, teammate):
             # If the friendship doesn't exist, then the status cannot be nothing
             if data['status'] == Friend.STATUS_NOTHING:
                 raise serializers.ValidationError('Cannot create a "Nothing" friend request.')
             return data
 
         # Since we know it exists
-        friendship = Friend.objects.get_friendship(data['team_captain'], data['teammate'])
+        friendship = Friend.objects.get_friendship(team_captain, teammate)
 
         # Now I have to check a lot of things.
         if friendship.status == Friend.STATUS_BLOCKED:
@@ -105,7 +91,7 @@ class FriendCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         # First I will check if a friend request already exists
-        team_captain = validated_data.pop('team_captain')
+        team_captain = self.context.get('team_captain')
         teammate = validated_data.pop('teammate')
         status = validated_data.pop('status')
 
