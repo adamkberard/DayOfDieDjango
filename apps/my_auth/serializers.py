@@ -67,6 +67,9 @@ class MyLogInSerializer(serializers.Serializer):
         token, _ = Token.objects.get_or_create(user=instance)
         representation['user']['token'] = str(token)
 
+        # Also I gotta add the email
+        representation['user']['email'] = instance.email
+
         # Now we get the games
         games = Game.objects.users_games(user=instance)
         representation['games'] = GameSerializer(games, many=True).data
