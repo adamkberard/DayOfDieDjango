@@ -65,4 +65,4 @@ class DetailUserView(RetrieveUpdateAPIView):
         return self.read_serializer
 
     def get_serializer_context(self):
-        return {'requester': self.request.user.uuid}
+        return {'requester': self.request.user}

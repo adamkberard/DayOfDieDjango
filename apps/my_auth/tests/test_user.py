@@ -100,6 +100,26 @@ class Test_Edit_User_Data(BasicUserTesting):
         self.assertResponse200()
         self.assertResponseEqual()
 
+    def test_updating_username_to_current_username(self):
+        """Testing changing my username to what it already is."""
+        authModel = CustomUserFactory()
+
+        data = {'username' : authModel.username}
+
+        client = APIClient()
+        url = 'http://testserver/users/' + authModel.username + '/'
+        client.force_authenticate(user=authModel)
+        self.response = client.patch(url, data, format='json')
+
+        self.check_against_data = {
+            'username': authModel.username,
+            'uuid': str(authModel.uuid),
+            'wins': 0,
+            'losses': 0
+        }
+        self.assertResponse200()
+        self.assertResponseEqual()
+
     def test_edit_username_already_existing(self):
         """Testing changing my username to something that already exists."""
         authModel = CustomUserFactory()

@@ -110,13 +110,13 @@ class CustomUserSerializer(serializers.Serializer):
     def validate_username(self, data):
         if CustomUser.objects.filter(username=data).exists():
             # If the person is us, then whatever who cares
-            if self.context.get('requester') != data:
+            if self.context.get('requester').username != data:
                 raise serializers.ValidationError('Username is not available.')
         return data
 
     def validate(self, data):
         # Gotta make sure the person is the right person
-        if self.context.get('requester') != self.instance.uuid:
+        if self.context.get('requester').uuid != self.instance.uuid:
             raise serializers.ValidationError("Can't edit a user that isn't you.")
         return data
 
