@@ -30,13 +30,6 @@ DEBUG = True
 ALLOWED_HOSTS = ['dayofdie.herokuapp.com', 'dayofdie-test.herokuapp.com',
                  '0.0.0.0', 'localhost', '127.0.0.1']
 
-# ENVIRONMENT VARIABLES
-# SECRET_KEY = os.environ.get('SECRET_KEY')
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
-
-# Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
