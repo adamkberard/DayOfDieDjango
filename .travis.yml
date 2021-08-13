@@ -16,8 +16,6 @@ before_script:
   - psql -c "CREATE USER dayofdieuser WITH PASSWORD 'password';"
   - psql -c "ALTER USER dayofdieuser WITH CREATEDB;"
   - psql -c "CREATE DATABASE dayofdiedb OWNER dayofdieuser;"
-  - python manage.py migrate
-  - python manage.py runserver &
 
 script:
   - python manage.py test
