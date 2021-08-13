@@ -1,0 +1,16 @@
+language: python
+
+python:
+  - "3.9.2"
+
+services:
+  - postgresql
+
+env:
+  - DJANGO=3.2.6
+
+install:
+  - pip install -r requirements.txt
+
+script:
+  - python manage.py test

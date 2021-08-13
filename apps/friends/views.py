@@ -22,7 +22,7 @@ class FriendListCreateAPIView(ListCreateAPIView):
         if self.request.method == 'POST':
             return self.write_serializer
         return self.read_serializer
-
+    
     def get_serializer_context(self):
         return {'team_captain': self.request.user}
 
