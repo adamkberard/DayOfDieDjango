@@ -99,7 +99,7 @@ class FriendCreateSerializer(serializers.ModelSerializer):
 
         if created:
             if status == Friend.STATUS_ACCEPTED:
-                status = Friend.STATUS_PENDING
+                friend.status = Friend.STATUS_PENDING
             else:
                 friend.status = status
         else:
@@ -119,7 +119,6 @@ class FriendCreateSerializer(serializers.ModelSerializer):
                     elif status == Friend.STATUS_NOTHING:
                         friend.status = Friend.STATUS_NOTHING
                 elif friend.status == Friend.STATUS_ACCEPTED:
-                    friend = status
                     if status == Friend.STATUS_BLOCKED:
                         friend.status = Friend.STATUS_BLOCKED
                     elif status == Friend.STATUS_NOTHING:
