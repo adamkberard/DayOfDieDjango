@@ -98,14 +98,10 @@ class FriendCreateSerializer(serializers.ModelSerializer):
         created, friend = Friend.objects.get_or_create_friend(team_captain, teammate)
 
         if created:
-            if status == Friend.STATUS_BLOCKED:
-                friend.status = Friend.STATUS_BLOCKED
-            elif status == Friend.STATUS_NOTHING:
-                friend.status = Friend.STATUS_NOTHING
-            elif status == Friend.STATUS_PENDING:
+            if status == Friend.STATUS_ACCEPTED:
                 friend.status = Friend.STATUS_PENDING
-            elif status == Friend.STATUS_ACCEPTED:
-                friend.status = Friend.STATUS_PENDING
+            else:
+                friend.status = status
         else:
             # This is when the team_captain is the one sending the request
             if friend.team_captain == team_captain:

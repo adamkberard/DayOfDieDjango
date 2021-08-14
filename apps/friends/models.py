@@ -47,11 +47,10 @@ class Friend(TimeStampedModel):
 
     team_captain = models.ForeignKey(settings.AUTH_USER_MODEL,
                                      on_delete=models.CASCADE,
-                                     related_name="teamOne")
+                                     related_name="team_captain")
     teammate = models.ForeignKey(settings.AUTH_USER_MODEL,
                                  on_delete=models.CASCADE,
-                                 related_name="teamTwo")
-    team_name = models.CharField(max_length=50, blank=True, null=True)
+                                 related_name="teammate")
 
     objects = FriendManager()
 

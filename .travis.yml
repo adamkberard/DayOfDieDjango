@@ -1,0 +1,21 @@
+language: python
+
+python:
+  - "3.9.0"
+
+services:
+  - postgresql
+
+env:
+  - DJANGO=3.2.6
+
+install:
+  - pip install -r requirements.txt
+
+before_script:
+  - psql -c "CREATE USER dayofdieuser WITH PASSWORD 'password';"
+  - psql -c "ALTER USER dayofdieuser WITH CREATEDB;"
+  - psql -c "CREATE DATABASE dayofdiedb OWNER dayofdieuser;"
+
+script:
+  - python manage.py test
