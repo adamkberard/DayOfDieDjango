@@ -160,6 +160,6 @@ MEDIA_URL = '/media/'
 # SALT
 HASHIDS = {
     # Keep salt secret
-    'SALT': 'im the sasquatch kid. wait no. the big squaaaaaaaaaaatch hehe',
+    'SALT': os.environ.get('SALT'),
     'MIN_LENGTH': 8
 }

@@ -65,6 +65,7 @@ class Point(TimeStampedModel):
     TYPE_FIFA = 'ff'
     TYPE_FIELD_GOAL = 'fg'
     TYPE_FIVE = 'fv'
+    TYPE_UNTRACKED = 'ut'
 
     TYPE_CHOICES = (
         (TYPE_SINGLE, 'Single Point'),
@@ -76,6 +77,7 @@ class Point(TimeStampedModel):
         (TYPE_FIFA, 'Fifa'),
         (TYPE_FIELD_GOAL, 'Field Goal'),
         (TYPE_FIVE, 'Five'),
+        (TYPE_UNTRACKED, 'Untracked'),
     )
 
     uuid = models.UUIDField(

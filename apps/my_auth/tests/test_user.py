@@ -15,16 +15,17 @@ class Test_Get_User_Data(BasicUserTesting):
         client = APIClient()
         url = 'http://testserver/users/' + userModel.username + '/'
         client.force_authenticate(user=authModel)
-        self.response = client.get(url)
+        response = client.get(url)
 
-        self.check_against_data = {
+        self.assertResponse200(response)
+        responseData = self.loadJSONSafely(response)
+        correctResponse = {
             'username': userModel.username,
             'uuid': str(userModel.uuid),
             'wins': 0,
             'losses': 0
         }
-        self.assertResponse200()
-        self.assertResponseEqual()
+        self.assertEqual(correctResponse, responseData)
 
     def test_get_user_data_same_user(self):
         """Testing retriving a regular user's data from a different user."""
@@ -33,17 +34,17 @@ class Test_Get_User_Data(BasicUserTesting):
         client = APIClient()
         url = 'http://testserver/users/' + userModel.username + '/'
         client.force_authenticate(user=userModel)
-        self.response = client.get(url)
+        response = client.get(url)
 
-        self.check_against_data = {
+        self.assertResponse200(response)
+        responseData = self.loadJSONSafely(response)
+        correctResponse = {
             'username': userModel.username,
             'uuid': str(userModel.uuid),
             'wins': 0,
             'losses': 0
         }
-
-        self.assertResponse200()
-        self.assertResponseEqual()
+        self.assertEqual(correctResponse, responseData)
 
     def test_get_user_data_many(self):
         """Testing retriving all the users which is only one."""
@@ -52,16 +53,17 @@ class Test_Get_User_Data(BasicUserTesting):
         client = APIClient()
         url = reverse('user_view')
         client.force_authenticate(user=userModel)
-        self.response = client.get(url)
+        response = client.get(url)
 
-        self.check_against_data = [{
+        self.assertResponse200(response)
+        responseData = self.loadJSONSafely(response)
+        correctResponse = [{
             'username': userModel.username,
             'uuid': str(userModel.uuid),
             'wins': 0,
             'losses': 0
         }]
-        self.assertResponse200()
-        self.assertResponseEqual()
+        self.assertEqual(correctResponse, responseData)
 
     def test_get_user_data_incorrect_username(self):
         """Testing retriving a regular user's data from a different user."""
@@ -70,9 +72,9 @@ class Test_Get_User_Data(BasicUserTesting):
         client = APIClient()
         url = 'http://testserver/users/' + 'badUsername' + '/'
         client.force_authenticate(user=userModel)
-        self.response = client.get(url)
+        response = client.get(url)
 
-        self.assertResponse404()
+        self.assertResponse404(response)
 
 
 class Test_Edit_User_Data(BasicUserTesting):
@@ -86,16 +88,17 @@ class Test_Edit_User_Data(BasicUserTesting):
         client = APIClient()
         url = 'http://testserver/users/' + authModel.username + '/'
         client.force_authenticate(user=authModel)
-        self.response = client.patch(url, data, format='json')
+        response = client.patch(url, data, format='json')
 
-        self.check_against_data = {
+        self.assertResponse200(response)
+        responseData = self.loadJSONSafely(response)
+        correctResponse = {
             'username': 'newUsername',
             'uuid': str(authModel.uuid),
             'wins': 0,
             'losses': 0
         }
-        self.assertResponse200()
-        self.assertResponseEqual()
+        self.assertEqual(correctResponse, responseData)
 
     def test_updating_username_to_current_username(self):
         """Testing changing my username to what it already is."""
@@ -106,16 +109,17 @@ class Test_Edit_User_Data(BasicUserTesting):
         client = APIClient()
         url = 'http://testserver/users/' + authModel.username + '/'
         client.force_authenticate(user=authModel)
-        self.response = client.patch(url, data, format='json')
+        response = client.patch(url, data, format='json')
 
-        self.check_against_data = {
+        self.assertResponse200(response)
+        responseData = self.loadJSONSafely(response)
+        correctResponse = {
             'username': authModel.username,
             'uuid': str(authModel.uuid),
             'wins': 0,
             'losses': 0
         }
-        self.assertResponse200()
-        self.assertResponseEqual()
+        self.assertEqual(correctResponse, responseData)
 
     def test_edit_username_already_existing(self):
         """Testing changing my username to something that already exists."""
@@ -127,12 +131,12 @@ class Test_Edit_User_Data(BasicUserTesting):
         client = APIClient()
         url = 'http://testserver/users/' + authModel.username + '/'
         client.force_authenticate(user=authModel)
-        self.response = client.patch(url, data, format='json')
+        response = client.patch(url, data, format='json')
 
-        self.assertResponse400()
-        self.loadJSONSafely()
-        self.check_against_data = {'username': ["Username is not available."]}
-        self.assertResponseEqual()
+        self.assertResponse400(response)
+        responseData = self.loadJSONSafely(response)
+        correctResponse = {'username': ["Username is not available."]}
+        self.assertEqual(correctResponse, responseData)
 
     def test_edit_other_users_username(self):
         """Testing changing somebody else's username."""
@@ -144,9 +148,9 @@ class Test_Edit_User_Data(BasicUserTesting):
         client = APIClient()
         url = 'http://testserver/users/' + otherModel.username + '/'
         client.force_authenticate(user=authModel)
-        self.response = client.patch(url, data, format='json')
+        response = client.patch(url, data, format='json')
 
-        self.assertResponse400()
-        self.loadJSONSafely()
-        self.check_against_data = {'non_field_errors': ["Can't edit a user that isn't you."]}
-        self.assertResponseEqual()
+        self.assertResponse400(response)
+        responseData = self.loadJSONSafely(response)
+        correctResponse = {'non_field_errors': ["Can't edit a user that isn't you."]}
+        self.assertEqual(correctResponse, responseData)

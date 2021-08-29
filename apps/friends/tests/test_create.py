@@ -1,3 +1,4 @@
+from django.db import reset_queries
 from django.urls import reverse
 from rest_framework.test import APIClient
 
@@ -19,13 +20,17 @@ class Test_Friend_URL_Params(FriendTesting):
         client = APIClient()
         client.force_authenticate(user=friendModel.team_captain)
         url = reverse('friend_request_create')
-        self.response = client.post(url, data, format='json')
+        response = client.post(url, data, format='json')
 
-        self.assertResponse400()
-        self.loadJSONSafely()
-        self.assertFieldsMissing(['teammate', 'status'])
+        self.assertResponse400(response)
+        responseData = self.loadJSONSafely(response)
+        correctResponse = {
+            'teammate': ['This field is required.'],
+            'status': ['This field is required.']
+        }
+        self.assertEqual(correctResponse, responseData)
 
-    def test_friend_request_no_teammate_but_status(self):
+    def test_friend_request_no_teammate_(self):
         """Testing a bad friend request with only the status param."""
         friendModel = FriendFactory()
         data = {'status': Friend.STATUS_PENDING}
@@ -33,10 +38,12 @@ class Test_Friend_URL_Params(FriendTesting):
         client = APIClient()
         client.force_authenticate(user=friendModel.team_captain)
         url = reverse('friend_request_create')
-        self.response = client.post(url, data, format='json')
+        response = client.post(url, data, format='json')
 
-        self.assertResponse400()
-        self.assertFieldsMissing(['teammate'])
+        self.assertResponse400(response)
+        responseData = self.loadJSONSafely(response)
+        correctResponse = {'teammate': ['This field is required.']}
+        self.assertEqual(correctResponse, responseData)
 
     def test_friend_request_invalid_status(self):
         """Testing a bad friend request with only the status param that is invalid."""
@@ -47,12 +54,12 @@ class Test_Friend_URL_Params(FriendTesting):
         client = APIClient()
         client.force_authenticate(user=friendModel.team_captain)
         url = reverse('friend_request_create')
-        self.response = client.post(url, data, format='json')
+        response = client.post(url, data, format='json')
 
-        self.assertResponse400()
-        self.fields = ['status']
-        self.check_against_data = {'status': ['"invalid" is not a valid choice.']}
-        self.assertResponseEqual()
+        self.assertResponse400(response)
+        responseData = self.loadJSONSafely(response)
+        correctResponse = {'status': ['"invalid" is not a valid choice.']}
+        self.assertEqual(correctResponse, responseData)
 
 
 class Test_Create_Nonexistent_Friend(FriendTesting):
@@ -66,23 +73,20 @@ class Test_Create_Nonexistent_Friend(FriendTesting):
         client = APIClient()
         client.force_authenticate(user=requester)
         url = reverse('friend_request_create')
-        self.response = client.post(url, data, format='json')
+        response = client.post(url, data, format='json')
 
-        # The response we want
+        self.assertResponse201(response)
+        responseData = self.loadJSONSafely(response)
+
         friendModel = Friend.objects.get_friendship(requester, requested)
-
-        # Make sure friend model is okay
         self.assertEqual(friendModel.status, Friend.STATUS_BLOCKED)
         self.assertEqual(friendModel.team_captain, requester)
         self.assertEqual(friendModel.teammate, requested)
 
-        # Make the dict to compare return to
-        self.check_against_data = FriendSerializer(friendModel).data
-        self.check_against_data['wins'] = 0
-        self.check_against_data['losses'] = 0
-
-        # Check return
-        self.assertFriendDataEqual()
+        correctResponse = FriendSerializer(friendModel).data
+        correctResponse['wins'] = 0
+        correctResponse['losses'] = 0
+        self.assertEqual(correctResponse, responseData)
 
     def test_nonexistent_friend_nothing(self):
         """Testing a friend request that is a nothing on a nonexistent friendship.
@@ -94,13 +98,12 @@ class Test_Create_Nonexistent_Friend(FriendTesting):
         client = APIClient()
         client.force_authenticate(user=requester)
         url = reverse('friend_request_create')
-        self.response = client.post(url, data, format='json')
+        response = client.post(url, data, format='json')
 
-        self.assertResponse400()
-        self.check_against_data = {
-            'non_field_errors': ['Cannot create a "Nothing" friend request.']
-        }
-        self.assertResponseEqual()
+        self.assertResponse400(response)
+        responseData = self.loadJSONSafely(response)
+        correctResponse = {'non_field_errors': ['Cannot create a "Nothing" friend request.']}
+        self.assertEqual(correctResponse, responseData)
 
     def test_nonexistent_friend_pending(self):
         """Testing a friend request that is a pending on a nonexistent friendship."""
@@ -111,24 +114,20 @@ class Test_Create_Nonexistent_Friend(FriendTesting):
         client = APIClient()
         client.force_authenticate(user=requester)
         url = reverse('friend_request_create')
-        self.response = client.post(url, data, format='json')
+        response = client.post(url, data, format='json')
 
-        # The response we want
+        self.assertResponse201(response)
+        responseData = self.loadJSONSafely(response)
+
         friendModel = Friend.objects.get_friendship(requester, requested)
-
-        # Make sure friend model is okay
         self.assertEqual(friendModel.status, Friend.STATUS_PENDING)
         self.assertEqual(friendModel.team_captain, requester)
         self.assertEqual(friendModel.teammate, requested)
 
-        # Make the dict to compare return to
-        self.check_against_data = FriendSerializer(friendModel).data
-        self.check_against_data['wins'] = 0
-        self.check_against_data['losses'] = 0
-
-        # Check return
-        self.assertResponse201()
-        self.assertFriendDataEqual()
+        correctResponse = FriendSerializer(friendModel).data
+        correctResponse['wins'] = 0
+        correctResponse['losses'] = 0
+        self.assertEqual(correctResponse, responseData)
 
     def test_nonexistent_friend_accept(self):
         """Testing a friend request that is an accept on a nonexistent friendship."""
@@ -139,24 +138,20 @@ class Test_Create_Nonexistent_Friend(FriendTesting):
         client = APIClient()
         client.force_authenticate(user=requester)
         url = reverse('friend_request_create')
-        self.response = client.post(url, data, format='json')
+        response = client.post(url, data, format='json')
 
-        # The response we want
+        self.assertResponse201(response)
+        responseData = self.loadJSONSafely(response)
+
         friendModel = Friend.objects.get_friendship(requester, requested)
-
-        # Make sure friend model is okay
         self.assertEqual(friendModel.status, Friend.STATUS_PENDING)
         self.assertEqual(friendModel.team_captain, requester)
         self.assertEqual(friendModel.teammate, requested)
 
-        # Make the dict to compare return to
-        self.check_against_data = FriendSerializer(friendModel).data
-        self.check_against_data['wins'] = 0
-        self.check_against_data['losses'] = 0
-
-        # Check return
-        self.assertResponse201()
-        self.assertFriendDataEqual()
+        correctResponse = FriendSerializer(friendModel).data
+        correctResponse['wins'] = 0
+        correctResponse['losses'] = 0
+        self.assertEqual(correctResponse, responseData)
 
 
 class Test_Create_Existent_Friend_Blocked(FriendTesting):
@@ -170,19 +165,17 @@ class Test_Create_Existent_Friend_Blocked(FriendTesting):
         client = APIClient()
         client.force_authenticate(user=friendship.team_captain)
         url = reverse('friend_request_create')
-        self.response = client.post(url, data, format='json')
+        response = client.post(url, data, format='json')
 
-        # The response we want
+        self.assertResponse201(response)
+        responseData = self.loadJSONSafely(response)
+ 
         friendModel = Friend.objects.get_friendship(friendship.team_captain, friendship.teammate)
 
-        # Make sure friend model is okay
         self.assertEqual(friendModel, friendship)
+        correctResponse = FriendSerializer(friendModel).data
 
-        # Make the dict to compare return to
-        self.check_against_data = FriendSerializer(friendModel).data
-
-        # Check return
-        self.assertFriendDataEqual()
+        self.assertEqual(correctResponse, responseData)
 
     def test_nothinging_an_existing_blocked_friend_as_team_captain(self):
         """Testing changing an existing blocked friend request to nothing
@@ -193,23 +186,20 @@ class Test_Create_Existent_Friend_Blocked(FriendTesting):
         client = APIClient()
         client.force_authenticate(user=friendship.team_captain)
         url = reverse('friend_request_create')
-        self.response = client.post(url, data, format='json')
+        response = client.post(url, data, format='json')
 
-        # The response we want
+        self.assertResponse201(response)
+        responseData = self.loadJSONSafely(response)
+
         friendModel = Friend.objects.get_friendship(friendship.team_captain, friendship.teammate)
-
-        # Make sure friend model is okay
         self.assertEqual(friendModel.status, Friend.STATUS_NOTHING)
         self.assertEqual(friendModel.team_captain, friendship.team_captain)
         self.assertEqual(friendModel.teammate, friendship.teammate)
 
-        # Make the dict to compare return to
-        self.check_against_data = FriendSerializer(friendModel).data
-        self.check_against_data['wins'] = 0
-        self.check_against_data['losses'] = 0
-
-        # Check return
-        self.assertFriendDataEqual()
+        correctResponse = FriendSerializer(friendModel).data
+        correctResponse['wins'] = 0
+        correctResponse['losses'] = 0
+        self.assertEqual(correctResponse, responseData)
 
     def test_pendinging_an_existing_blocked_friend_as_team_captain(self):
         """Testing changing an existing blocked friend request to pending as
@@ -220,14 +210,13 @@ class Test_Create_Existent_Friend_Blocked(FriendTesting):
         client = APIClient()
         client.force_authenticate(user=friendship.team_captain)
         url = reverse('friend_request_create')
-        self.response = client.post(url, data, format='json')
+        response = client.post(url, data, format='json')
 
         # The response we want
-        self.assertResponse400()
-        self.check_against_data = {
-            'non_field_errors': ['This action is not allowed when blocking.']
-        }
-        self.assertResponseEqual()
+        self.assertResponse400(response)
+        responseData = self.loadJSONSafely(response)
+        correctResponse = {'non_field_errors': ['This action is not allowed when blocking.']}
+        self.assertEqual(correctResponse, responseData)
 
     def test_accepting_an_existing_blocked_friend_as_team_captain(self):
         """Testing changing an existing blocked friend request to accepted as
@@ -238,14 +227,13 @@ class Test_Create_Existent_Friend_Blocked(FriendTesting):
         client = APIClient()
         client.force_authenticate(user=friendship.team_captain)
         url = reverse('friend_request_create')
-        self.response = client.post(url, data, format='json')
+        response = client.post(url, data, format='json')
 
         # The response we want
-        self.assertResponse400()
-        self.check_against_data = {
-            'non_field_errors': ['This action is not allowed when blocking.']
-        }
-        self.assertResponseEqual()
+        self.assertResponse400(response)
+        responseData = self.loadJSONSafely(response)
+        correctResponse = {'non_field_errors': ['This action is not allowed when blocking.']}
+        self.assertEqual(correctResponse, responseData)
 
     def test_doing_everything_to_existing_blocked_friend_as_teammate(self):
         """Testing doing anything to an existing blocked friend request
@@ -259,14 +247,13 @@ class Test_Create_Existent_Friend_Blocked(FriendTesting):
         for status in [item[0] for item in Friend.STATUS_CHOICES]:
             data = {'teammate': friendship.team_captain.username, 'status': status}
 
-            self.response = client.post(url, data, format='json')
+            response = client.post(url, data, format='json')
 
             # The response we want
-            self.assertResponse400()
-            self.check_against_data = {
-                'non_field_errors': ['This action is not allowed when blocking.']
-            }
-            self.assertResponseEqual()
+            self.assertResponse400(response)
+            responseData = self.loadJSONSafely(response)
+            correctResponse = {'non_field_errors': ['This action is not allowed when blocked.']}
+            self.assertEqual(correctResponse, responseData)
 
 
 class Test_Create_Existent_Friend_Nothing(FriendTesting):
@@ -279,23 +266,20 @@ class Test_Create_Existent_Friend_Nothing(FriendTesting):
         client = APIClient()
         client.force_authenticate(user=friendship.team_captain)
         url = reverse('friend_request_create')
-        self.response = client.post(url, data, format='json')
+        response = client.post(url, data, format='json')
 
-        # The response we want
+        self.assertResponse201(response)
+        responseData = self.loadJSONSafely(response)
+
         friendModel = Friend.objects.get_friendship(friendship.team_captain, friendship.teammate)
-
-        # Make sure friend model is okay
         self.assertEqual(friendModel.status, Friend.STATUS_BLOCKED)
         self.assertEqual(friendModel.team_captain, friendship.team_captain)
         self.assertEqual(friendModel.teammate, friendship.teammate)
 
-        # Make the dict to compare return to
-        self.check_against_data = FriendSerializer(friendModel).data
-        self.check_against_data['wins'] = 0
-        self.check_against_data['losses'] = 0
-
-        # Check return
-        self.assertFriendDataEqual()
+        correctResponse = FriendSerializer(friendModel).data
+        correctResponse['wins'] = 0
+        correctResponse['losses'] = 0
+        self.assertEqual(correctResponse, responseData)
 
     def test_blocking_an_existing_nothing_friend_as_teammate(self):
         """Testing blocking an existing nothing friend request as the teammate."""
@@ -305,23 +289,20 @@ class Test_Create_Existent_Friend_Nothing(FriendTesting):
         client = APIClient()
         client.force_authenticate(user=friendship.teammate)
         url = reverse('friend_request_create')
-        self.response = client.post(url, data, format='json')
+        response = client.post(url, data, format='json')
 
-        # The response we want
+        self.assertResponse201(response)
+        responseData = self.loadJSONSafely(response)
+
         friendModel = Friend.objects.get_friendship(friendship.team_captain, friendship.teammate)
-
-        # Make sure friend model is okay
         self.assertEqual(friendModel.status, Friend.STATUS_BLOCKED)
         self.assertEqual(friendModel.team_captain, friendship.teammate)
         self.assertEqual(friendModel.teammate, friendship.team_captain)
 
-        # Make the dict to compare return to
-        self.check_against_data = FriendSerializer(friendModel).data
-        self.check_against_data['wins'] = 0
-        self.check_against_data['losses'] = 0
-
-        # Check return
-        self.assertFriendDataEqual()
+        correctResponse = FriendSerializer(friendModel).data
+        correctResponse['wins'] = 0
+        correctResponse['losses'] = 0
+        self.assertEqual(correctResponse, responseData)
 
     def test_nothinging_an_existing_nothing_friend_as_team_captain(self):
         """Testing nothinging an existing nothing friend request as the team captain."""
@@ -331,19 +312,16 @@ class Test_Create_Existent_Friend_Nothing(FriendTesting):
         client = APIClient()
         client.force_authenticate(user=friendship.team_captain)
         url = reverse('friend_request_create')
-        self.response = client.post(url, data, format='json')
+        response = client.post(url, data, format='json')
 
-        # The response we want
+        self.assertResponse201(response)
+        responseData = self.loadJSONSafely(response)
+    
         friendModel = Friend.objects.get_friendship(friendship.team_captain, friendship.teammate)
-
-        # Make sure friend model is okay
         self.assertEqual(friendModel, friendship)
 
-        # Make the dict to compare return to
-        self.check_against_data = FriendSerializer(friendModel).data
-
-        # Check return
-        self.assertFriendDataEqual()
+        correctResponse = FriendSerializer(friendModel).data
+        self.assertEqual(correctResponse, responseData)
 
     def test_nothinging_an_existing_nothing_friend_as_teammate(self):
         """Testing nothinging an existing nothing friend request as the teammate."""
@@ -353,19 +331,16 @@ class Test_Create_Existent_Friend_Nothing(FriendTesting):
         client = APIClient()
         client.force_authenticate(user=friendship.teammate)
         url = reverse('friend_request_create')
-        self.response = client.post(url, data, format='json')
+        response = client.post(url, data, format='json')
 
-        # The response we want
+        self.assertResponse201(response)
+        responseData = self.loadJSONSafely(response)
+
         friendModel = Friend.objects.get_friendship(friendship.team_captain, friendship.teammate)
-
-        # Make sure friend model is okay
         self.assertEqual(friendModel, friendship)
 
-        # Make the dict to compare return to
-        self.check_against_data = FriendSerializer(friendModel).data
-
-        # Check return
-        self.assertFriendDataEqual()
+        correctResponse = FriendSerializer(friendModel).data
+        self.assertEqual(correctResponse, responseData)
 
     def test_pendinging_an_existing_nothing_friend_as_team_captain(self):
         """Testing pendinging an existing nothing friend request as the team captain."""
@@ -375,23 +350,20 @@ class Test_Create_Existent_Friend_Nothing(FriendTesting):
         client = APIClient()
         client.force_authenticate(user=friendship.team_captain)
         url = reverse('friend_request_create')
-        self.response = client.post(url, data, format='json')
+        response = client.post(url, data, format='json')
 
-        # The response we want
+        self.assertResponse201(response)
+        responseData = self.loadJSONSafely(response)
+
         friendModel = Friend.objects.get_friendship(friendship.team_captain, friendship.teammate)
-
-        # Make sure friend model is okay
         self.assertEqual(friendModel.status, Friend.STATUS_PENDING)
         self.assertEqual(friendModel.team_captain, friendship.team_captain)
         self.assertEqual(friendModel.teammate, friendship.teammate)
 
-        # Make the dict to compare return to
-        self.check_against_data = FriendSerializer(friendModel).data
-        self.check_against_data['wins'] = 0
-        self.check_against_data['losses'] = 0
-
-        # Check return
-        self.assertFriendDataEqual()
+        correctResponse = FriendSerializer(friendModel).data
+        correctResponse['wins'] = 0
+        correctResponse['losses'] = 0
+        self.assertEqual(correctResponse, responseData)
 
     def test_pendinging_an_existing_nothing_friend_as_teammate(self):
         """Testing pendinging an existing nothing friend request as the teammate."""
@@ -401,23 +373,20 @@ class Test_Create_Existent_Friend_Nothing(FriendTesting):
         client = APIClient()
         client.force_authenticate(user=friendship.teammate)
         url = reverse('friend_request_create')
-        self.response = client.post(url, data, format='json')
+        response = client.post(url, data, format='json')
 
-        # The response we want
+        self.assertResponse201(response)
+        responseData = self.loadJSONSafely(response)
+
         friendModel = Friend.objects.get_friendship(friendship.team_captain, friendship.teammate)
-
-        # Make sure friend model is okay
         self.assertEqual(friendModel.status, Friend.STATUS_PENDING)
         self.assertEqual(friendModel.team_captain, friendship.teammate)
         self.assertEqual(friendModel.teammate, friendship.team_captain)
 
-        # Make the dict to compare return to
-        self.check_against_data = FriendSerializer(friendModel).data
-        self.check_against_data['wins'] = 0
-        self.check_against_data['losses'] = 0
-
-        # Check return
-        self.assertFriendDataEqual()
+        correctResponse = FriendSerializer(friendModel).data
+        correctResponse['wins'] = 0
+        correctResponse['losses'] = 0
+        self.assertEqual(correctResponse, responseData)
 
     def test_accepting_an_existing_nothing_friend_as_team_captain(self):
         """Testing accepting an existing nothing friend request as the team captain."""
@@ -427,23 +396,20 @@ class Test_Create_Existent_Friend_Nothing(FriendTesting):
         client = APIClient()
         client.force_authenticate(user=friendship.team_captain)
         url = reverse('friend_request_create')
-        self.response = client.post(url, data, format='json')
+        response = client.post(url, data, format='json')
 
-        # The response we want
+        self.assertResponse201(response)
+        responseData = self.loadJSONSafely(response)
+
         friendModel = Friend.objects.get_friendship(friendship.team_captain, friendship.teammate)
-
-        # Make sure friend model is okay
         self.assertEqual(friendModel.status, Friend.STATUS_PENDING)
         self.assertEqual(friendModel.team_captain, friendship.team_captain)
         self.assertEqual(friendModel.teammate, friendship.teammate)
 
-        # Make the dict to compare return to
-        self.check_against_data = FriendSerializer(friendModel).data
-        self.check_against_data['wins'] = 0
-        self.check_against_data['losses'] = 0
-
-        # Check return
-        self.assertFriendDataEqual()
+        correctResponse  = FriendSerializer(friendModel).data
+        correctResponse ['wins'] = 0
+        correctResponse ['losses'] = 0
+        self.assertEqual(correctResponse, responseData)
 
     def test_accepting_an_existing_nothing_friend_as_teammate(self):
         """Testing accepting an existing nothing friend request as the teammate."""
@@ -453,23 +419,20 @@ class Test_Create_Existent_Friend_Nothing(FriendTesting):
         client = APIClient()
         client.force_authenticate(user=friendship.teammate)
         url = reverse('friend_request_create')
-        self.response = client.post(url, data, format='json')
+        response = client.post(url, data, format='json')
 
-        # The response we want
+        self.assertResponse201(response)
+        responseData = self.loadJSONSafely(response)
+
         friendModel = Friend.objects.get_friendship(friendship.team_captain, friendship.teammate)
-
-        # Make sure friend model is okay
         self.assertEqual(friendModel.status, Friend.STATUS_PENDING)
         self.assertEqual(friendModel.team_captain, friendship.teammate)
         self.assertEqual(friendModel.teammate, friendship.team_captain)
 
-        # Make the dict to compare return to
-        self.check_against_data = FriendSerializer(friendModel).data
-        self.check_against_data['wins'] = 0
-        self.check_against_data['losses'] = 0
-
-        # Check return
-        self.assertFriendDataEqual()
+        correctResponse = FriendSerializer(friendModel).data
+        correctResponse['wins'] = 0
+        correctResponse['losses'] = 0
+        self.assertEqual(correctResponse, responseData)
 
 
 class Test_Create_Existent_Friend_Pending(FriendTesting):
@@ -482,23 +445,22 @@ class Test_Create_Existent_Friend_Pending(FriendTesting):
         client = APIClient()
         client.force_authenticate(user=friendship.team_captain)
         url = reverse('friend_request_create')
-        self.response = client.post(url, data, format='json')
+        response = client.post(url, data, format='json')
 
-        # The response we want
+        self.assertResponse201(response)
+        responseData = self.loadJSONSafely(response)
+
         friendModel = Friend.objects.get_friendship(friendship.team_captain, friendship.teammate)
-
-        # Make sure friend model is okay
         self.assertEqual(friendModel.status, Friend.STATUS_BLOCKED)
         self.assertEqual(friendModel.team_captain, friendship.team_captain)
         self.assertEqual(friendModel.teammate, friendship.teammate)
 
-        # Make the dict to compare return to
-        self.check_against_data = FriendSerializer(friendModel).data
-        self.check_against_data['wins'] = 0
-        self.check_against_data['losses'] = 0
+        correctResponse = FriendSerializer(friendModel).data
+        correctResponse['wins'] = 0
+        correctResponse['losses'] = 0
 
         # Check return
-        self.assertFriendDataEqual()
+        self.assertEqual(correctResponse, responseData)
 
     def test_blocking_an_existing_pending_friend_as_teammate(self):
         """Testing blocking an existing pending friend request as the teammate."""
@@ -508,23 +470,20 @@ class Test_Create_Existent_Friend_Pending(FriendTesting):
         client = APIClient()
         client.force_authenticate(user=friendship.teammate)
         url = reverse('friend_request_create')
-        self.response = client.post(url, data, format='json')
+        response = client.post(url, data, format='json')
 
-        # The response we want
+        self.assertResponse201(response)
+        responseData = self.loadJSONSafely(response)
+
         friendModel = Friend.objects.get_friendship(friendship.team_captain, friendship.teammate)
-
-        # Make sure friend model is okay
         self.assertEqual(friendModel.status, Friend.STATUS_BLOCKED)
         self.assertEqual(friendModel.team_captain, friendship.teammate)
         self.assertEqual(friendModel.teammate, friendship.team_captain)
 
-        # Make the dict to compare return to
-        self.check_against_data = FriendSerializer(friendModel).data
-        self.check_against_data['wins'] = 0
-        self.check_against_data['losses'] = 0
-
-        # Check return
-        self.assertFriendDataEqual()
+        correctResponse = FriendSerializer(friendModel).data
+        correctResponse['wins'] = 0
+        correctResponse['losses'] = 0
+        self.assertEqual(correctResponse, responseData)
 
     def test_nothinging_an_existing_pending_friend_as_team_captain(self):
         """Testing nothinging an existing pending friend request as the team captain."""
@@ -534,23 +493,20 @@ class Test_Create_Existent_Friend_Pending(FriendTesting):
         client = APIClient()
         client.force_authenticate(user=friendship.team_captain)
         url = reverse('friend_request_create')
-        self.response = client.post(url, data, format='json')
+        response = client.post(url, data, format='json')
 
-        # The response we want
+        self.assertResponse201(response)
+        responseData = self.loadJSONSafely(response)
+
         friendModel = Friend.objects.get_friendship(friendship.team_captain, friendship.teammate)
-
-        # Make sure friend model is okay
         self.assertEqual(friendModel.status, Friend.STATUS_NOTHING)
         self.assertEqual(friendModel.team_captain, friendship.team_captain)
         self.assertEqual(friendModel.teammate, friendship.teammate)
 
-        # Make the dict to compare return to
-        self.check_against_data = FriendSerializer(friendModel).data
-        self.check_against_data['wins'] = 0
-        self.check_against_data['losses'] = 0
-
-        # Check return
-        self.assertFriendDataEqual()
+        correctResponse = FriendSerializer(friendModel).data
+        correctResponse['wins'] = 0
+        correctResponse['losses'] = 0
+        self.assertEqual(correctResponse, responseData)
 
     def test_nothinging_an_existing_pending_friend_as_teammate(self):
         """Testing nothinging an existing pending friend request as the teammate."""
@@ -560,23 +516,20 @@ class Test_Create_Existent_Friend_Pending(FriendTesting):
         client = APIClient()
         client.force_authenticate(user=friendship.teammate)
         url = reverse('friend_request_create')
-        self.response = client.post(url, data, format='json')
+        response = client.post(url, data, format='json')
 
-        # The response we want
+        self.assertResponse201(response)
+        responseData = self.loadJSONSafely(response)
+
         friendModel = Friend.objects.get_friendship(friendship.team_captain, friendship.teammate)
-
-        # Make sure friend model is okay
         self.assertEqual(friendModel.status, Friend.STATUS_NOTHING)
         self.assertEqual(friendModel.team_captain, friendship.team_captain)
         self.assertEqual(friendModel.teammate, friendship.teammate)
 
-        # Make the dict to compare return to
-        self.check_against_data = FriendSerializer(friendModel).data
-        self.check_against_data['wins'] = 0
-        self.check_against_data['losses'] = 0
-
-        # Check return
-        self.assertFriendDataEqual()
+        correctResponse = FriendSerializer(friendModel).data
+        correctResponse['wins'] = 0
+        correctResponse['losses'] = 0
+        self.assertEqual(correctResponse, responseData)
 
     def test_pendinging_an_existing_pending_friend_as_team_captain(self):
         """Testing pendinging an existing pending friend request as the team captain."""
@@ -586,19 +539,16 @@ class Test_Create_Existent_Friend_Pending(FriendTesting):
         client = APIClient()
         client.force_authenticate(user=friendship.team_captain)
         url = reverse('friend_request_create')
-        self.response = client.post(url, data, format='json')
+        response = client.post(url, data, format='json')
 
-        # The response we want
+        self.assertResponse201(response)
+        responseData = self.loadJSONSafely(response)
+
         friendModel = Friend.objects.get_friendship(friendship.team_captain, friendship.teammate)
-
-        # Make sure friend model is okay
         self.assertEqual(friendModel, friendship)
 
-        # Make the dict to compare return to
-        self.check_against_data = FriendSerializer(friendModel).data
-
-        # Check return
-        self.assertFriendDataEqual()
+        correctResponse = FriendSerializer(friendModel).data
+        self.assertEqual(correctResponse, responseData)
 
     def test_pendinging_an_existing_pending_friend_as_teammate(self):
         """Testing pendinging an existing pending friend request as the teammate."""
@@ -608,19 +558,16 @@ class Test_Create_Existent_Friend_Pending(FriendTesting):
         client = APIClient()
         client.force_authenticate(user=friendship.teammate)
         url = reverse('friend_request_create')
-        self.response = client.post(url, data, format='json')
+        response = client.post(url, data, format='json')
 
-        # The response we want
+        self.assertResponse201(response)
+        responseData = self.loadJSONSafely(response)
+
         friendModel = Friend.objects.get_friendship(friendship.team_captain, friendship.teammate)
-
-        # Make sure friend model is okay
         self.assertEqual(friendModel, friendship)
 
-        # Make the dict to compare return to
-        self.check_against_data = FriendSerializer(friendModel).data
-
-        # Check return
-        self.assertFriendDataEqual()
+        correctResponse = FriendSerializer(friendModel).data
+        self.assertEqual(correctResponse, responseData)
 
     def test_accepting_an_existing_pending_friend_as_team_captain(self):
         """Testing accepting an existing pending friend request as the team captain."""
@@ -630,23 +577,20 @@ class Test_Create_Existent_Friend_Pending(FriendTesting):
         client = APIClient()
         client.force_authenticate(user=friendship.team_captain)
         url = reverse('friend_request_create')
-        self.response = client.post(url, data, format='json')
+        response = client.post(url, data, format='json')
 
-        # The response we want
+        self.assertResponse201(response)
+        responseData = self.loadJSONSafely(response)
+
         friendModel = Friend.objects.get_friendship(friendship.team_captain, friendship.teammate)
-
-        # Make sure friend model is okay
         self.assertEqual(friendModel.status, Friend.STATUS_PENDING)
         self.assertEqual(friendModel.team_captain, friendship.team_captain)
         self.assertEqual(friendModel.teammate, friendship.teammate)
 
-        # Make the dict to compare return to
-        self.check_against_data = FriendSerializer(friendModel).data
-        self.check_against_data['wins'] = 0
-        self.check_against_data['losses'] = 0
-
-        # Check return
-        self.assertFriendDataEqual()
+        correctResponse = FriendSerializer(friendModel).data
+        correctResponse['wins'] = 0
+        correctResponse['losses'] = 0
+        self.assertEqual(correctResponse, responseData)
 
     def test_accepting_an_existing_pending_friend_as_teammate(self):
         """Testing accepting an existing pending friend request as the teammate."""
@@ -656,23 +600,20 @@ class Test_Create_Existent_Friend_Pending(FriendTesting):
         client = APIClient()
         client.force_authenticate(user=friendship.teammate)
         url = reverse('friend_request_create')
-        self.response = client.post(url, data, format='json')
+        response = client.post(url, data, format='json')
 
-        # The response we want
+        self.assertResponse201(response)
+        responseData = self.loadJSONSafely(response)
+
         friendModel = Friend.objects.get_friendship(friendship.team_captain, friendship.teammate)
-
-        # Make sure friend model is okay
         self.assertEqual(friendModel.status, Friend.STATUS_ACCEPTED)
         self.assertEqual(friendModel.team_captain, friendship.team_captain)
         self.assertEqual(friendModel.teammate, friendship.teammate)
 
-        # Make the dict to compare return to
-        self.check_against_data = FriendSerializer(friendModel).data
-        self.check_against_data['wins'] = 0
-        self.check_against_data['losses'] = 0
-
-        # Check return
-        self.assertFriendDataEqual()
+        correctResponse = FriendSerializer(friendModel).data
+        correctResponse['wins'] = 0
+        correctResponse['losses'] = 0
+        self.assertEqual(correctResponse, responseData)
 
 
 class Test_Create_Existent_Friend_Accepted(FriendTesting):
@@ -685,23 +626,20 @@ class Test_Create_Existent_Friend_Accepted(FriendTesting):
         client = APIClient()
         client.force_authenticate(user=friendship.team_captain)
         url = reverse('friend_request_create')
-        self.response = client.post(url, data, format='json')
+        response = client.post(url, data, format='json')
 
-        # The response we want
+        self.assertResponse201(response)
+        responseData = self.loadJSONSafely(response)
+
         friendModel = Friend.objects.get_friendship(friendship.team_captain, friendship.teammate)
-
-        # Make sure friend model is okay
         self.assertEqual(friendModel.status, Friend.STATUS_BLOCKED)
         self.assertEqual(friendModel.team_captain, friendship.team_captain)
         self.assertEqual(friendModel.teammate, friendship.teammate)
 
-        # Make the dict to compare return to
-        self.check_against_data = FriendSerializer(friendModel).data
-        self.check_against_data['wins'] = 0
-        self.check_against_data['losses'] = 0
-
-        # Check return
-        self.assertFriendDataEqual()
+        correctResponse = FriendSerializer(friendModel).data
+        correctResponse['wins'] = 0
+        correctResponse['losses'] = 0
+        self.assertEqual(correctResponse, responseData)
 
     def test_blocking_an_existing_accepted_friend_as_teammate(self):
         """Testing blocking an existing accepted friend request as the teammate."""
@@ -711,23 +649,20 @@ class Test_Create_Existent_Friend_Accepted(FriendTesting):
         client = APIClient()
         client.force_authenticate(user=friendship.teammate)
         url = reverse('friend_request_create')
-        self.response = client.post(url, data, format='json')
+        response = client.post(url, data, format='json')
 
-        # The response we want
+        self.assertResponse201(response)
+        responseData = self.loadJSONSafely(response)
+
         friendModel = Friend.objects.get_friendship(friendship.team_captain, friendship.teammate)
-
-        # Make sure friend model is okay
         self.assertEqual(friendModel.status, Friend.STATUS_BLOCKED)
         self.assertEqual(friendModel.team_captain, friendship.teammate)
         self.assertEqual(friendModel.teammate, friendship.team_captain)
 
-        # Make the dict to compare return to
-        self.check_against_data = FriendSerializer(friendModel).data
-        self.check_against_data['wins'] = 0
-        self.check_against_data['losses'] = 0
-
-        # Check return
-        self.assertFriendDataEqual()
+        correctResponse = FriendSerializer(friendModel).data
+        correctResponse['wins'] = 0
+        correctResponse['losses'] = 0
+        self.assertEqual(correctResponse, responseData)
 
     def test_nothinging_an_existing_accepted_friend_as_team_captain(self):
         """Testing nothinging an existing accepted friend request as the team captain."""
@@ -737,23 +672,20 @@ class Test_Create_Existent_Friend_Accepted(FriendTesting):
         client = APIClient()
         client.force_authenticate(user=friendship.team_captain)
         url = reverse('friend_request_create')
-        self.response = client.post(url, data, format='json')
+        response = client.post(url, data, format='json')
 
-        # The response we want
+        self.assertResponse201(response)
+        responseData = self.loadJSONSafely(response)
+
         friendModel = Friend.objects.get_friendship(friendship.team_captain, friendship.teammate)
-
-        # Make sure friend model is okay
         self.assertEqual(friendModel.status, Friend.STATUS_NOTHING)
         self.assertEqual(friendModel.team_captain, friendship.team_captain)
         self.assertEqual(friendModel.teammate, friendship.teammate)
 
-        # Make the dict to compare return to
-        self.check_against_data = FriendSerializer(friendModel).data
-        self.check_against_data['wins'] = 0
-        self.check_against_data['losses'] = 0
-
-        # Check return
-        self.assertFriendDataEqual()
+        correctResponse = FriendSerializer(friendModel).data
+        correctResponse['wins'] = 0
+        correctResponse['losses'] = 0
+        self.assertEqual(correctResponse, responseData)
 
     def test_nothinging_an_existing_accepted_friend_as_teammate(self):
         """Testing nothinging an existing accepted friend request as the teammate."""
@@ -763,23 +695,20 @@ class Test_Create_Existent_Friend_Accepted(FriendTesting):
         client = APIClient()
         client.force_authenticate(user=friendship.teammate)
         url = reverse('friend_request_create')
-        self.response = client.post(url, data, format='json')
+        response = client.post(url, data, format='json')
 
-        # The response we want
+        self.assertResponse201(response)
+        responseData = self.loadJSONSafely(response)
+
         friendModel = Friend.objects.get_friendship(friendship.team_captain, friendship.teammate)
-
-        # Make sure friend model is okay
         self.assertEqual(friendModel.status, Friend.STATUS_NOTHING)
         self.assertEqual(friendModel.team_captain, friendship.team_captain)
         self.assertEqual(friendModel.teammate, friendship.teammate)
 
-        # Make the dict to compare return to
-        self.check_against_data = FriendSerializer(friendModel).data
-        self.check_against_data['wins'] = 0
-        self.check_against_data['losses'] = 0
-
-        # Check return
-        self.assertFriendDataEqual()
+        correctResponse = FriendSerializer(friendModel).data
+        correctResponse['wins'] = 0
+        correctResponse['losses'] = 0
+        self.assertEqual(correctResponse, responseData)
 
     def test_pendinging_an_existing_accepted_friend_as_team_captain(self):
         """Testing pendinging an existing accepted friend request as the team captain."""
@@ -789,14 +718,15 @@ class Test_Create_Existent_Friend_Accepted(FriendTesting):
         client = APIClient()
         client.force_authenticate(user=friendship.team_captain)
         url = reverse('friend_request_create')
-        self.response = client.post(url, data, format='json')
+        response = client.post(url, data, format='json')
 
-        # The response we want
-        self.assertResponse400()
-        self.check_against_data = {
+        self.assertResponse400(response)
+        responseData = self.loadJSONSafely(response)
+
+        correctResponse = {
             'non_field_errors': ['Cannot go from accepted friend request to pending.']
         }
-        self.assertResponseEqual()
+        self.assertEqual(correctResponse, responseData)
 
     def test_pendinging_an_existing_accepted_friend_as_teammate(self):
         """Testing pendinging an existing accepted friend request as the teammate."""
@@ -806,14 +736,15 @@ class Test_Create_Existent_Friend_Accepted(FriendTesting):
         client = APIClient()
         client.force_authenticate(user=friendship.teammate)
         url = reverse('friend_request_create')
-        self.response = client.post(url, data, format='json')
+        response = client.post(url, data, format='json')
 
-        # The response we want
-        self.assertResponse400()
-        self.check_against_data = {
-            'non_field_errors': ['Cannot go from accepted frieend request to pending.']
+        self.assertResponse400(response)
+        responseData = self.loadJSONSafely(response)
+
+        correctResponse = {
+            'non_field_errors': ['Cannot go from accepted friend request to pending.']
         }
-        self.assertResponseEqual()
+        self.assertEqual(correctResponse, responseData)
 
     def test_accepting_an_existing_accepted_friend_as_team_captain(self):
         """Testing accepting an existing accepted friend request as the team captain."""
@@ -823,19 +754,16 @@ class Test_Create_Existent_Friend_Accepted(FriendTesting):
         client = APIClient()
         client.force_authenticate(user=friendship.team_captain)
         url = reverse('friend_request_create')
-        self.response = client.post(url, data, format='json')
+        response = client.post(url, data, format='json')
 
-        # The response we want
+        self.assertResponse201(response)
+        responseData = self.loadJSONSafely(response)
+
         friendModel = Friend.objects.get_friendship(friendship.team_captain, friendship.teammate)
-
-        # Make sure friend model is okay
         self.assertEqual(friendModel, friendship)
 
-        # Make the dict to compare return to
-        self.check_against_data = FriendSerializer(friendModel).data
-
-        # Check return
-        self.assertFriendDataEqual()
+        correctResponse = FriendSerializer(friendModel).data
+        self.assertEqual(correctResponse, responseData)
 
     def test_accepting_an_existing_accepted_friend_as_teammate(self):
         """Testing accepting an existing accepted friend request as the teammate."""
@@ -845,16 +773,13 @@ class Test_Create_Existent_Friend_Accepted(FriendTesting):
         client = APIClient()
         client.force_authenticate(user=friendship.teammate)
         url = reverse('friend_request_create')
-        self.response = client.post(url, data, format='json')
+        response = client.post(url, data, format='json')
 
-        # The response we want
+        self.assertResponse201(response)
+        responseData = self.loadJSONSafely(response)
+
         friendModel = Friend.objects.get_friendship(friendship.team_captain, friendship.teammate)
-
-        # Make sure friend model is okay
         self.assertEqual(friendModel, friendship)
 
-        # Make the dict to compare return to
-        self.check_against_data = FriendSerializer(friendModel).data
-
-        # Check return
-        self.assertFriendDataEqual()
+        correctResponse = FriendSerializer(friendModel).data
+        self.assertEqual(correctResponse, responseData)

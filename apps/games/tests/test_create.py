@@ -31,9 +31,12 @@ class Test_Game_URL_Params(GameTesting):
         client = APIClient()
         client.force_authenticate(user=gameModel.team_one.team_captain)
         url = reverse('game_request_create')
-        self.response = client.post(url, data, format='json')
+        response = client.post(url, data, format='json')
 
-        self.assertFieldsMissing(['time_started'])
+        self.assertResponse400(response)
+        responseData = self.loadJSONSafely(response)
+        correctResponse = {'time_started': ['This field is required.']}
+        self.assertEqual(correctResponse, responseData)
 
     def test_game_request_missing_time_ended(self):
         """Testing a bad game request missing the time ended param."""
@@ -51,9 +54,12 @@ class Test_Game_URL_Params(GameTesting):
         client = APIClient()
         client.force_authenticate(user=gameModel.team_one.team_captain)
         url = reverse('game_request_create')
-        self.response = client.post(url, data, format='json')
+        response = client.post(url, data, format='json')
 
-        self.assertFieldsMissing(['time_ended'])
+        self.assertResponse400(response)
+        responseData = self.loadJSONSafely(response)
+        correctResponse = {'time_ended': ['This field is required.']}
+        self.assertEqual(correctResponse, responseData)
 
     def test_game_request_missing_player_one(self):
         """Testing a bad game request missing the player one param."""
@@ -71,9 +77,12 @@ class Test_Game_URL_Params(GameTesting):
         client = APIClient()
         client.force_authenticate(user=gameModel.team_one.team_captain)
         url = reverse('game_request_create')
-        self.response = client.post(url, data, format='json')
+        response = client.post(url, data, format='json')
 
-        self.assertFieldsMissing(['playerOne'])
+        self.assertResponse400(response)
+        responseData = self.loadJSONSafely(response)
+        correctResponse = {'playerOne': ['This field is required.']}
+        self.assertEqual(correctResponse, responseData)
 
     def test_game_request_missing_player_two(self):
         """Testing a bad game request missing the player two param."""
@@ -91,9 +100,12 @@ class Test_Game_URL_Params(GameTesting):
         client = APIClient()
         client.force_authenticate(user=gameModel.team_one.team_captain)
         url = reverse('game_request_create')
-        self.response = client.post(url, data, format='json')
+        response = client.post(url, data, format='json')
 
-        self.assertFieldsMissing(['playerTwo'])
+        self.assertResponse400(response)
+        responseData = self.loadJSONSafely(response)
+        correctResponse = {'playerTwo': ['This field is required.']}
+        self.assertEqual(correctResponse, responseData)
 
     def test_game_request_missing_player_three(self):
         """Testing a bad game request missing the player three param."""
@@ -111,9 +123,12 @@ class Test_Game_URL_Params(GameTesting):
         client = APIClient()
         client.force_authenticate(user=gameModel.team_one.team_captain)
         url = reverse('game_request_create')
-        self.response = client.post(url, data, format='json')
+        response = client.post(url, data, format='json')
 
-        self.assertFieldsMissing(['playerThree'])
+        self.assertResponse400(response)
+        responseData = self.loadJSONSafely(response)
+        correctResponse = {'playerThree': ['This field is required.']}
+        self.assertEqual(correctResponse, responseData)
 
     def test_game_request_missing_player_four(self):
         """Testing a bad game request missing the player four param."""
@@ -131,9 +146,12 @@ class Test_Game_URL_Params(GameTesting):
         client = APIClient()
         client.force_authenticate(user=gameModel.team_one.team_captain)
         url = reverse('game_request_create')
-        self.response = client.post(url, data, format='json')
+        response = client.post(url, data, format='json')
 
-        self.assertFieldsMissing(['playerFour'])
+        self.assertResponse400(response)
+        responseData = self.loadJSONSafely(response)
+        correctResponse = {'playerFour': ['This field is required.']}
+        self.assertEqual(correctResponse, responseData)
 
     def test_game_request_missing_team_one_score(self):
         """Testing a bad game request missing the team one score param."""
@@ -151,9 +169,12 @@ class Test_Game_URL_Params(GameTesting):
         client = APIClient()
         client.force_authenticate(user=gameModel.team_one.team_captain)
         url = reverse('game_request_create')
-        self.response = client.post(url, data, format='json')
+        response = client.post(url, data, format='json')
 
-        self.assertFieldsMissing(['team_one_score'])
+        self.assertResponse400(response)
+        responseData = self.loadJSONSafely(response)
+        correctResponse = {'team_one_score': ['This field is required.']}
+        self.assertEqual(correctResponse, responseData)
 
     def test_game_request_missing_team_two_score(self):
         """Testing a bad game request missing the team two score param."""
@@ -171,9 +192,12 @@ class Test_Game_URL_Params(GameTesting):
         client = APIClient()
         client.force_authenticate(user=gameModel.team_one.team_captain)
         url = reverse('game_request_create')
-        self.response = client.post(url, data, format='json')
+        response = client.post(url, data, format='json')
 
-        self.assertFieldsMissing(['team_two_score'])
+        self.assertResponse400(response)
+        responseData = self.loadJSONSafely(response)
+        correctResponse = {'team_two_score': ['This field is required.']}
+        self.assertEqual(correctResponse, responseData)
 
     def test_game_request_no_params(self):
         """Testing a bad game request with no params."""
@@ -183,11 +207,21 @@ class Test_Game_URL_Params(GameTesting):
         client = APIClient()
         client.force_authenticate(user=gameModel.team_one.team_captain)
         url = reverse('game_request_create')
-        self.response = client.post(url, data, format='json')
-        missingFields = [
-            'time_started', 'time_ended', 'playerOne', 'playerTwo', 'playerThree',
-            'playerFour', 'team_one_score', 'team_two_score']
-        self.assertFieldsMissing(missingFields)
+        response = client.post(url, data, format='json')
+
+        self.assertResponse400(response)
+        responseData = self.loadJSONSafely(response)
+        correctResponse = {
+            'time_started': ['This field is required.'],
+            'time_ended': ['This field is required.'],
+            'playerOne': ['This field is required.'],
+            'playerTwo': ['This field is required.'],
+            'playerThree': ['This field is required.'],
+            'playerFour': ['This field is required.'],
+            'team_one_score': ['This field is required.'],
+            'team_two_score': ['This field is required.'],
+        }
+        self.assertEqual(correctResponse, responseData)
 
 
 class Test_Create_Game(GameTesting):
@@ -231,7 +265,10 @@ class Test_Create_Game(GameTesting):
         client = APIClient()
         client.force_authenticate(user=players[0])
         url = reverse('game_request_create')
-        self.response = client.post(url, data, format='json')
+        response = client.post(url, data, format='json')
+
+        self.assertResponse201(response)
+        responseData = self.loadJSONSafely(response)
 
         # The response we want
         team_one = Friend.objects.get_friendship(players[0], players[1])
@@ -248,13 +285,10 @@ class Test_Create_Game(GameTesting):
         self.assertEqual(gameModel.confirmed, False)
 
         # Make the dict to compare return to
-        self.check_against_data = GameSerializer(gameModel).data
+        correctResponse = GameSerializer(gameModel).data
+        correctResponse['points'] = []
 
-        # I have to manually add an empty points field since we have no full points in this
-        self.check_against_data['points'] = []
-
-        # Check return
-        self.assertGameResponseEqual()
+        self.assertEqual(correctResponse, responseData)
 
     def test_success_different_player_order_no_points(self):
         """Testing creating a game with the players in the opposite order and no points.
@@ -286,7 +320,10 @@ class Test_Create_Game(GameTesting):
         client = APIClient()
         client.force_authenticate(user=players[0])
         url = reverse('game_request_create')
-        self.response = client.post(url, data, format='json')
+        response = client.post(url, data, format='json')
+
+        self.assertResponse201(response)
+        responseData = self.loadJSONSafely(response)
 
         # The response we want
         team_one = Friend.objects.get_friendship(players[0], players[1])
@@ -303,13 +340,10 @@ class Test_Create_Game(GameTesting):
         self.assertEqual(gameModel.confirmed, False)
 
         # Make the dict to compare return to
-        self.check_against_data = GameSerializer(gameModel).data
+        correctResponse = GameSerializer(gameModel).data
+        correctResponse['points'] = []
 
-        # I have to manually add an empty points field since we have no full points in this
-        self.check_against_data['points'] = []
-
-        # Check return
-        self.assertGameResponseEqual()
+        self.assertEqual(correctResponse, responseData)
 
     def test_success_with_points(self):
         """ This is just a game created with the correct amount of corresponding points.
@@ -357,7 +391,10 @@ class Test_Create_Game(GameTesting):
         client = APIClient()
         client.force_authenticate(user=players[0])
         url = reverse('game_request_create')
-        self.response = client.post(url, data, format='json')
+        response = client.post(url, data, format='json')
+
+        self.assertResponse201(response)
+        responseData = self.loadJSONSafely(response)
 
         # The response we want
         team_one = Friend.objects.get_friendship(players[0], players[1])
@@ -377,11 +414,8 @@ class Test_Create_Game(GameTesting):
         pointModels = Point.objects.filter(game=gameModel)
         self.assertEqual(len(pointModels), len(points))
 
-        # Make the dict to compare return to
-        self.check_against_data = GameSerializer(gameModel).data
-
-        # Check return
-        self.assertGameResponseEqual()
+        correctResponse = GameSerializer(gameModel).data
+        self.assertEqual(correctResponse, responseData)
 
     # def test_invalid_score_no_points
     # def test_invalid_score
