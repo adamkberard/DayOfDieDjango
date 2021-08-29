@@ -1,4 +1,3 @@
-from django.db import reset_queries
 from django.urls import reverse
 from rest_framework.test import APIClient
 
@@ -169,7 +168,7 @@ class Test_Create_Existent_Friend_Blocked(FriendTesting):
 
         self.assertResponse201(response)
         responseData = self.loadJSONSafely(response)
- 
+
         friendModel = Friend.objects.get_friendship(friendship.team_captain, friendship.teammate)
 
         self.assertEqual(friendModel, friendship)
@@ -316,7 +315,7 @@ class Test_Create_Existent_Friend_Nothing(FriendTesting):
 
         self.assertResponse201(response)
         responseData = self.loadJSONSafely(response)
-    
+
         friendModel = Friend.objects.get_friendship(friendship.team_captain, friendship.teammate)
         self.assertEqual(friendModel, friendship)
 
@@ -406,9 +405,9 @@ class Test_Create_Existent_Friend_Nothing(FriendTesting):
         self.assertEqual(friendModel.team_captain, friendship.team_captain)
         self.assertEqual(friendModel.teammate, friendship.teammate)
 
-        correctResponse  = FriendSerializer(friendModel).data
-        correctResponse ['wins'] = 0
-        correctResponse ['losses'] = 0
+        correctResponse = FriendSerializer(friendModel).data
+        correctResponse['wins'] = 0
+        correctResponse['losses'] = 0
         self.assertEqual(correctResponse, responseData)
 
     def test_accepting_an_existing_nothing_friend_as_teammate(self):
