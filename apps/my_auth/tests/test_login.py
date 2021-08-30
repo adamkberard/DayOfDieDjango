@@ -19,8 +19,11 @@ class Test_Login_View(AuthTesting):
 
         self.assertResponse200(response)
         responseData = self.loadJSONSafely(response)
-        responseToken = responseData.get('token', '')
-        self.assertEqual(responseToken, str(Token.objects.get(user=userModel)))
+        correctResponse = {
+            'token': str(Token.objects.get(user=userModel)),
+            'username': userModel.username
+        }
+        self.assertEqual(correctResponse, responseData)
 
     def test_correct_login_one_other_user(self):
         """Testing a legitimate login with one other user."""
@@ -34,8 +37,11 @@ class Test_Login_View(AuthTesting):
 
         self.assertResponse200(response)
         responseData = self.loadJSONSafely(response)
-        responseToken = responseData.get('token', '')
-        self.assertEqual(responseToken, str(Token.objects.get(user=userModel)))
+        correctResponse = {
+            'token': str(Token.objects.get(user=userModel)),
+            'username': userModel.username
+        }
+        self.assertEqual(correctResponse, responseData)
 
     def test_login_bad_email(self):
         """Testing a bad login with bad email param."""

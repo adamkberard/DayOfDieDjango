@@ -19,9 +19,12 @@ class Test_Register_View(AuthTesting):
 
         self.assertResponse200(response)
         responseData = self.loadJSONSafely(response)
-        responseToken = responseData.get('token', '')
         user = CustomUser.objects.get(email=data['email'])
-        self.assertEqual(responseToken, str(Token.objects.get(user=user)))
+        correctResponse = {
+            'token': str(Token.objects.get(user=user)),
+            'username': user.username
+        }
+        self.assertEqual(correctResponse, responseData)
 
     def test_correct_register_one_other_user(self):
         """Testing a legitimate registration with one other user."""
@@ -34,9 +37,12 @@ class Test_Register_View(AuthTesting):
 
         self.assertResponse200(response)
         responseData = self.loadJSONSafely(response)
-        responseToken = responseData.get('token', '')
         user = CustomUser.objects.get(email=data['email'])
-        self.assertEqual(responseToken, str(Token.objects.get(user=user)))
+        correctResponse = {
+            'token': str(Token.objects.get(user=user)),
+            'username': user.username
+        }
+        self.assertEqual(correctResponse, responseData)
 
     def test_register_bad_email(self):
         """Testing a bad register with bad email param."""

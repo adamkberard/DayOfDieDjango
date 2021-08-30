@@ -23,7 +23,6 @@ class CustomUserManager(BaseUserManager):
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
         user.username = username
-
         user.save()
         return user
 

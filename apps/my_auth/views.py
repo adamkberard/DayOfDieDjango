@@ -29,7 +29,11 @@ class LoginView(APIView):
             return Response({'user': 'Not a valid user.'}, status=400)
 
         token, _ = Token.objects.get_or_create(user=user)
-        return Response({'token': str(token)}, status=200)
+        content = {
+            'token': str(token),
+            'username': user.username
+        }
+        return Response(content, status=200)
 
 
 class RegisterView(CreateAPIView):
@@ -47,7 +51,11 @@ class RegisterView(CreateAPIView):
                                          password=request.data['password'])
 
         token, _ = Token.objects.get_or_create(user=user)
-        return Response({'token': str(token)}, status=200)
+        content = {
+            'token': str(token),
+            'username': user.username
+        }
+        return Response(content, status=200)
 
 
 class UserView(ListAPIView):

@@ -17,4 +17,4 @@ class CustomUserFactory(factory.django.DjangoModelFactory):
     @classmethod
     def _create(cls, model_class, *args, **kwargs):
         """Create an instance of the model, and save it to the database."""
-        return CustomUser.objects.create_user(kwargs['email'], password=kwargs['password'])
+        return CustomUser.objects.create_user(email=kwargs['email'], password=kwargs['password'])
