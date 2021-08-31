@@ -5,7 +5,6 @@ from apps.friends.models import Friend
 from apps.my_auth.tests.factories import CustomUserFactory
 from apps.my_auth.serializers import CustomUserReadSerializer
 
-from ..serializers import FriendSerializer
 from .checkers import FriendTesting
 from .factories import FriendFactory
 
