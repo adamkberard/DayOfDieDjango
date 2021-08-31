@@ -55,7 +55,7 @@ class RegisterView(CreateAPIView):
             'token': str(token),
             'username': user.username
         }
-        return Response(content, status=200)
+        return Response(content, status=201)
 
 
 class UserView(ListAPIView):
