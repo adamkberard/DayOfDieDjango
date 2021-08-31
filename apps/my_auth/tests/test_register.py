@@ -17,7 +17,7 @@ class Test_Register_View(AuthTesting):
         url = reverse('register')
         response = client.post(url, data, format='json')
 
-        self.assertResponse200(response)
+        self.assertResponse201(response)
         responseData = self.loadJSONSafely(response)
         user = CustomUser.objects.get(email=data['email'])
         correctResponse = {
@@ -35,7 +35,7 @@ class Test_Register_View(AuthTesting):
         url = reverse('register')
         response = client.post(url, data, format='json')
 
-        self.assertResponse200(response)
+        self.assertResponse201(response)
         responseData = self.loadJSONSafely(response)
         user = CustomUser.objects.get(email=data['email'])
         correctResponse = {
