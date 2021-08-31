@@ -28,7 +28,7 @@ class Test_Get_User_Data(BasicUserTesting):
         self.assertEqual(correctResponse, responseData)
 
     def test_get_user_data_same_user(self):
-        """Testing retriving a regular user's data from a different user."""
+        """Testing retriving a user's own data."""
         userModel = CustomUserFactory()
 
         client = APIClient()

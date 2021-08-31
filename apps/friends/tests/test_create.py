@@ -18,7 +18,7 @@ class Test_Friend_URL_Params(FriendTesting):
 
         client = APIClient()
         client.force_authenticate(user=friendModel.team_captain)
-        url = reverse('friend_request_create')
+        url = reverse('friend_generic')
         response = client.post(url, data, format='json')
 
         self.assertResponse400(response)
@@ -36,7 +36,7 @@ class Test_Friend_URL_Params(FriendTesting):
 
         client = APIClient()
         client.force_authenticate(user=friendModel.team_captain)
-        url = reverse('friend_request_create')
+        url = reverse('friend_generic')
         response = client.post(url, data, format='json')
 
         self.assertResponse400(response)
@@ -52,7 +52,7 @@ class Test_Friend_URL_Params(FriendTesting):
 
         client = APIClient()
         client.force_authenticate(user=friendModel.team_captain)
-        url = reverse('friend_request_create')
+        url = reverse('friend_generic')
         response = client.post(url, data, format='json')
 
         self.assertResponse400(response)
@@ -71,7 +71,7 @@ class Test_Create_Nonexistent_Friend(FriendTesting):
 
         client = APIClient()
         client.force_authenticate(user=requester)
-        url = reverse('friend_request_create')
+        url = reverse('friend_generic')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)
@@ -96,7 +96,7 @@ class Test_Create_Nonexistent_Friend(FriendTesting):
 
         client = APIClient()
         client.force_authenticate(user=requester)
-        url = reverse('friend_request_create')
+        url = reverse('friend_generic')
         response = client.post(url, data, format='json')
 
         self.assertResponse400(response)
@@ -112,7 +112,7 @@ class Test_Create_Nonexistent_Friend(FriendTesting):
 
         client = APIClient()
         client.force_authenticate(user=requester)
-        url = reverse('friend_request_create')
+        url = reverse('friend_generic')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)
@@ -136,7 +136,7 @@ class Test_Create_Nonexistent_Friend(FriendTesting):
 
         client = APIClient()
         client.force_authenticate(user=requester)
-        url = reverse('friend_request_create')
+        url = reverse('friend_generic')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)
@@ -163,7 +163,7 @@ class Test_Create_Existent_Friend_Blocked(FriendTesting):
 
         client = APIClient()
         client.force_authenticate(user=friendship.team_captain)
-        url = reverse('friend_request_create')
+        url = reverse('friend_generic')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)
@@ -184,7 +184,7 @@ class Test_Create_Existent_Friend_Blocked(FriendTesting):
 
         client = APIClient()
         client.force_authenticate(user=friendship.team_captain)
-        url = reverse('friend_request_create')
+        url = reverse('friend_generic')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)
@@ -208,7 +208,7 @@ class Test_Create_Existent_Friend_Blocked(FriendTesting):
 
         client = APIClient()
         client.force_authenticate(user=friendship.team_captain)
-        url = reverse('friend_request_create')
+        url = reverse('friend_generic')
         response = client.post(url, data, format='json')
 
         # The response we want
@@ -225,7 +225,7 @@ class Test_Create_Existent_Friend_Blocked(FriendTesting):
 
         client = APIClient()
         client.force_authenticate(user=friendship.team_captain)
-        url = reverse('friend_request_create')
+        url = reverse('friend_generic')
         response = client.post(url, data, format='json')
 
         # The response we want
@@ -241,7 +241,7 @@ class Test_Create_Existent_Friend_Blocked(FriendTesting):
 
         client = APIClient()
         client.force_authenticate(user=friendship.teammate)
-        url = reverse('friend_request_create')
+        url = reverse('friend_generic')
 
         for status in [item[0] for item in Friend.STATUS_CHOICES]:
             data = {'teammate': friendship.team_captain.username, 'status': status}
@@ -264,7 +264,7 @@ class Test_Create_Existent_Friend_Nothing(FriendTesting):
 
         client = APIClient()
         client.force_authenticate(user=friendship.team_captain)
-        url = reverse('friend_request_create')
+        url = reverse('friend_generic')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)
@@ -287,7 +287,7 @@ class Test_Create_Existent_Friend_Nothing(FriendTesting):
 
         client = APIClient()
         client.force_authenticate(user=friendship.teammate)
-        url = reverse('friend_request_create')
+        url = reverse('friend_generic')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)
@@ -310,7 +310,7 @@ class Test_Create_Existent_Friend_Nothing(FriendTesting):
 
         client = APIClient()
         client.force_authenticate(user=friendship.team_captain)
-        url = reverse('friend_request_create')
+        url = reverse('friend_generic')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)
@@ -329,7 +329,7 @@ class Test_Create_Existent_Friend_Nothing(FriendTesting):
 
         client = APIClient()
         client.force_authenticate(user=friendship.teammate)
-        url = reverse('friend_request_create')
+        url = reverse('friend_generic')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)
@@ -348,7 +348,7 @@ class Test_Create_Existent_Friend_Nothing(FriendTesting):
 
         client = APIClient()
         client.force_authenticate(user=friendship.team_captain)
-        url = reverse('friend_request_create')
+        url = reverse('friend_generic')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)
@@ -371,7 +371,7 @@ class Test_Create_Existent_Friend_Nothing(FriendTesting):
 
         client = APIClient()
         client.force_authenticate(user=friendship.teammate)
-        url = reverse('friend_request_create')
+        url = reverse('friend_generic')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)
@@ -394,7 +394,7 @@ class Test_Create_Existent_Friend_Nothing(FriendTesting):
 
         client = APIClient()
         client.force_authenticate(user=friendship.team_captain)
-        url = reverse('friend_request_create')
+        url = reverse('friend_generic')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)
@@ -417,7 +417,7 @@ class Test_Create_Existent_Friend_Nothing(FriendTesting):
 
         client = APIClient()
         client.force_authenticate(user=friendship.teammate)
-        url = reverse('friend_request_create')
+        url = reverse('friend_generic')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)
@@ -443,7 +443,7 @@ class Test_Create_Existent_Friend_Pending(FriendTesting):
 
         client = APIClient()
         client.force_authenticate(user=friendship.team_captain)
-        url = reverse('friend_request_create')
+        url = reverse('friend_generic')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)
@@ -468,7 +468,7 @@ class Test_Create_Existent_Friend_Pending(FriendTesting):
 
         client = APIClient()
         client.force_authenticate(user=friendship.teammate)
-        url = reverse('friend_request_create')
+        url = reverse('friend_generic')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)
@@ -491,7 +491,7 @@ class Test_Create_Existent_Friend_Pending(FriendTesting):
 
         client = APIClient()
         client.force_authenticate(user=friendship.team_captain)
-        url = reverse('friend_request_create')
+        url = reverse('friend_generic')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)
@@ -514,7 +514,7 @@ class Test_Create_Existent_Friend_Pending(FriendTesting):
 
         client = APIClient()
         client.force_authenticate(user=friendship.teammate)
-        url = reverse('friend_request_create')
+        url = reverse('friend_generic')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)
@@ -537,7 +537,7 @@ class Test_Create_Existent_Friend_Pending(FriendTesting):
 
         client = APIClient()
         client.force_authenticate(user=friendship.team_captain)
-        url = reverse('friend_request_create')
+        url = reverse('friend_generic')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)
@@ -556,7 +556,7 @@ class Test_Create_Existent_Friend_Pending(FriendTesting):
 
         client = APIClient()
         client.force_authenticate(user=friendship.teammate)
-        url = reverse('friend_request_create')
+        url = reverse('friend_generic')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)
@@ -575,7 +575,7 @@ class Test_Create_Existent_Friend_Pending(FriendTesting):
 
         client = APIClient()
         client.force_authenticate(user=friendship.team_captain)
-        url = reverse('friend_request_create')
+        url = reverse('friend_generic')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)
@@ -598,7 +598,7 @@ class Test_Create_Existent_Friend_Pending(FriendTesting):
 
         client = APIClient()
         client.force_authenticate(user=friendship.teammate)
-        url = reverse('friend_request_create')
+        url = reverse('friend_generic')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)
@@ -624,7 +624,7 @@ class Test_Create_Existent_Friend_Accepted(FriendTesting):
 
         client = APIClient()
         client.force_authenticate(user=friendship.team_captain)
-        url = reverse('friend_request_create')
+        url = reverse('friend_generic')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)
@@ -647,7 +647,7 @@ class Test_Create_Existent_Friend_Accepted(FriendTesting):
 
         client = APIClient()
         client.force_authenticate(user=friendship.teammate)
-        url = reverse('friend_request_create')
+        url = reverse('friend_generic')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)
@@ -670,7 +670,7 @@ class Test_Create_Existent_Friend_Accepted(FriendTesting):
 
         client = APIClient()
         client.force_authenticate(user=friendship.team_captain)
-        url = reverse('friend_request_create')
+        url = reverse('friend_generic')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)
@@ -693,7 +693,7 @@ class Test_Create_Existent_Friend_Accepted(FriendTesting):
 
         client = APIClient()
         client.force_authenticate(user=friendship.teammate)
-        url = reverse('friend_request_create')
+        url = reverse('friend_generic')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)
@@ -716,7 +716,7 @@ class Test_Create_Existent_Friend_Accepted(FriendTesting):
 
         client = APIClient()
         client.force_authenticate(user=friendship.team_captain)
-        url = reverse('friend_request_create')
+        url = reverse('friend_generic')
         response = client.post(url, data, format='json')
 
         self.assertResponse400(response)
@@ -734,7 +734,7 @@ class Test_Create_Existent_Friend_Accepted(FriendTesting):
 
         client = APIClient()
         client.force_authenticate(user=friendship.teammate)
-        url = reverse('friend_request_create')
+        url = reverse('friend_generic')
         response = client.post(url, data, format='json')
 
         self.assertResponse400(response)
@@ -752,7 +752,7 @@ class Test_Create_Existent_Friend_Accepted(FriendTesting):
 
         client = APIClient()
         client.force_authenticate(user=friendship.team_captain)
-        url = reverse('friend_request_create')
+        url = reverse('friend_generic')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)
@@ -771,7 +771,7 @@ class Test_Create_Existent_Friend_Accepted(FriendTesting):
 
         client = APIClient()
         client.force_authenticate(user=friendship.teammate)
-        url = reverse('friend_request_create')
+        url = reverse('friend_generic')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)

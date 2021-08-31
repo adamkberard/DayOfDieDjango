@@ -1,9 +1,6 @@
 from rest_framework import authentication
-from rest_framework.generics import ListAPIView, ListCreateAPIView
+from rest_framework.generics import ListCreateAPIView
 from rest_framework.permissions import IsAuthenticated
-
-from apps.my_auth.models import CustomUser
-from apps.my_auth.serializers import BasicCustomUserSerializer
 
 from .models import Friend
 from .serializers import FriendCreateSerializer, FriendSerializer
@@ -25,10 +22,3 @@ class FriendListCreateAPIView(ListCreateAPIView):
 
     def get_serializer_context(self):
         return {'team_captain': self.request.user}
-
-
-class AllUsersAPIView(ListAPIView):
-    permission_classes = (IsAuthenticated, )
-    authentication_classes = [authentication.TokenAuthentication]
-    serializer_class = BasicCustomUserSerializer
-    queryset = CustomUser.objects.all()

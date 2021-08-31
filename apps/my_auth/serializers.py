@@ -25,15 +25,7 @@ class LogInSerializer(serializers.Serializer):
         module = CustomUser
 
 
-class BasicCustomUserSerializer(serializers.Serializer):
-    username = serializers.CharField()
-    uuid = serializers.UUIDField()
-
-    class Meta:
-        module = CustomUser
-
-
-class CustomUserPageSerializer(serializers.ModelSerializer):
+class CustomUserReadSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ['username', 'uuid']
@@ -46,8 +38,8 @@ class CustomUserPageSerializer(serializers.ModelSerializer):
         rep['losses'] = losses
         return rep
 
-
-class CustomUserSerializer(serializers.Serializer):
+# For updating a custom user
+class CustomUserWriteSerializer(serializers.Serializer):
     class Meta:
         module = CustomUser
 
@@ -55,7 +47,7 @@ class CustomUserSerializer(serializers.Serializer):
     username = serializers.CharField()
     uuid = serializers.UUIDField()
 
-    # Gotta be sure it doesn't exist already...
+    # Gotta be sure the new username doesn't exist already.
     def validate_username(self, data):
         if CustomUser.objects.filter(username=data).exists():
             # If the person is us, then whatever who cares
@@ -79,4 +71,4 @@ class CustomUserSerializer(serializers.Serializer):
         return instance
 
     def to_representation(self, instance):
-        return CustomUserPageSerializer(instance).data
+        return CustomUserReadSerializer(instance).data

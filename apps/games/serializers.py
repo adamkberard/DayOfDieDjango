@@ -3,7 +3,7 @@ from rest_framework import serializers
 from apps.friends.models import Friend
 from apps.friends.serializers import FriendSerializer
 from apps.my_auth.models import CustomUser
-from apps.my_auth.serializers import BasicCustomUserSerializer
+from apps.my_auth.serializers import CustomUserReadSerializer
 
 from .models import Game, Point
 
@@ -59,7 +59,7 @@ class GameWriteSerializer(serializers.Serializer):
 
 
 class PointSerializer(serializers.ModelSerializer):
-    scorer = BasicCustomUserSerializer()
+    scorer = CustomUserReadSerializer()
 
     class Meta:
         model = Point

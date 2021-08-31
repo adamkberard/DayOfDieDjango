@@ -1,14 +1,14 @@
 from rest_framework import serializers
 
 from apps.my_auth.models import CustomUser
-from apps.my_auth.serializers import BasicCustomUserSerializer
+from apps.my_auth.serializers import CustomUserReadSerializer
 
 from .models import Friend
 
 
 class FriendSerializer(serializers.ModelSerializer):
-    team_captain = BasicCustomUserSerializer()
-    teammate = BasicCustomUserSerializer()
+    team_captain = CustomUserReadSerializer()
+    teammate = CustomUserReadSerializer()
 
     class Meta:
         model = Friend

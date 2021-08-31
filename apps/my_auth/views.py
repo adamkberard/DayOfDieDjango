@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import CustomUser
-from .serializers import (CustomUserPageSerializer, CustomUserSerializer,
+from .serializers import (CustomUserReadSerializer, CustomUserWriteSerializer,
                           LogInSerializer, RegisterSerializer)
 
 
@@ -65,7 +65,7 @@ class UserView(ListAPIView):
     * Requires username
     * Requres token auth
     """
-    serializer_class = CustomUserPageSerializer
+    serializer_class = CustomUserReadSerializer
     permission_classes = (IsAuthenticated,)
     authentication_classes = [authentication.TokenAuthentication]
     renderer_classes = [JSONRenderer]
@@ -81,8 +81,8 @@ class DetailUserView(RetrieveUpdateAPIView):
     * Requires username
     * Requres token auth
     """
-    read_serializer = CustomUserPageSerializer
-    write_serializer = CustomUserSerializer
+    read_serializer = CustomUserReadSerializer
+    write_serializer = CustomUserWriteSerializer
     permission_classes = (IsAuthenticated,)
     authentication_classes = [authentication.TokenAuthentication]
     renderer_classes = [JSONRenderer]
