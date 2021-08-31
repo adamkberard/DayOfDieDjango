@@ -1,14 +1,10 @@
-from django.urls import reverse
-from rest_framework.test import APIClient
-
 from apps.friends.models import Friend
-from apps.my_auth.tests.factories import CustomUserFactory
 from apps.my_auth.serializers import CustomUserReadSerializer
+from apps.my_auth.tests.factories import CustomUserFactory
 
+from ..serializers import FriendSerializer
 from .checkers import FriendTesting
 from .factories import FriendFactory
-from ..serializers import FriendSerializer
-
 
 
 class Test_Friend_Serializers(FriendTesting):

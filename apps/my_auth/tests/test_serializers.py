@@ -1,11 +1,7 @@
-from django.urls import reverse
-from rest_framework.authtoken.models import Token
-from rest_framework.test import APIClient
-
-from .checkers import AuthTesting
-from .factories import DEFAULT_PASSWORD, CustomUserFactory
 from ..models import CustomUser
 from ..serializers import CustomUserReadSerializer
+from .checkers import AuthTesting
+from .factories import CustomUserFactory
 
 
 class Test_User_Serializer(AuthTesting):

@@ -38,6 +38,7 @@ class CustomUserReadSerializer(serializers.ModelSerializer):
         rep['losses'] = losses
         return rep
 
+
 # For updating a custom user
 class CustomUserWriteSerializer(serializers.Serializer):
     class Meta:
