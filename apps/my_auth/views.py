@@ -46,7 +46,7 @@ class RegisterView(CreateAPIView):
         serializer = RegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = CustomUser.objects.create_user(email=request.data['email'],
-                                         password=request.data['password'])
+                                              password=request.data['password'])
 
         token, _ = Token.objects.get_or_create(user=user)
         content = {
