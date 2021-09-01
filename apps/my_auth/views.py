@@ -45,9 +45,7 @@ class RegisterView(CreateAPIView):
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-
-        # Now we create the user and their token
-        user = CustomUser.objects.create(email=request.data['email'],
+        user = CustomUser.objects.create_user(email=request.data['email'],
                                          password=request.data['password'])
 
         token, _ = Token.objects.get_or_create(user=user)
