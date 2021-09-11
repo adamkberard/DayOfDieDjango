@@ -26,6 +26,7 @@ class Test_Game_URL_Params(GameTesting):
             'playerFour': gameModel.team_one.team_captain.uuid,
             'team_one_score': gameModel.team_one_score,
             'team_two_score': gameModel.team_two_score,
+            'points': []
         }
 
         client = APIClient()
@@ -49,6 +50,7 @@ class Test_Game_URL_Params(GameTesting):
             'playerFour': gameModel.team_one.team_captain.uuid,
             'team_one_score': gameModel.team_one_score,
             'team_two_score': gameModel.team_two_score,
+            'points': []
         }
 
         client = APIClient()
@@ -72,6 +74,7 @@ class Test_Game_URL_Params(GameTesting):
             'playerFour': gameModel.team_one.team_captain.uuid,
             'team_one_score': gameModel.team_one_score,
             'team_two_score': gameModel.team_two_score,
+            'points': []
         }
 
         client = APIClient()
@@ -95,6 +98,7 @@ class Test_Game_URL_Params(GameTesting):
             'playerFour': gameModel.team_one.team_captain.uuid,
             'team_one_score': gameModel.team_one_score,
             'team_two_score': gameModel.team_two_score,
+            'points': []
         }
 
         client = APIClient()
@@ -118,6 +122,7 @@ class Test_Game_URL_Params(GameTesting):
             'playerFour': gameModel.team_one.team_captain.uuid,
             'team_one_score': gameModel.team_one_score,
             'team_two_score': gameModel.team_two_score,
+            'points': []
         }
 
         client = APIClient()
@@ -141,6 +146,7 @@ class Test_Game_URL_Params(GameTesting):
             'playerThree': gameModel.team_one.team_captain.uuid,
             'team_one_score': gameModel.team_one_score,
             'team_two_score': gameModel.team_two_score,
+            'points': []
         }
 
         client = APIClient()
@@ -164,6 +170,7 @@ class Test_Game_URL_Params(GameTesting):
             'playerThree': gameModel.team_one.team_captain.uuid,
             'playerFour': gameModel.team_one.team_captain.uuid,
             'team_two_score': gameModel.team_two_score,
+            'points': []
         }
 
         client = APIClient()
@@ -187,6 +194,7 @@ class Test_Game_URL_Params(GameTesting):
             'playerThree': gameModel.team_one.team_captain.uuid,
             'playerFour': gameModel.team_one.team_captain.uuid,
             'team_one_score': gameModel.team_one_score,
+            'points': []
         }
 
         client = APIClient()
@@ -197,6 +205,30 @@ class Test_Game_URL_Params(GameTesting):
         self.assertResponse400(response)
         responseData = self.loadJSONSafely(response)
         correctResponse = {'team_two_score': ['This field is required.']}
+        self.assertEqual(correctResponse, responseData)
+
+    def test_game_request_missing_points(self):
+        """Testing a bad game request missing the team two score param."""
+        gameModel = GameFactory()
+        data = {
+            'time_started': gameModel.time_started,
+            'time_ended': gameModel.time_ended,
+            'playerOne': gameModel.team_one.team_captain.uuid,
+            'playerTwo': gameModel.team_one.team_captain.uuid,
+            'playerThree': gameModel.team_one.team_captain.uuid,
+            'playerFour': gameModel.team_one.team_captain.uuid,
+            'team_one_score': gameModel.team_one_score,
+            'team_two_score': gameModel.team_two_score,
+        }
+
+        client = APIClient()
+        client.force_authenticate(user=gameModel.team_one.team_captain)
+        url = reverse('game_request_create')
+        response = client.post(url, data, format='json')
+
+        self.assertResponse400(response)
+        responseData = self.loadJSONSafely(response)
+        correctResponse = {'points': ['This field is required.']}
         self.assertEqual(correctResponse, responseData)
 
     def test_game_request_no_params(self):
@@ -220,6 +252,7 @@ class Test_Game_URL_Params(GameTesting):
             'playerFour': ['This field is required.'],
             'team_one_score': ['This field is required.'],
             'team_two_score': ['This field is required.'],
+            'points': ['This field is required.']
         }
         self.assertEqual(correctResponse, responseData)
 
@@ -259,7 +292,8 @@ class Test_Create_Game(GameTesting):
             'playerThree': players[2].uuid,
             'playerFour': players[3].uuid,
             'team_one_score': 11,
-            'team_two_score': 9
+            'team_two_score': 9,
+            'points': []
         }
 
         client = APIClient()
@@ -314,7 +348,8 @@ class Test_Create_Game(GameTesting):
             'playerThree': players[3].uuid,
             'playerFour': players[2].uuid,
             'team_one_score': 11,
-            'team_two_score': 9
+            'team_two_score': 9,
+            'points': []
         }
 
         client = APIClient()
