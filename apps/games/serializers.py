@@ -1,10 +1,10 @@
 from rest_framework import serializers
 
+from apps.core.validators import validate_players
 from apps.friends.models import Friend
 from apps.friends.serializers import FriendSerializer
 from apps.my_auth.models import CustomUser
 from apps.my_auth.serializers import CustomUserReadSerializer
-from apps.core.validators import validate_players
 
 from .models import Game, Point
 
@@ -36,7 +36,7 @@ class GameWriteSerializer(serializers.Serializer):
         points_data = validated_data.pop('points')
 
         # Must find the teams myself, if they don't exist I create them
-        playerOne = validated_data.pop('playerOne')
+        playerOne = CustomUser.objects.get(uuid=validated_data.pop('playerOne'))
         playerTwo = CustomUser.objects.get(uuid=validated_data.pop('playerTwo'))
         playerThree = CustomUser.objects.get(uuid=validated_data.pop('playerThree'))
         playerFour = CustomUser.objects.get(uuid=validated_data.pop('playerFour'))
