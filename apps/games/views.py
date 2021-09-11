@@ -22,21 +22,6 @@ class GameListCreateAPIView(ListCreateAPIView):
     def get_queryset(self):
         return Game.objects.users_games(user=self.request.user)
 
-    def create(self, request, *args, **kwargs):
-        try:
-            request.data._mutable = True
-        except Exception:
-            pass
-
-        request.data['points'] = request.data.get('points', [])
-
-        try:
-            request.data._mutable = False
-        except Exception:
-            pass
-
-        return super().create(request, *args, **kwargs)
-
 
 class GameRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     """
