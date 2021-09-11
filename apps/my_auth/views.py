@@ -26,7 +26,7 @@ class LoginView(APIView):
         # Now we retrieve the user and send back their token.
         user = authenticate(username=request.data['email'], password=request.data['password'])
         if user is None:
-            return Response({'user': 'Not a valid user.'}, status=400)
+            return Response({'user': ['Not a valid user.']}, status=400)
 
         token, _ = Token.objects.get_or_create(user=user)
         content = {
