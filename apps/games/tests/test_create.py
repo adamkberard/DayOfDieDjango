@@ -457,3 +457,7 @@ class Test_Create_Game(GameTesting):
     # def test_points_do_not_match_score
     # def test_team_one_points_do_not_match_score
     # def test_team_two_points_do_not_match_score
+    # def test_invalid_player_one
+    # def test_invalid_player_two
+    # def test_invalid_player_three
+    # def test_invalid_player_four
