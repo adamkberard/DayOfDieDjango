@@ -34,3 +34,16 @@ class GameRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         return Game.objects.users_games(user=self.request.user)
+
+
+class GameRetrieveTeamsAPIView(RetrieveUpdateDestroyAPIView):
+    """
+    Getting, updating, or deleting an existing game
+    """
+    permission_classes = (IsAuthenticated, )
+    authentication_classes = [authentication.TokenAuthentication]
+    serializer_class = GameSerializer
+    lookup_field = 'uuid'
+
+    def get_queryset(self):
+        return Game.objects.users_games(user=self.request.user)

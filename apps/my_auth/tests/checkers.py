@@ -10,7 +10,7 @@ class CustomUserTesting(BaseChecker):
 
 
 class AuthTesting(BaseChecker):
-    fields = ['user', 'games', 'friends', 'all_users']
+    fields = ['user', 'games', 'teams', 'all_users']
     auth_user_fields = ['email', 'username', 'uuid', 'token']
     basic_user_fields = ['username', 'uuid', 'wins', 'losses']
     full_user_fields = ['email', 'username', 'uuid', 'token']
@@ -37,11 +37,11 @@ class AuthTesting(BaseChecker):
             self.assertTrue(field in self.responseData)
 
         # Now we gotta import the other testers
-        from apps.friends.tests.checkers import FriendTesting
         from apps.games.tests.checkers import GameTesting
+        from apps.teams.tests.checkers import TeamTesting
 
         gameTester = GameTesting()
-        friendTester = FriendTesting()
+        teamTester = TeamTesting()
 
         # First we check the user dict. Fairly simple
         self.assertDictEqual(self.responseData.get('user'),
@@ -52,9 +52,9 @@ class AuthTesting(BaseChecker):
         gameTester.assertGamesEqual(self.responseData.get('games'),
                                     self.check_against_data.get('games'))
 
-        # Now check the friends
-        friendTester.assertFriendsEqual(self.responseData.get('friends'),
-                                        self.check_against_data.get('friends'))
+        # Now check the teams
+        teamTester.assertTeamsEqual(self.responseData.get('teams'),
+                                    self.check_against_data.get('teams'))
 
         # Now make sure all the users are there
         self.assertDictListSame(self.responseData.get('all_users'),

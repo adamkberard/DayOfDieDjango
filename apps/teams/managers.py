@@ -1,17 +1,17 @@
 from django.contrib.auth.base_user import BaseUserManager
 
 
-class FriendManager(BaseUserManager):
+class TeamManager(BaseUserManager):
     """
-    Custom friend model manager to add my own filter thing
+    Custom team model manager to add my own filter thing
     """
 
-    def users_friends(self, user):
+    def get_player_teams(self, user):
         team_captains = super().get_queryset().filter(teammate=user)
         teammates = super().get_queryset().filter(team_captain=user)
         return team_captains | teammates
 
-    def get_friendship(self, user1, user2):
+    def get_team(self, user1, user2):
         possibility = super().get_queryset().filter(team_captain=user1, teammate=user2).first()
         if possibility is not None:
             return possibility
@@ -22,7 +22,7 @@ class FriendManager(BaseUserManager):
 
         return None
 
-    def friendship_exists(self, user1, user2):
+    def team_exists(self, user1, user2):
         possibility = super().get_queryset().filter(team_captain=user1, teammate=user2).first()
         if possibility is not None:
             return True
@@ -33,14 +33,13 @@ class FriendManager(BaseUserManager):
 
         return False
 
-    def get_or_create_friend(self, user1, user2):
-        if(self.friendship_exists(user1, user2)):
-            return False, self.get_friendship(user1, user2)
+    def get_or_create_team(self, user1, user2):
+        if(self.team_exists(user1, user2)):
+            return False, self.get_team(user1, user2)
 
-        friend = super().create(status='nt',
-                                team_captain=user1,
-                                teammate=user2
-                                )
+        team = super().create(status='nt',
+                              team_captain=user1,
+                              teammate=user2)
 
-        # Returning whether or not the friendship was created, and the friendship
-        return True, friend
+        # Returning whether or not the teamship was created, and the teamship
+        return True, team

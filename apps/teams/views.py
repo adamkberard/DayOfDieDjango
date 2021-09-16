@@ -2,18 +2,18 @@ from rest_framework import authentication
 from rest_framework.generics import ListCreateAPIView
 from rest_framework.permissions import IsAuthenticated
 
-from .models import Friend
-from .serializers import FriendCreateSerializer, FriendSerializer
+from .models import Team
+from .serializers import TeamCreateSerializer, TeamSerializer
 
 
-class FriendListCreateAPIView(ListCreateAPIView):
+class TeamListCreateAPIView(ListCreateAPIView):
     permission_classes = (IsAuthenticated, )
     authentication_classes = [authentication.TokenAuthentication]
-    read_serializer = FriendSerializer
-    write_serializer = FriendCreateSerializer
+    read_serializer = TeamSerializer
+    write_serializer = TeamCreateSerializer
 
     def get_queryset(self):
-        return Friend.objects.users_friends(user=self.request.user)
+        return Team.objects.get_player_teams(user=self.request.user)
 
     def get_serializer_class(self):
         if self.request.method == 'POST':

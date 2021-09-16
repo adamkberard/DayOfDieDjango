@@ -4,10 +4,10 @@ from django.conf import settings
 from django.db import models
 
 from ..core.models import TimeStampedModel
-from .managers import FriendManager
+from .managers import TeamManager
 
 
-class Friend(TimeStampedModel):
+class Team(TimeStampedModel):
     LEAGUE_UNRANKED = 'ur'
     LEAGUE_BRONZE = 'br'
     LEAGUE_SILVER = 'sv'
@@ -52,7 +52,7 @@ class Friend(TimeStampedModel):
                                  on_delete=models.CASCADE,
                                  related_name="teammate")
 
-    objects = FriendManager()
+    objects = TeamManager()
 
     def __str__(self):
         return self.team_captain.username + " and " + self.teammate.username

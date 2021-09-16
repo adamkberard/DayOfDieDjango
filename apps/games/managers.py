@@ -1,6 +1,6 @@
 from django.contrib.auth.base_user import BaseUserManager
 
-from apps.friends.models import Friend
+from apps.teams.models import Team
 
 
 class GameManager(BaseUserManager):
@@ -8,27 +8,27 @@ class GameManager(BaseUserManager):
     Custom game model manager to add my own filter thing
     """
 
-    def users_games(self, user):
+    def get_player_games(self, user):
         # First I get the teams the user in on
-        friends = Friend.objects.users_friends(user=user)
-        friends_ones = super().get_queryset().filter(team_one__in=friends)
-        friends_twos = super().get_queryset().filter(team_two__in=friends)
-        return friends_ones | friends_twos
+        teams = Team.objects.get_player_teams(user=user)
+        teams_ones = super().get_queryset().filter(team_one__in=teams)
+        teams_twos = super().get_queryset().filter(team_two__in=teams)
+        return teams_ones | teams_twos
 
-    def friends_games(self, friends):
-        friends_ones = super().get_queryset().filter(team_one=friends)
-        friends_twos = super().get_queryset().filter(team_two=friends)
-        return friends_ones | friends_twos
+    def get_team_games(self, teams):
+        teams_ones = super().get_queryset().filter(team_one=teams)
+        teams_twos = super().get_queryset().filter(team_two=teams)
+        return teams_ones | teams_twos
 
-    def users_wins_losses(self, user):
+    def get_player_wins_losses(self, user):
         # First I get the teams the user in on
-        friends = Friend.objects.users_friends(user=user)
+        teams = Team.objects.get_player_teams(user=user)
         wins = 0
         losses = 0
 
-        for friend in friends:
-            for game in self.friends_games(friend):
-                if game.didWin(friend):
+        for team in teams:
+            for game in self.get_team_games(team):
+                if game.didWin(team):
                     wins += 1
                 else:
                     losses += 1

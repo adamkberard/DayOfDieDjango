@@ -4,7 +4,7 @@ from django.conf import settings
 from django.db import models
 
 from ..core.models import TimeStampedModel
-from ..friends.models import Friend
+from ..teams.models import Team
 from .managers import GameManager
 
 
@@ -29,10 +29,10 @@ class Game(TimeStampedModel):
         primary_key=True
     )
 
-    team_one = models.ForeignKey(Friend,
+    team_one = models.ForeignKey(Team,
                                  on_delete=models.CASCADE,
                                  related_name="team_one")
-    team_two = models.ForeignKey(Friend,
+    team_two = models.ForeignKey(Team,
                                  on_delete=models.CASCADE,
                                  related_name="team_two")
 
@@ -44,10 +44,10 @@ class Game(TimeStampedModel):
     objects = GameManager()
 
     # TODO
-    def didWin(self, friend):
-        if self.team_one == friend:
+    def didWin(self, team):
+        if self.team_one == team:
             return self.team_one_score > self.team_two_score
-        if self.team_two == friend:
+        if self.team_two == team:
             return self.team_two_score > self.team_one_score
         return False
 

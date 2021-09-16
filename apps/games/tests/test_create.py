@@ -4,8 +4,8 @@ import pytz
 from django.urls import reverse
 from rest_framework.test import APIClient
 
-from apps.friends.models import Friend
 from apps.my_auth.tests.factories import CustomUserFactory
+from apps.teams.models import Team
 
 from ..models import Game, Point
 from ..serializers import GameSerializer
@@ -262,9 +262,9 @@ class Test_Create_Game(GameTesting):
     def test_model_equality(self):
         p1 = CustomUserFactory()
         p2 = CustomUserFactory()
-        team_one = Friend(team_captain=p1, teammate=p2)
-        team_two = Friend(team_captain=p2, teammate=p1)
-        team_three = Friend(team_captain=p1, teammate=p2)
+        team_one = Team(team_captain=p1, teammate=p2)
+        team_two = Team(team_captain=p2, teammate=p1)
+        team_three = Team(team_captain=p1, teammate=p2)
 
         self.assertEqual(team_one, team_two)
         self.assertEqual(team_two, team_three)
@@ -305,8 +305,8 @@ class Test_Create_Game(GameTesting):
         responseData = self.loadJSONSafely(response)
 
         # The response we want
-        team_one = Friend.objects.get_friendship(players[0], players[1])
-        team_two = Friend.objects.get_friendship(players[2], players[3])
+        team_one = Team.objects.get_team(players[0], players[1])
+        team_two = Team.objects.get_team(players[2], players[3])
         gameModel = Game.objects.get(team_one=team_one, time_started=time_started)
 
         # Make sure game model is okay
@@ -361,8 +361,8 @@ class Test_Create_Game(GameTesting):
         responseData = self.loadJSONSafely(response)
 
         # The response we want
-        team_one = Friend.objects.get_friendship(players[0], players[1])
-        team_two = Friend.objects.get_friendship(players[2], players[3])
+        team_one = Team.objects.get_team(players[0], players[1])
+        team_two = Team.objects.get_team(players[2], players[3])
         gameModel = Game.objects.get(team_one=team_one, time_started=time_started)
 
         # Make sure game model is okay
@@ -432,8 +432,8 @@ class Test_Create_Game(GameTesting):
         responseData = self.loadJSONSafely(response)
 
         # The response we want
-        team_one = Friend.objects.get_friendship(players[0], players[1])
-        team_two = Friend.objects.get_friendship(players[2], players[3])
+        team_one = Team.objects.get_team(players[0], players[1])
+        team_two = Team.objects.get_team(players[2], players[3])
         gameModel = Game.objects.get(team_one=team_one, time_started=time_started)
 
         # Make sure game model is okay

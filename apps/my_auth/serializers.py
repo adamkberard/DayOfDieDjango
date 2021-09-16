@@ -33,7 +33,7 @@ class CustomUserReadSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         from apps.games.models import Game
         rep = super().to_representation(instance)
-        wins, losses = Game.objects.users_wins_losses(instance)
+        wins, losses = Game.objects.get_player_wins_losses(instance)
         rep['wins'] = wins
         rep['losses'] = losses
         return rep

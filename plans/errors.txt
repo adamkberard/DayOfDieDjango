@@ -4,7 +4,7 @@ returnData = {'errors': ['list', 'of', 'errors'],
 
 example of not finding a user
 returnData = {'userId': ['User not found'],
-              'errors': ['Cant accept friend request as requester']}
+              'errors': ['Cant accept team request as requester']}
 
 When the error string is too long call it estr
 If it is an error dictionary call it edict
