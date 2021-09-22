@@ -6,5 +6,5 @@ urlpatterns = [
     path('games/', include('apps.games.urls')),
     path('teams/', include('apps.teams.urls')),
     path('auth/', include('apps.my_auth.urls.auth_urls')),
-    path('users/', include('apps.my_auth.urls.user_urls')),
+    path('players/', include('apps.my_auth.urls.player_urls')),
 ]

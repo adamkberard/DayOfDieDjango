@@ -1,7 +1,10 @@
 from rest_framework import authentication
-from rest_framework.generics import (ListCreateAPIView,
+from rest_framework.generics import (ListAPIView, ListCreateAPIView,
                                      RetrieveUpdateDestroyAPIView)
 from rest_framework.permissions import IsAuthenticated
+
+from apps.my_auth.models import CustomUser
+from apps.teams.models import Team
 
 from .models import Game
 from .serializers import GameSerializer, GameWriteSerializer
@@ -20,7 +23,7 @@ class GameListCreateAPIView(ListCreateAPIView):
         return self.read_serializer
 
     def get_queryset(self):
-        return Game.objects.users_games(user=self.request.user)
+        return Game.objects.get_player_games(user=self.request.user)
 
 
 class GameRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
@@ -33,7 +36,7 @@ class GameRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     lookup_field = 'uuid'
 
     def get_queryset(self):
-        return Game.objects.users_games(user=self.request.user)
+        return Game.objects.get_player_games(user=self.request.user)
 
 
 class GameRetrieveTeamsAPIView(RetrieveUpdateDestroyAPIView):
@@ -46,4 +49,26 @@ class GameRetrieveTeamsAPIView(RetrieveUpdateDestroyAPIView):
     lookup_field = 'uuid'
 
     def get_queryset(self):
-        return Game.objects.users_games(user=self.request.user)
+        return Game.objects.get_player_games(user=self.request.user)
+
+
+class GetPlayerGames(ListAPIView):
+    serializer_class = GameSerializer
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = [authentication.TokenAuthentication]
+
+    def get_queryset(self):
+        urlUser = CustomUser.objects.filter(username=self.kwargs['username'])
+        return Game.objects.get_player_games(user=urlUser.first())
+
+
+class GetTeamGames(ListAPIView):
+    serializer_class = GameSerializer
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = [authentication.TokenAuthentication]
+
+    def get_queryset(self):
+        urlUser1 = CustomUser.objects.filter(username=self.kwargs['username1'])
+        urlUser2 = CustomUser.objects.filter(username=self.kwargs['username2'])
+        urlTeam = Team.objects.get_team(urlUser1.first(), urlUser2.first())
+        return Game.objects.get_team_games(urlTeam)

@@ -13,7 +13,7 @@ class Test_Get_User_Data(BasicUserTesting):
         authModel = CustomUserFactory()
 
         client = APIClient()
-        url = 'http://testserver/users/' + userModel.username + '/'
+        url = 'http://testserver/players/' + userModel.username + '/'
         client.force_authenticate(user=authModel)
         response = client.get(url)
 
@@ -32,7 +32,7 @@ class Test_Get_User_Data(BasicUserTesting):
         userModel = CustomUserFactory()
 
         client = APIClient()
-        url = 'http://testserver/users/' + userModel.username + '/'
+        url = 'http://testserver/players/' + userModel.username + '/'
         client.force_authenticate(user=userModel)
         response = client.get(url)
 
@@ -70,7 +70,7 @@ class Test_Get_User_Data(BasicUserTesting):
         userModel = CustomUserFactory()
 
         client = APIClient()
-        url = 'http://testserver/users/' + 'badUsername' + '/'
+        url = 'http://testserver/players/' + 'badUsername' + '/'
         client.force_authenticate(user=userModel)
         response = client.get(url)
 
@@ -86,7 +86,7 @@ class Test_Edit_User_Data(BasicUserTesting):
         data = {'username': 'newUsername'}
 
         client = APIClient()
-        url = 'http://testserver/users/' + authModel.username + '/'
+        url = 'http://testserver/players/' + authModel.username + '/'
         client.force_authenticate(user=authModel)
         response = client.patch(url, data, format='json')
 
@@ -107,7 +107,7 @@ class Test_Edit_User_Data(BasicUserTesting):
         data = {'username': authModel.username}
 
         client = APIClient()
-        url = 'http://testserver/users/' + authModel.username + '/'
+        url = 'http://testserver/players/' + authModel.username + '/'
         client.force_authenticate(user=authModel)
         response = client.patch(url, data, format='json')
 
@@ -129,7 +129,7 @@ class Test_Edit_User_Data(BasicUserTesting):
         data = {'username': otherModel.username}
 
         client = APIClient()
-        url = 'http://testserver/users/' + authModel.username + '/'
+        url = 'http://testserver/players/' + authModel.username + '/'
         client.force_authenticate(user=authModel)
         response = client.patch(url, data, format='json')
 
@@ -146,7 +146,7 @@ class Test_Edit_User_Data(BasicUserTesting):
         data = {'username': 'newUsername'}
 
         client = APIClient()
-        url = 'http://testserver/users/' + otherModel.username + '/'
+        url = 'http://testserver/players/' + otherModel.username + '/'
         client.force_authenticate(user=authModel)
         response = client.patch(url, data, format='json')
 
