@@ -33,4 +33,5 @@ class GetPlayerFriends(ListAPIView):
 
     def get_queryset(self):
         urlUser = CustomUser.objects.filter(username=self.kwargs['username'])
-        return Team.objects.get_player_teams(user=urlUser.first())
+        allTeams = Team.objects.get_player_teams(user=urlUser.first())
+        return allTeams.filter(status=Team.STATUS_ACCEPTED)
