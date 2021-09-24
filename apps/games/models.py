@@ -4,7 +4,7 @@ from django.conf import settings
 from django.db import models
 
 from ..core.models import TimeStampedModel
-from ..friends.models import Friend
+from ..teams.models import Team
 from .managers import GameManager
 
 
@@ -29,26 +29,26 @@ class Game(TimeStampedModel):
         primary_key=True
     )
 
-    team_one = models.ForeignKey(Friend,
-                                 on_delete=models.CASCADE,
-                                 related_name="team_one")
-    team_two = models.ForeignKey(Friend,
-                                 on_delete=models.CASCADE,
-                                 related_name="team_two")
+    home_team = models.ForeignKey(Team,
+                                  on_delete=models.CASCADE,
+                                  related_name="home_team")
+    away_team = models.ForeignKey(Team,
+                                  on_delete=models.CASCADE,
+                                  related_name="away_team")
 
-    team_one_score = models.SmallIntegerField()
-    team_two_score = models.SmallIntegerField()
+    home_team_score = models.SmallIntegerField()
+    away_team_score = models.SmallIntegerField()
 
     confirmed = models.BooleanField()
 
     objects = GameManager()
 
     # TODO
-    def didWin(self, friend):
-        if self.team_one == friend:
-            return self.team_one_score > self.team_two_score
-        if self.team_two == friend:
-            return self.team_two_score > self.team_one_score
+    def didWin(self, team):
+        if self.home_team == team:
+            return self.home_team_score > self.away_team_score
+        if self.away_team == team:
+            return self.away_team_score > self.home_team_score
         return False
 
     def __str__(self):
@@ -65,6 +65,7 @@ class Point(TimeStampedModel):
     TYPE_FIFA = 'ff'
     TYPE_FIELD_GOAL = 'fg'
     TYPE_FIVE = 'fv'
+    TYPE_UNTRACKED = 'ut'
 
     TYPE_CHOICES = (
         (TYPE_SINGLE, 'Single Point'),
@@ -76,6 +77,7 @@ class Point(TimeStampedModel):
         (TYPE_FIFA, 'Fifa'),
         (TYPE_FIELD_GOAL, 'Field Goal'),
         (TYPE_FIVE, 'Five'),
+        (TYPE_UNTRACKED, 'Untracked'),
     )
 
     uuid = models.UUIDField(

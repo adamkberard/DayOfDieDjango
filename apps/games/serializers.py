@@ -1,9 +1,10 @@
 from rest_framework import serializers
 
-from apps.friends.models import Friend
-from apps.friends.serializers import FriendSerializer
+from apps.core.validators import validate_players
 from apps.my_auth.models import CustomUser
-from apps.my_auth.serializers import BasicCustomUserSerializer
+from apps.my_auth.serializers import CustomUserReadSerializer
+from apps.teams.models import Team
+from apps.teams.serializers import TeamSerializer
 
 from .models import Game, Point
 
@@ -14,13 +15,13 @@ class PointWriteSerializer(serializers.Serializer):
 
 
 class GameWriteSerializer(serializers.Serializer):
-    playerOne = serializers.UUIDField()
-    playerTwo = serializers.UUIDField()
-    playerThree = serializers.UUIDField()
-    playerFour = serializers.UUIDField()
+    playerOne = serializers.UUIDField(validators=[validate_players])
+    playerTwo = serializers.UUIDField(validators=[validate_players])
+    playerThree = serializers.UUIDField(validators=[validate_players])
+    playerFour = serializers.UUIDField(validators=[validate_players])
 
-    team_one_score = serializers.IntegerField()
-    team_two_score = serializers.IntegerField()
+    home_team_score = serializers.IntegerField()
+    away_team_score = serializers.IntegerField()
 
     time_started = serializers.DateTimeField()
     time_ended = serializers.DateTimeField()
@@ -40,15 +41,15 @@ class GameWriteSerializer(serializers.Serializer):
         playerThree = CustomUser.objects.get(uuid=validated_data.pop('playerThree'))
         playerFour = CustomUser.objects.get(uuid=validated_data.pop('playerFour'))
 
-        _, team_one = Friend.objects.get_or_create_friend(playerOne, playerTwo)
-        _, team_two = Friend.objects.get_or_create_friend(playerThree, playerFour)
+        _, home_team = Team.objects.get_or_create_team(playerOne, playerTwo)
+        _, away_team = Team.objects.get_or_create_team(playerThree, playerFour)
 
-        team_one.save()
-        team_two.save()
+        home_team.save()
+        away_team.save()
 
         # Created games are always unconfirmed
-        game = Game.objects.create(**validated_data, team_one=team_one,
-                                   team_two=team_two, confirmed=False)
+        game = Game.objects.create(**validated_data, home_team=home_team,
+                                   away_team=away_team, confirmed=False)
 
         for point_data in points_data:
             scorer = CustomUser.objects.get(uuid=point_data.get('scorer'))
@@ -59,7 +60,7 @@ class GameWriteSerializer(serializers.Serializer):
 
 
 class PointSerializer(serializers.ModelSerializer):
-    scorer = BasicCustomUserSerializer()
+    scorer = CustomUserReadSerializer()
 
     class Meta:
         model = Point
@@ -68,8 +69,8 @@ class PointSerializer(serializers.ModelSerializer):
 
 class GameSerializer(serializers.ModelSerializer):
     points = PointSerializer(many=True)
-    team_one = FriendSerializer()
-    team_two = FriendSerializer()
+    home_team = TeamSerializer()
+    away_team = TeamSerializer()
 
     class Meta:
         model = Game

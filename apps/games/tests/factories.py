@@ -4,8 +4,8 @@ import factory
 import factory.fuzzy
 import pytz
 
-from apps.friends.tests.factories import FriendFactory
 from apps.my_auth.tests.factories import CustomUserFactory
+from apps.teams.tests.factories import TeamFactory
 
 from ..models import Game, Point
 
@@ -31,10 +31,10 @@ class GameFactory(factory.django.DjangoModelFactory):
 
     time_started = factory.fuzzy.FuzzyDateTime(datetime.datetime(2021, 3, 12, tzinfo=pytz.utc))
     time_ended = factory.LazyAttribute(lambda o: o.time_started + datetime.timedelta(minutes=25))
-    team_one = factory.SubFactory(FriendFactory)
-    team_two = factory.SubFactory(FriendFactory)
+    home_team = factory.SubFactory(TeamFactory)
+    away_team = factory.SubFactory(TeamFactory)
 
-    team_one_score = 11
-    team_two_score = 9
+    home_team_score = 11
+    away_team_score = 9
 
     confirmed = False

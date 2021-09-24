@@ -4,10 +4,10 @@ from django.conf import settings
 from django.db import models
 
 from ..core.models import TimeStampedModel
-from .managers import FriendManager
+from .managers import TeamManager
 
 
-class Friend(TimeStampedModel):
+class Team(TimeStampedModel):
     LEAGUE_UNRANKED = 'ur'
     LEAGUE_BRONZE = 'br'
     LEAGUE_SILVER = 'sv'
@@ -52,7 +52,7 @@ class Friend(TimeStampedModel):
                                  on_delete=models.CASCADE,
                                  related_name="teammate")
 
-    objects = FriendManager()
+    objects = TeamManager()
 
     def __str__(self):
         return self.team_captain.username + " and " + self.teammate.username
@@ -61,5 +61,7 @@ class Friend(TimeStampedModel):
         return self.team_captain == user
 
     def __eq__(self, other):
-        return (self.team_captain == other.team_captain and self.teammate == other.teammate or
-                self.team_captain == other.teammate and self.teammate == other.team_captain)
+        if other:
+            return (self.team_captain == other.team_captain and self.teammate == other.teammate or
+                    self.team_captain == other.teammate and self.teammate == other.team_captain)
+        return None

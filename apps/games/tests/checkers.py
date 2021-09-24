@@ -4,8 +4,8 @@ from apps.core.checker import BaseChecker
 class GameTesting(BaseChecker):
     def assertPointEqual(self, data1, data2):
         fields = [
-            'points', 'team_one', 'team_two', 'time_started', 'time_ended', 'uuid',
-            'team_one_score', 'team_two_score', 'confirmed'
+            'points', 'home_team', 'away_team', 'time_started', 'time_ended', 'uuid',
+            'home_team_score', 'away_team_score', 'confirmed'
         ]
 
         self.assertEqual(len(data1), len(data2))
@@ -15,8 +15,8 @@ class GameTesting(BaseChecker):
 
     def assertGameEqual(self, data1, data2):
         fields = [
-            'team_one', 'team_two', 'time_started', 'time_ended', 'uuid',
-            'team_one_score', 'team_two_score', 'confirmed'
+            'home_team', 'away_team', 'time_started', 'time_ended', 'uuid',
+            'home_team_score', 'away_team_score', 'confirmed'
         ]
 
         self.assertEqual(len(data1), len(data2))
