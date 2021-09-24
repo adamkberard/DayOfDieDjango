@@ -29,15 +29,15 @@ class Game(TimeStampedModel):
         primary_key=True
     )
 
-    team_one = models.ForeignKey(Team,
-                                 on_delete=models.CASCADE,
-                                 related_name="team_one")
-    team_two = models.ForeignKey(Team,
-                                 on_delete=models.CASCADE,
-                                 related_name="team_two")
+    home_team = models.ForeignKey(Team,
+                                  on_delete=models.CASCADE,
+                                  related_name="home_team")
+    away_team = models.ForeignKey(Team,
+                                  on_delete=models.CASCADE,
+                                  related_name="away_team")
 
-    team_one_score = models.SmallIntegerField()
-    team_two_score = models.SmallIntegerField()
+    home_team_score = models.SmallIntegerField()
+    away_team_score = models.SmallIntegerField()
 
     confirmed = models.BooleanField()
 
@@ -45,10 +45,10 @@ class Game(TimeStampedModel):
 
     # TODO
     def didWin(self, team):
-        if self.team_one == team:
-            return self.team_one_score > self.team_two_score
-        if self.team_two == team:
-            return self.team_two_score > self.team_one_score
+        if self.home_team == team:
+            return self.home_team_score > self.away_team_score
+        if self.away_team == team:
+            return self.away_team_score > self.home_team_score
         return False
 
     def __str__(self):

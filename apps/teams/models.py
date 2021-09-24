@@ -61,5 +61,7 @@ class Team(TimeStampedModel):
         return self.team_captain == user
 
     def __eq__(self, other):
-        return (self.team_captain == other.team_captain and self.teammate == other.teammate or
-                self.team_captain == other.teammate and self.teammate == other.team_captain)
+        if other:
+            return (self.team_captain == other.team_captain and self.teammate == other.teammate or
+                    self.team_captain == other.teammate and self.teammate == other.team_captain)
+        return None
