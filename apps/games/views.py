@@ -58,7 +58,7 @@ class GetPlayerGames(ListAPIView):
     authentication_classes = [authentication.TokenAuthentication]
 
     def get_queryset(self):
-        urlUser = CustomUser.objects.filter(username=self.kwargs['username'])
+        urlUser = CustomUser.objects.filter(username=self.kwargs['username'], is_staff=False)
         return Game.objects.get_player_games(user=urlUser.first())
 
 
@@ -68,7 +68,7 @@ class GetTeamGames(ListAPIView):
     authentication_classes = [authentication.TokenAuthentication]
 
     def get_queryset(self):
-        urlUser1 = CustomUser.objects.filter(username=self.kwargs['username1'])
-        urlUser2 = CustomUser.objects.filter(username=self.kwargs['username2'])
+        urlUser1 = CustomUser.objects.filter(username=self.kwargs['username1'], is_staff=False)
+        urlUser2 = CustomUser.objects.filter(username=self.kwargs['username2'], is_staff=False)
         urlTeam = Team.objects.get_team(urlUser1.first(), urlUser2.first())
         return Game.objects.get_team_games(urlTeam)
