@@ -4,6 +4,6 @@ from apps.my_auth.models import CustomUser
 
 
 def validate_players(data):
-    userList = CustomUser.objects.filter(uuid=data)
+    userList = CustomUser.objects.filter(uuid=data, is_staff=False)
     if not userList.exists():
         raise serializers.ValidationError("User does not exist with that uuid.")

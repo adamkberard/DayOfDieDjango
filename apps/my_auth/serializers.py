@@ -1,6 +1,8 @@
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 
+import string
+
 from .models import CustomUser
 
 
@@ -48,14 +50,22 @@ class CustomUserWriteSerializer(serializers.Serializer):
     username = serializers.CharField()
     uuid = serializers.UUIDField()
 
+    def checkUsernameContents(self, username):
+        allowedCharacters = string.ascii_letters + string.digits
+        allowedCharacters += ".-_"
+        for character in username:
+            if character not in allowedCharacters:
+                raise serializers.ValidationError('Username may only contain A-z, 0-9, and .-_')
+
     # Gotta be sure the new username doesn't exist already.
     def validate_username(self, data):
+        self.checkUsernameContents(data)
         if CustomUser.objects.filter(username=data).exists():
             # If the person is us, then whatever who cares
             if self.context.get('requester').username != data:
                 raise serializers.ValidationError('Username is not available.')
         return data
-
+    
     def validate(self, data):
         # Gotta make sure the person is the right person
         if self.context.get('requester').uuid != self.instance.uuid:
