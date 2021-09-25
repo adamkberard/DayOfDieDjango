@@ -19,7 +19,7 @@ class Test_Register_View(AuthTesting):
 
         self.assertResponse201(response)
         responseData = self.loadJSONSafely(response)
-        user = CustomUser.objects.get(email=data['email'])
+        user = CustomUser.objects.get(email=data['email'], is_staff=False)
         correctResponse = {
             'token': str(Token.objects.get(user=user)),
             'username': user.username
@@ -37,7 +37,7 @@ class Test_Register_View(AuthTesting):
 
         self.assertResponse201(response)
         responseData = self.loadJSONSafely(response)
-        user = CustomUser.objects.get(email=data['email'])
+        user = CustomUser.objects.get(email=data['email'], is_staff=False)
         correctResponse = {
             'token': str(Token.objects.get(user=user)),
             'username': user.username

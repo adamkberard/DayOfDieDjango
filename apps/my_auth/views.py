@@ -58,9 +58,8 @@ class RegisterView(CreateAPIView):
 
 class UserView(ListAPIView):
     """
-    View for getting and setting usernames
+    View for getting all users
 
-    * Requires username
     * Requres token auth
     """
     serializer_class = CustomUserReadSerializer
@@ -68,7 +67,7 @@ class UserView(ListAPIView):
     authentication_classes = [authentication.TokenAuthentication]
     renderer_classes = [JSONRenderer]
 
-    queryset = CustomUser.objects.all()
+    queryset = CustomUser.objects.filter(is_staff=False)
     lookup_field = 'username'
 
 
@@ -85,7 +84,7 @@ class DetailUserView(RetrieveUpdateAPIView):
     authentication_classes = [authentication.TokenAuthentication]
     renderer_classes = [JSONRenderer]
     lookup_field = 'username'
-    queryset = CustomUser.objects.all()
+    queryset = CustomUser.objects.filter(is_staff=False)
 
     def get_serializer_class(self):
         if self.request.method == 'PATCH':

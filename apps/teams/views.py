@@ -32,6 +32,6 @@ class GetPlayerFriends(ListAPIView):
     authentication_classes = [authentication.TokenAuthentication]
 
     def get_queryset(self):
-        urlUser = CustomUser.objects.filter(username=self.kwargs['username'])
+        urlUser = CustomUser.objects.filter(username=self.kwargs['username'], is_staff=False)
         allTeams = Team.objects.get_player_teams(user=urlUser.first())
         return allTeams.filter(status=Team.STATUS_ACCEPTED)

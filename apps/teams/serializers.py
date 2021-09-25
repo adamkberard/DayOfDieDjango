@@ -51,7 +51,7 @@ class TeamCreateSerializer(serializers.ModelSerializer):
         fields = ['teammate', 'status']
 
     def validate_teammate(self, value):
-        teammate = CustomUser.objects.filter(username=value)
+        teammate = CustomUser.objects.filter(username=value, is_staff=False)
         if not teammate.exists():
             raise serializers.ValidationError('Teammate not a user.')
         return teammate.first()

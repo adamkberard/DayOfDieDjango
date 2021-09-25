@@ -9,7 +9,7 @@ def convertToPK(data):
         if term in data:
             username = data[term]
             if username is not None:
-                data[term] = CustomUser.objects.get(username=username).id
+                data[term] = CustomUser.objects.get(username=username, is_staff=False).id
 
     return data
 
