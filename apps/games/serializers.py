@@ -82,4 +82,8 @@ class GameSerializer(serializers.ModelSerializer):
         points_set = Point.objects.filter(game=instance)
         serialized_points = PointSerializer(points_set, many=True)
         representation['points'] = serialized_points.data
+
+        representation['time_started'] = instance.time_started.isoformat()
+        representation['time_ended'] = instance.time_ended.isoformat()
+
         return representation
