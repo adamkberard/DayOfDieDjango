@@ -1,7 +1,7 @@
+import string
+
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
-
-import string
 
 from .models import CustomUser
 
@@ -65,7 +65,7 @@ class CustomUserWriteSerializer(serializers.Serializer):
             if self.context.get('requester').username != data:
                 raise serializers.ValidationError('Username is not available.')
         return data
-    
+
     def validate(self, data):
         # Gotta make sure the person is the right person
         if self.context.get('requester').uuid != self.instance.uuid:

@@ -38,7 +38,8 @@ class GameWriteSerializer(serializers.Serializer):
         # Must find the teams myself, if they don't exist I create them
         playerOne = CustomUser.objects.get(uuid=validated_data.pop('playerOne'), is_staff=False)
         playerTwo = CustomUser.objects.get(uuid=validated_data.pop('playerTwo'), is_staff=False)
-        playerThree = CustomUser.objects.get(uuid=validated_data.pop('playerThree'), is_staff=False)
+        playerThree = CustomUser.objects.get(uuid=validated_data.pop('playerThree'),
+                                             is_staff=False)
         playerFour = CustomUser.objects.get(uuid=validated_data.pop('playerFour'), is_staff=False)
 
         _, home_team = Team.objects.get_or_create_team(playerOne, playerTwo)

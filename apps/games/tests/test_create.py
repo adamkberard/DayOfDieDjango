@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 
+import dateutil.parser
 import pytz
 from django.urls import reverse
 from rest_framework.test import APIClient
@@ -322,6 +323,14 @@ class Test_Create_Game(GameTesting):
         correctResponse = GameSerializer(gameModel).data
         correctResponse['points'] = []
 
+        # Compare the time's manually
+        correctResponse.pop('time_started')
+        correctResponse.pop('time_ended')
+        responseDataTimeStarted = dateutil.parser.isoparse(responseData.pop('time_started'))
+        responseDataTimeEnded = dateutil.parser.isoparse(responseData.pop('time_ended'))
+        self.assertEqual(gameModel.time_started, responseDataTimeStarted)
+        self.assertEqual(gameModel.time_ended, responseDataTimeEnded)
+
         self.assertEqual(correctResponse, responseData)
 
     def test_success_different_player_order_no_points(self):
@@ -377,6 +386,14 @@ class Test_Create_Game(GameTesting):
         # Make the dict to compare return to
         correctResponse = GameSerializer(gameModel).data
         correctResponse['points'] = []
+
+        # Compare the time's manually
+        correctResponse.pop('time_started')
+        correctResponse.pop('time_ended')
+        responseDataTimeStarted = dateutil.parser.isoparse(responseData.pop('time_started'))
+        responseDataTimeEnded = dateutil.parser.isoparse(responseData.pop('time_ended'))
+        self.assertEqual(gameModel.time_started, responseDataTimeStarted)
+        self.assertEqual(gameModel.time_ended, responseDataTimeEnded)
 
         self.assertEqual(correctResponse, responseData)
 
@@ -450,6 +467,14 @@ class Test_Create_Game(GameTesting):
         self.assertEqual(len(pointModels), len(points))
 
         correctResponse = GameSerializer(gameModel).data
+        # Compare the time's manually
+        correctResponse.pop('time_started')
+        correctResponse.pop('time_ended')
+        responseDataTimeStarted = dateutil.parser.isoparse(responseData.pop('time_started'))
+        responseDataTimeEnded = dateutil.parser.isoparse(responseData.pop('time_ended'))
+        self.assertEqual(gameModel.time_started, responseDataTimeStarted)
+        self.assertEqual(gameModel.time_ended, responseDataTimeEnded)
+
         self.assertEqual(correctResponse, responseData)
 
     # def test_invalid_score_no_points
