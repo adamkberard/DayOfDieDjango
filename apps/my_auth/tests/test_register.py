@@ -3,9 +3,9 @@ from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
 from apps.players.models import Player
+from apps.players.tests.factories import DEFAULT_PASSWORD, PlayerFactory
 
 from .checkers import AuthTesting
-from apps.players.tests.factories import DEFAULT_PASSWORD, PlayerFactory
 
 
 class Test_Register_View(AuthTesting):

@@ -2,8 +2,9 @@ from django.urls import reverse
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
-from .checkers import AuthTesting
 from apps.players.tests.factories import DEFAULT_PASSWORD, PlayerFactory
+
+from .checkers import AuthTesting
 
 
 class Test_Login_View(AuthTesting):

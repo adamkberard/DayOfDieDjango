@@ -1,8 +1,8 @@
 from django.urls import reverse
 from rest_framework.test import APIClient
 
-from apps.players.tests.factories import PlayerFactory
 from apps.players.serializers import PlayerReadSerializer
+from apps.players.tests.factories import PlayerFactory
 
 from .checkers import TeamTesting
 from .factories import TeamFactory
