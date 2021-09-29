@@ -4,7 +4,7 @@ import factory
 import factory.fuzzy
 import pytz
 
-from apps.my_auth.tests.factories import PlayerFactory
+from apps.players.tests.factories import PlayerFactory
 from apps.teams.tests.factories import TeamFactory
 
 from ..models import Game, Point

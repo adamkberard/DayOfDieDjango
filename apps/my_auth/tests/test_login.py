@@ -3,7 +3,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
 from .checkers import AuthTesting
-from .factories import DEFAULT_PASSWORD, PlayerFactory
+from apps.players.tests.factories import DEFAULT_PASSWORD, PlayerFactory
 
 
 class Test_Login_View(AuthTesting):
@@ -21,7 +21,7 @@ class Test_Login_View(AuthTesting):
         responseData = self.loadJSONSafely(response)
         correctResponse = {
             'token': str(Token.objects.get(user=userModel)),
-            'username': userModel.username
+            'uuid': str(userModel.uuid)
         }
         self.assertEqual(correctResponse, responseData)
 
@@ -39,7 +39,7 @@ class Test_Login_View(AuthTesting):
         responseData = self.loadJSONSafely(response)
         correctResponse = {
             'token': str(Token.objects.get(user=userModel)),
-            'username': userModel.username
+            'uuid': str(userModel.uuid)
         }
         self.assertEqual(correctResponse, responseData)
 

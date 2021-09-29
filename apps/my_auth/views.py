@@ -28,7 +28,7 @@ class LoginView(APIView):
         token, _ = Token.objects.get_or_create(user=user)
         content = {
             'token': str(token),
-            'username': user.username
+            'uuid': str(user.uuid)
         }
         return Response(content, status=200)
 
@@ -48,6 +48,6 @@ class RegisterView(CreateAPIView):
         token, _ = Token.objects.get_or_create(user=user)
         content = {
             'token': str(token),
-            'username': user.username
+            'uuid': str(user.uuid)
         }
         return Response(content, status=201)

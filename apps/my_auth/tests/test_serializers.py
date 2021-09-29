@@ -2,7 +2,7 @@ from apps.players.models import Player
 from apps.players.serializers import PlayerReadSerializer
 
 from .checkers import AuthTesting
-from .factories import PlayerFactory
+from apps.players.tests.factories import PlayerFactory
 
 
 class Test_User_Serializer(AuthTesting):

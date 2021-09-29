@@ -1,7 +1,7 @@
 import factory
 import factory.fuzzy
 
-from apps.my_auth.tests.factories import PlayerFactory
+from apps.players.tests.factories import PlayerFactory
 
 from ..models import Team
 

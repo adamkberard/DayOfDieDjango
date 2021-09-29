@@ -1,4 +1,4 @@
-from apps.my_auth.tests.factories import PlayerFactory
+from apps.players.tests.factories import PlayerFactory
 from apps.players.serializers import PlayerReadSerializer
 from apps.teams.models import Team
 
