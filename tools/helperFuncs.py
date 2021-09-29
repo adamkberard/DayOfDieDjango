@@ -1,4 +1,4 @@
-from apps.my_auth.models import CustomUser
+from apps.my_auth.models import Player
 
 
 def convertToPK(data):
@@ -9,7 +9,7 @@ def convertToPK(data):
         if term in data:
             username = data[term]
             if username is not None:
-                data[term] = CustomUser.objects.get(username=username, is_staff=False).id
+                data[term] = Player.objects.get(username=username, is_staff=False).id
 
     return data
 

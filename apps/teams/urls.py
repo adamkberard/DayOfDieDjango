@@ -1,16 +1,9 @@
 from django.urls import path
 
-from .views import GetPlayerFriends, TeamListCreateAPIView
+from .views import GetTeamGames, TeamDetail, TeamListCreate
 
 urlpatterns = [
-    path(
-        route='<str:username>/',
-        view=GetPlayerFriends.as_view(),
-        name='player_teams'
-    ),
-    path(
-        route='',
-        view=TeamListCreateAPIView.as_view(),
-        name='team_generic'
-    ),
+    path(route='<uuid:uuid>/', view=TeamDetail.as_view(), name='TeamDetail'),
+    path(route='<uuid:uuid>/games/', view=GetTeamGames.as_view(), name='GetTeamGames'),
+    path(route='', view=TeamListCreate.as_view(), name='TeamListCreate')
 ]

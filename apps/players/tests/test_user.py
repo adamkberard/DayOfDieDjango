@@ -2,18 +2,18 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 
 from .checkers import BasicUserTesting
-from .factories import CustomUserFactory
+from .factories import PlayerFactory
 
 
 class Test_Get_User_Data(BasicUserTesting):
 
     def test_get_user_data_other_user(self):
         """Testing retriving a regular user's data from a different user."""
-        userModel = CustomUserFactory()
-        authModel = CustomUserFactory()
+        userModel = PlayerFactory()
+        authModel = PlayerFactory()
 
         client = APIClient()
-        url = 'http://testserver/players/' + userModel.username + '/'
+        url = reverse('PlayerDetail', kwargs={'uuid': userModel.uuid})
         client.force_authenticate(user=authModel)
         response = client.get(url)
 
@@ -29,10 +29,10 @@ class Test_Get_User_Data(BasicUserTesting):
 
     def test_get_user_data_same_user(self):
         """Testing retriving a user's own data."""
-        userModel = CustomUserFactory()
+        userModel = PlayerFactory()
 
         client = APIClient()
-        url = 'http://testserver/players/' + userModel.username + '/'
+        url = reverse('PlayerDetail', kwargs={'uuid': userModel.uuid})
         client.force_authenticate(user=userModel)
         response = client.get(url)
 
@@ -48,10 +48,10 @@ class Test_Get_User_Data(BasicUserTesting):
 
     def test_get_user_data_many(self):
         """Testing retriving all the users which is only one."""
-        userModel = CustomUserFactory()
+        userModel = PlayerFactory()
 
         client = APIClient()
-        url = reverse('user_view')
+        url = reverse('PlayerList')
         client.force_authenticate(user=userModel)
         response = client.get(url)
 
@@ -65,12 +65,12 @@ class Test_Get_User_Data(BasicUserTesting):
         }]
         self.assertEqual(correctResponse, responseData)
 
-    def test_get_user_data_incorrect_username(self):
-        """Testing retriving a regular user's data from a different user."""
-        userModel = CustomUserFactory()
+    def test_get_user_data_incorrect_uuid(self):
+        """Testing retriving a player with an incorrect uuid."""
+        userModel = PlayerFactory()
 
         client = APIClient()
-        url = 'http://testserver/players/' + 'badUsername' + '/'
+        url = reverse('PlayerDetail', kwargs={'uuid': '00000000-0000-0000-0000-000000000000'})
         client.force_authenticate(user=userModel)
         response = client.get(url)
 
@@ -81,12 +81,12 @@ class Test_Edit_User_Data(BasicUserTesting):
 
     def test_edit_username(self):
         """Testing changing my username."""
-        authModel = CustomUserFactory()
+        authModel = PlayerFactory()
 
         data = {'username': 'newUsername'}
 
         client = APIClient()
-        url = 'http://testserver/players/' + authModel.username + '/'
+        url = reverse('PlayerDetail', kwargs={'uuid': authModel.uuid})
         client.force_authenticate(user=authModel)
         response = client.patch(url, data, format='json')
 
@@ -102,12 +102,12 @@ class Test_Edit_User_Data(BasicUserTesting):
 
     def test_updating_username_to_current_username(self):
         """Testing changing my username to what it already is."""
-        authModel = CustomUserFactory()
+        authModel = PlayerFactory()
 
         data = {'username': authModel.username}
 
         client = APIClient()
-        url = 'http://testserver/players/' + authModel.username + '/'
+        url = reverse('PlayerDetail', kwargs={'uuid': authModel.uuid})
         client.force_authenticate(user=authModel)
         response = client.patch(url, data, format='json')
 
@@ -123,13 +123,13 @@ class Test_Edit_User_Data(BasicUserTesting):
 
     def test_edit_username_already_existing(self):
         """Testing changing my username to something that already exists."""
-        authModel = CustomUserFactory()
-        otherModel = CustomUserFactory()
+        authModel = PlayerFactory()
+        otherModel = PlayerFactory()
 
         data = {'username': otherModel.username}
 
         client = APIClient()
-        url = 'http://testserver/players/' + authModel.username + '/'
+        url = reverse('PlayerDetail', kwargs={'uuid': authModel.uuid})
         client.force_authenticate(user=authModel)
         response = client.patch(url, data, format='json')
 
@@ -140,13 +140,13 @@ class Test_Edit_User_Data(BasicUserTesting):
 
     def test_edit_other_users_username(self):
         """Testing changing somebody else's username."""
-        authModel = CustomUserFactory()
-        otherModel = CustomUserFactory()
+        authModel = PlayerFactory()
+        otherModel = PlayerFactory()
 
         data = {'username': 'newUsername'}
 
         client = APIClient()
-        url = 'http://testserver/players/' + otherModel.username + '/'
+        url = reverse('PlayerDetail', kwargs={'uuid': otherModel.uuid})
         client.force_authenticate(user=authModel)
         response = client.patch(url, data, format='json')
 

@@ -5,7 +5,7 @@ import pytz
 from django.urls import reverse
 from rest_framework.test import APIClient
 
-from apps.my_auth.tests.factories import CustomUserFactory
+from apps.players.tests.factories import PlayerFactory
 from apps.teams.models import Team
 
 from ..models import Game, Point
@@ -32,7 +32,7 @@ class Test_Game_URL_Params(GameTesting):
 
         client = APIClient()
         client.force_authenticate(user=gameModel.home_team.team_captain)
-        url = reverse('game_request_create')
+        url = reverse('GameListCreate')
         response = client.post(url, data, format='json')
 
         self.assertResponse400(response)
@@ -56,7 +56,7 @@ class Test_Game_URL_Params(GameTesting):
 
         client = APIClient()
         client.force_authenticate(user=gameModel.home_team.team_captain)
-        url = reverse('game_request_create')
+        url = reverse('GameListCreate')
         response = client.post(url, data, format='json')
 
         self.assertResponse400(response)
@@ -80,7 +80,7 @@ class Test_Game_URL_Params(GameTesting):
 
         client = APIClient()
         client.force_authenticate(user=gameModel.home_team.team_captain)
-        url = reverse('game_request_create')
+        url = reverse('GameListCreate')
         response = client.post(url, data, format='json')
 
         self.assertResponse400(response)
@@ -104,7 +104,7 @@ class Test_Game_URL_Params(GameTesting):
 
         client = APIClient()
         client.force_authenticate(user=gameModel.home_team.team_captain)
-        url = reverse('game_request_create')
+        url = reverse('GameListCreate')
         response = client.post(url, data, format='json')
 
         self.assertResponse400(response)
@@ -128,7 +128,7 @@ class Test_Game_URL_Params(GameTesting):
 
         client = APIClient()
         client.force_authenticate(user=gameModel.home_team.team_captain)
-        url = reverse('game_request_create')
+        url = reverse('GameListCreate')
         response = client.post(url, data, format='json')
 
         self.assertResponse400(response)
@@ -152,7 +152,7 @@ class Test_Game_URL_Params(GameTesting):
 
         client = APIClient()
         client.force_authenticate(user=gameModel.home_team.team_captain)
-        url = reverse('game_request_create')
+        url = reverse('GameListCreate')
         response = client.post(url, data, format='json')
 
         self.assertResponse400(response)
@@ -176,7 +176,7 @@ class Test_Game_URL_Params(GameTesting):
 
         client = APIClient()
         client.force_authenticate(user=gameModel.home_team.team_captain)
-        url = reverse('game_request_create')
+        url = reverse('GameListCreate')
         response = client.post(url, data, format='json')
 
         self.assertResponse400(response)
@@ -200,7 +200,7 @@ class Test_Game_URL_Params(GameTesting):
 
         client = APIClient()
         client.force_authenticate(user=gameModel.home_team.team_captain)
-        url = reverse('game_request_create')
+        url = reverse('GameListCreate')
         response = client.post(url, data, format='json')
 
         self.assertResponse400(response)
@@ -224,7 +224,7 @@ class Test_Game_URL_Params(GameTesting):
 
         client = APIClient()
         client.force_authenticate(user=gameModel.home_team.team_captain)
-        url = reverse('game_request_create')
+        url = reverse('GameListCreate')
         response = client.post(url, data, format='json')
 
         self.assertResponse400(response)
@@ -239,7 +239,7 @@ class Test_Game_URL_Params(GameTesting):
 
         client = APIClient()
         client.force_authenticate(user=gameModel.home_team.team_captain)
-        url = reverse('game_request_create')
+        url = reverse('GameListCreate')
         response = client.post(url, data, format='json')
 
         self.assertResponse400(response)
@@ -261,8 +261,8 @@ class Test_Game_URL_Params(GameTesting):
 class Test_Create_Game(GameTesting):
 
     def test_model_equality(self):
-        p1 = CustomUserFactory()
-        p2 = CustomUserFactory()
+        p1 = PlayerFactory()
+        p2 = PlayerFactory()
         home_team = Team(team_captain=p1, teammate=p2)
         away_team = Team(team_captain=p2, teammate=p1)
         team_three = Team(team_captain=p1, teammate=p2)
@@ -280,10 +280,10 @@ class Test_Create_Game(GameTesting):
         time_ended_iso = time_ended.isoformat()
 
         players = [
-            CustomUserFactory(),
-            CustomUserFactory(),
-            CustomUserFactory(),
-            CustomUserFactory()
+            PlayerFactory(),
+            PlayerFactory(),
+            PlayerFactory(),
+            PlayerFactory()
         ]
         data = {
             'time_started': time_started_iso,
@@ -299,7 +299,7 @@ class Test_Create_Game(GameTesting):
 
         client = APIClient()
         client.force_authenticate(user=players[0])
-        url = reverse('game_request_create')
+        url = reverse('GameListCreate')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)
@@ -344,10 +344,10 @@ class Test_Create_Game(GameTesting):
         time_ended_iso = time_ended.isoformat()
 
         players = [
-            CustomUserFactory(),
-            CustomUserFactory(),
-            CustomUserFactory(),
-            CustomUserFactory()
+            PlayerFactory(),
+            PlayerFactory(),
+            PlayerFactory(),
+            PlayerFactory()
         ]
         data = {
             'time_started': time_started_iso,
@@ -363,7 +363,7 @@ class Test_Create_Game(GameTesting):
 
         client = APIClient()
         client.force_authenticate(user=players[0])
-        url = reverse('game_request_create')
+        url = reverse('GameListCreate')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)
@@ -411,10 +411,10 @@ class Test_Create_Game(GameTesting):
         away_team_score = 9
 
         players = [
-            CustomUserFactory(),
-            CustomUserFactory(),
-            CustomUserFactory(),
-            CustomUserFactory()
+            PlayerFactory(),
+            PlayerFactory(),
+            PlayerFactory(),
+            PlayerFactory()
             ]
         points = []
         for i in range(0, home_team_score):
@@ -442,7 +442,7 @@ class Test_Create_Game(GameTesting):
 
         client = APIClient()
         client.force_authenticate(user=players[0])
-        url = reverse('game_request_create')
+        url = reverse('GameListCreate')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)

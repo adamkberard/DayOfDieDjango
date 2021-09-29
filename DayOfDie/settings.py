@@ -46,12 +46,13 @@ INSTALLED_APPS = [
     # Local Apps
     'apps.games',
     'apps.my_auth',
+    'apps.players',
     'apps.teams',
     'apps.core',
     'tools.ids_encoder',
 ]
 
-AUTH_USER_MODEL = 'my_auth.CustomUser'
+AUTH_USER_MODEL = 'players.Player'
 
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [

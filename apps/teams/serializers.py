@@ -1,14 +1,14 @@
 from rest_framework import serializers
 
-from apps.my_auth.models import CustomUser
-from apps.my_auth.serializers import CustomUserReadSerializer
+from apps.players.models import Player
+from apps.players.serializers import PlayerReadSerializer
 
 from .models import Team
 
 
 class TeamSerializer(serializers.ModelSerializer):
-    team_captain = CustomUserReadSerializer()
-    teammate = CustomUserReadSerializer()
+    team_captain = PlayerReadSerializer()
+    teammate = PlayerReadSerializer()
 
     class Meta:
         model = Team
@@ -51,7 +51,7 @@ class TeamCreateSerializer(serializers.ModelSerializer):
         fields = ['teammate', 'status']
 
     def validate_teammate(self, value):
-        teammate = CustomUser.objects.filter(username=value, is_staff=False)
+        teammate = Player.objects.filter(username=value, is_staff=False)
         if not teammate.exists():
             raise serializers.ValidationError('Teammate not a user.')
         return teammate.first()
@@ -161,6 +161,21 @@ class TeamCreateSerializer(serializers.ModelSerializer):
 
         team.save()
         return team
+
+    def to_representation(self, instance):
+        return TeamSerializer(instance).data
+
+
+class WriteTeamSerializer(serializers.Serializer):
+    class Meta:
+        module = Player
+
+    teamName = serializers.CharField()
+
+    def update(self, instance, validated_data):
+        instance.team_name = validated_data.get('team_name', instance.team_name)
+        instance.save()
+        return instance
 
     def to_representation(self, instance):
         return TeamSerializer(instance).data
