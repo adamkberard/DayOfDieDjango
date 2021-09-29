@@ -4,6 +4,7 @@ from rest_framework.test import APIClient
 
 from apps.players.models import Player
 from apps.players.tests.factories import DEFAULT_PASSWORD, PlayerFactory
+from apps.players.serializers import PlayerReadSerializer
 
 from .checkers import AuthTesting
 
@@ -23,7 +24,7 @@ class Test_Register_View(AuthTesting):
         user = Player.objects.get(email=data['email'], is_staff=False)
         correctResponse = {
             'token': str(Token.objects.get(user=user)),
-            'uuid': str(user.uuid)
+            'player': PlayerReadSerializer(user).data
         }
         self.assertEqual(correctResponse, responseData)
 
@@ -41,7 +42,7 @@ class Test_Register_View(AuthTesting):
         user = Player.objects.get(email=data['email'], is_staff=False)
         correctResponse = {
             'token': str(Token.objects.get(user=user)),
-            'uuid': str(user.uuid)
+            'player': PlayerReadSerializer(user).data
         }
         self.assertEqual(correctResponse, responseData)
 
