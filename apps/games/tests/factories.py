@@ -4,7 +4,7 @@ import factory
 import factory.fuzzy
 import pytz
 
-from apps.my_auth.tests.factories import CustomUserFactory
+from apps.my_auth.tests.factories import PlayerFactory
 from apps.teams.tests.factories import TeamFactory
 
 from ..models import Game, Point
@@ -15,9 +15,9 @@ class PointFactory(factory.django.DjangoModelFactory):
         model = Point
 
     class Params:
-        inputScoredOn = factory.SubFactory(CustomUserFactory)
+        inputScoredOn = factory.SubFactory(PlayerFactory)
 
-    scorer = factory.SubFactory(CustomUserFactory)
+    scorer = factory.SubFactory(PlayerFactory)
     typeOfPoint = factory.fuzzy.FuzzyChoice(item[0] for item in
                                             Point.TYPE_CHOICES)
     scoredOn = factory.LazyAttribute(lambda x: x.inputScoredOn

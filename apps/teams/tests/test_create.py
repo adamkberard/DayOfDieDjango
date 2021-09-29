@@ -1,7 +1,7 @@
 from django.urls import reverse
 from rest_framework.test import APIClient
 
-from apps.my_auth.tests.factories import CustomUserFactory
+from apps.my_auth.tests.factories import PlayerFactory
 from apps.teams.models import Team
 
 from ..serializers import TeamSerializer
@@ -18,7 +18,7 @@ class Test_Team_URL_Params(TeamTesting):
 
         client = APIClient()
         client.force_authenticate(user=teamModel.team_captain)
-        url = reverse('team_generic')
+        url = reverse('TeamListCreate')
         response = client.post(url, data, format='json')
 
         self.assertResponse400(response)
@@ -36,7 +36,7 @@ class Test_Team_URL_Params(TeamTesting):
 
         client = APIClient()
         client.force_authenticate(user=teamModel.team_captain)
-        url = reverse('team_generic')
+        url = reverse('TeamListCreate')
         response = client.post(url, data, format='json')
 
         self.assertResponse400(response)
@@ -52,7 +52,7 @@ class Test_Team_URL_Params(TeamTesting):
 
         client = APIClient()
         client.force_authenticate(user=teamModel.team_captain)
-        url = reverse('team_generic')
+        url = reverse('TeamListCreate')
         response = client.post(url, data, format='json')
 
         self.assertResponse400(response)
@@ -65,13 +65,13 @@ class Test_Create_Nonexistent_Team(TeamTesting):
 
     def test_nonexistent_team_block(self):
         """Testing a team request that is a block on a nonexistent teamship."""
-        requester = CustomUserFactory()
-        requested = CustomUserFactory()
+        requester = PlayerFactory()
+        requested = PlayerFactory()
         data = {'teammate': requested.username, 'status': Team.STATUS_BLOCKED}
 
         client = APIClient()
         client.force_authenticate(user=requester)
-        url = reverse('team_generic')
+        url = reverse('TeamListCreate')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)
@@ -90,13 +90,13 @@ class Test_Create_Nonexistent_Team(TeamTesting):
     def test_nonexistent_team_nothing(self):
         """Testing a team request that is a nothing on a nonexistent teamship.
            This is not allowed."""
-        requester = CustomUserFactory()
-        requested = CustomUserFactory()
+        requester = PlayerFactory()
+        requested = PlayerFactory()
         data = {'teammate': requested.username, 'status': Team.STATUS_NOTHING}
 
         client = APIClient()
         client.force_authenticate(user=requester)
-        url = reverse('team_generic')
+        url = reverse('TeamListCreate')
         response = client.post(url, data, format='json')
 
         self.assertResponse400(response)
@@ -106,13 +106,13 @@ class Test_Create_Nonexistent_Team(TeamTesting):
 
     def test_nonexistent_team_pending(self):
         """Testing a team request that is a pending on a nonexistent teamship."""
-        requester = CustomUserFactory()
-        requested = CustomUserFactory()
+        requester = PlayerFactory()
+        requested = PlayerFactory()
         data = {'teammate': requested.username, 'status': Team.STATUS_PENDING}
 
         client = APIClient()
         client.force_authenticate(user=requester)
-        url = reverse('team_generic')
+        url = reverse('TeamListCreate')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)
@@ -130,13 +130,13 @@ class Test_Create_Nonexistent_Team(TeamTesting):
 
     def test_nonexistent_team_accept(self):
         """Testing a team request that is an accept on a nonexistent teamship."""
-        requester = CustomUserFactory()
-        requested = CustomUserFactory()
+        requester = PlayerFactory()
+        requested = PlayerFactory()
         data = {'teammate': requested.username, 'status': Team.STATUS_ACCEPTED}
 
         client = APIClient()
         client.force_authenticate(user=requester)
-        url = reverse('team_generic')
+        url = reverse('TeamListCreate')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)
@@ -163,7 +163,7 @@ class Test_Create_Existent_Team_Blocked(TeamTesting):
 
         client = APIClient()
         client.force_authenticate(user=teamship.team_captain)
-        url = reverse('team_generic')
+        url = reverse('TeamListCreate')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)
@@ -184,7 +184,7 @@ class Test_Create_Existent_Team_Blocked(TeamTesting):
 
         client = APIClient()
         client.force_authenticate(user=teamship.team_captain)
-        url = reverse('team_generic')
+        url = reverse('TeamListCreate')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)
@@ -208,7 +208,7 @@ class Test_Create_Existent_Team_Blocked(TeamTesting):
 
         client = APIClient()
         client.force_authenticate(user=teamship.team_captain)
-        url = reverse('team_generic')
+        url = reverse('TeamListCreate')
         response = client.post(url, data, format='json')
 
         # The response we want
@@ -225,7 +225,7 @@ class Test_Create_Existent_Team_Blocked(TeamTesting):
 
         client = APIClient()
         client.force_authenticate(user=teamship.team_captain)
-        url = reverse('team_generic')
+        url = reverse('TeamListCreate')
         response = client.post(url, data, format='json')
 
         # The response we want
@@ -241,7 +241,7 @@ class Test_Create_Existent_Team_Blocked(TeamTesting):
 
         client = APIClient()
         client.force_authenticate(user=teamship.teammate)
-        url = reverse('team_generic')
+        url = reverse('TeamListCreate')
 
         for status in [item[0] for item in Team.STATUS_CHOICES]:
             data = {'teammate': teamship.team_captain.username, 'status': status}
@@ -264,7 +264,7 @@ class Test_Create_Existent_Team_Nothing(TeamTesting):
 
         client = APIClient()
         client.force_authenticate(user=teamship.team_captain)
-        url = reverse('team_generic')
+        url = reverse('TeamListCreate')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)
@@ -287,7 +287,7 @@ class Test_Create_Existent_Team_Nothing(TeamTesting):
 
         client = APIClient()
         client.force_authenticate(user=teamship.teammate)
-        url = reverse('team_generic')
+        url = reverse('TeamListCreate')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)
@@ -310,7 +310,7 @@ class Test_Create_Existent_Team_Nothing(TeamTesting):
 
         client = APIClient()
         client.force_authenticate(user=teamship.team_captain)
-        url = reverse('team_generic')
+        url = reverse('TeamListCreate')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)
@@ -329,7 +329,7 @@ class Test_Create_Existent_Team_Nothing(TeamTesting):
 
         client = APIClient()
         client.force_authenticate(user=teamship.teammate)
-        url = reverse('team_generic')
+        url = reverse('TeamListCreate')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)
@@ -348,7 +348,7 @@ class Test_Create_Existent_Team_Nothing(TeamTesting):
 
         client = APIClient()
         client.force_authenticate(user=teamship.team_captain)
-        url = reverse('team_generic')
+        url = reverse('TeamListCreate')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)
@@ -371,7 +371,7 @@ class Test_Create_Existent_Team_Nothing(TeamTesting):
 
         client = APIClient()
         client.force_authenticate(user=teamship.teammate)
-        url = reverse('team_generic')
+        url = reverse('TeamListCreate')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)
@@ -394,7 +394,7 @@ class Test_Create_Existent_Team_Nothing(TeamTesting):
 
         client = APIClient()
         client.force_authenticate(user=teamship.team_captain)
-        url = reverse('team_generic')
+        url = reverse('TeamListCreate')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)
@@ -417,7 +417,7 @@ class Test_Create_Existent_Team_Nothing(TeamTesting):
 
         client = APIClient()
         client.force_authenticate(user=teamship.teammate)
-        url = reverse('team_generic')
+        url = reverse('TeamListCreate')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)
@@ -443,7 +443,7 @@ class Test_Create_Existent_Team_Pending(TeamTesting):
 
         client = APIClient()
         client.force_authenticate(user=teamship.team_captain)
-        url = reverse('team_generic')
+        url = reverse('TeamListCreate')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)
@@ -468,7 +468,7 @@ class Test_Create_Existent_Team_Pending(TeamTesting):
 
         client = APIClient()
         client.force_authenticate(user=teamship.teammate)
-        url = reverse('team_generic')
+        url = reverse('TeamListCreate')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)
@@ -491,7 +491,7 @@ class Test_Create_Existent_Team_Pending(TeamTesting):
 
         client = APIClient()
         client.force_authenticate(user=teamship.team_captain)
-        url = reverse('team_generic')
+        url = reverse('TeamListCreate')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)
@@ -514,7 +514,7 @@ class Test_Create_Existent_Team_Pending(TeamTesting):
 
         client = APIClient()
         client.force_authenticate(user=teamship.teammate)
-        url = reverse('team_generic')
+        url = reverse('TeamListCreate')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)
@@ -537,7 +537,7 @@ class Test_Create_Existent_Team_Pending(TeamTesting):
 
         client = APIClient()
         client.force_authenticate(user=teamship.team_captain)
-        url = reverse('team_generic')
+        url = reverse('TeamListCreate')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)
@@ -556,7 +556,7 @@ class Test_Create_Existent_Team_Pending(TeamTesting):
 
         client = APIClient()
         client.force_authenticate(user=teamship.teammate)
-        url = reverse('team_generic')
+        url = reverse('TeamListCreate')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)
@@ -575,7 +575,7 @@ class Test_Create_Existent_Team_Pending(TeamTesting):
 
         client = APIClient()
         client.force_authenticate(user=teamship.team_captain)
-        url = reverse('team_generic')
+        url = reverse('TeamListCreate')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)
@@ -598,7 +598,7 @@ class Test_Create_Existent_Team_Pending(TeamTesting):
 
         client = APIClient()
         client.force_authenticate(user=teamship.teammate)
-        url = reverse('team_generic')
+        url = reverse('TeamListCreate')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)
@@ -624,7 +624,7 @@ class Test_Create_Existent_Team_Accepted(TeamTesting):
 
         client = APIClient()
         client.force_authenticate(user=teamship.team_captain)
-        url = reverse('team_generic')
+        url = reverse('TeamListCreate')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)
@@ -647,7 +647,7 @@ class Test_Create_Existent_Team_Accepted(TeamTesting):
 
         client = APIClient()
         client.force_authenticate(user=teamship.teammate)
-        url = reverse('team_generic')
+        url = reverse('TeamListCreate')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)
@@ -670,7 +670,7 @@ class Test_Create_Existent_Team_Accepted(TeamTesting):
 
         client = APIClient()
         client.force_authenticate(user=teamship.team_captain)
-        url = reverse('team_generic')
+        url = reverse('TeamListCreate')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)
@@ -693,7 +693,7 @@ class Test_Create_Existent_Team_Accepted(TeamTesting):
 
         client = APIClient()
         client.force_authenticate(user=teamship.teammate)
-        url = reverse('team_generic')
+        url = reverse('TeamListCreate')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)
@@ -716,7 +716,7 @@ class Test_Create_Existent_Team_Accepted(TeamTesting):
 
         client = APIClient()
         client.force_authenticate(user=teamship.team_captain)
-        url = reverse('team_generic')
+        url = reverse('TeamListCreate')
         response = client.post(url, data, format='json')
 
         self.assertResponse400(response)
@@ -734,7 +734,7 @@ class Test_Create_Existent_Team_Accepted(TeamTesting):
 
         client = APIClient()
         client.force_authenticate(user=teamship.teammate)
-        url = reverse('team_generic')
+        url = reverse('TeamListCreate')
         response = client.post(url, data, format='json')
 
         self.assertResponse400(response)
@@ -752,7 +752,7 @@ class Test_Create_Existent_Team_Accepted(TeamTesting):
 
         client = APIClient()
         client.force_authenticate(user=teamship.team_captain)
-        url = reverse('team_generic')
+        url = reverse('TeamListCreate')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)
@@ -771,7 +771,7 @@ class Test_Create_Existent_Team_Accepted(TeamTesting):
 
         client = APIClient()
         client.force_authenticate(user=teamship.teammate)
-        url = reverse('team_generic')
+        url = reverse('TeamListCreate')
         response = client.post(url, data, format='json')
 
         self.assertResponse201(response)

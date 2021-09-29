@@ -1,8 +1,8 @@
 from django.urls import reverse
 from rest_framework.test import APIClient
 
-from apps.my_auth.serializers import CustomUserReadSerializer
-from apps.my_auth.tests.factories import CustomUserFactory
+from apps.my_auth.tests.factories import PlayerFactory
+from apps.players.serializers import PlayerReadSerializer
 
 from .checkers import TeamTesting
 from .factories import TeamFactory
@@ -12,11 +12,11 @@ class Test_Team_GET(TeamTesting):
 
     def test_team_get_no_teams(self):
         """Testing a team request get with no teams."""
-        user = CustomUserFactory()
+        user = PlayerFactory()
 
         client = APIClient()
         client.force_authenticate(user=user)
-        url = reverse('team_generic')
+        url = reverse('TeamListCreate')
         response = client.get(url)
 
         self.assertResponse200(response)
@@ -30,7 +30,7 @@ class Test_Team_GET(TeamTesting):
 
         client = APIClient()
         client.force_authenticate(user=teamship.team_captain)
-        url = reverse('team_generic')
+        url = reverse('TeamListCreate')
         response = client.get(url)
 
         self.assertResponse200(response)
@@ -39,8 +39,9 @@ class Test_Team_GET(TeamTesting):
             {
                 'uuid': str(teamship.uuid),
                 'status': teamship.status,
-                'team_captain': CustomUserReadSerializer(teamship.team_captain).data,
-                'teammate': CustomUserReadSerializer(teamship.teammate).data,
+                'team_captain': PlayerReadSerializer(teamship.team_captain).data,
+                'teammate': PlayerReadSerializer(teamship.teammate).data,
+                'team_name': None,
                 'wins': 0,
                 'losses': 0
             }
@@ -53,7 +54,7 @@ class Test_Team_GET(TeamTesting):
 
         client = APIClient()
         client.force_authenticate(user=teamship.teammate)
-        url = reverse('team_generic')
+        url = reverse('TeamListCreate')
         response = client.get(url)
 
         self.assertResponse200(response)
@@ -62,8 +63,9 @@ class Test_Team_GET(TeamTesting):
             {
                 'uuid': str(teamship.uuid),
                 'status': teamship.status,
-                'team_captain': CustomUserReadSerializer(teamship.team_captain).data,
-                'teammate': CustomUserReadSerializer(teamship.teammate).data,
+                'team_captain': PlayerReadSerializer(teamship.team_captain).data,
+                'teammate': PlayerReadSerializer(teamship.teammate).data,
+                'team_name': None,
                 'wins': 0,
                 'losses': 0
             }
@@ -73,22 +75,23 @@ class Test_Team_GET(TeamTesting):
     def test_getting_many_teams(self):
         numTeams = 5
         correctResponse = []
-        user = CustomUserFactory()
+        user = PlayerFactory()
 
         for _ in range(numTeams):
             teamship = TeamFactory(team_captain=user)
             correctResponse.append({
                 'uuid': str(teamship.uuid),
                 'status': teamship.status,
-                'team_captain': CustomUserReadSerializer(teamship.team_captain).data,
-                'teammate': CustomUserReadSerializer(teamship.teammate).data,
+                'team_captain': PlayerReadSerializer(teamship.team_captain).data,
+                'teammate': PlayerReadSerializer(teamship.teammate).data,
+                'team_name': None,
                 'wins': 0,
                 'losses': 0
             })
 
         client = APIClient()
         client.force_authenticate(user=user)
-        url = reverse('team_generic')
+        url = reverse('TeamListCreate')
         response = client.get(url)
 
         self.assertResponse200(response)
@@ -102,7 +105,7 @@ class Test_Team_GET(TeamTesting):
 
         client = APIClient()
         client.force_authenticate(user=teamship.team_captain)
-        url = reverse('team_generic')
+        url = reverse('TeamListCreate')
         response = client.get(url)
 
         self.assertResponse200(response)
@@ -111,8 +114,9 @@ class Test_Team_GET(TeamTesting):
             {
                 'uuid': str(teamship.uuid),
                 'status': teamship.status,
-                'team_captain': CustomUserReadSerializer(teamship.team_captain).data,
-                'teammate': CustomUserReadSerializer(teamship.teammate).data,
+                'team_captain': PlayerReadSerializer(teamship.team_captain).data,
+                'teammate': PlayerReadSerializer(teamship.teammate).data,
+                'team_name': None,
                 'wins': 0,
                 'losses': 0
             }

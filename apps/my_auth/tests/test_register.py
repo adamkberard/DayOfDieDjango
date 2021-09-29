@@ -2,9 +2,10 @@ from django.urls import reverse
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
-from ..models import CustomUser
+from apps.players.models import Player
+
 from .checkers import AuthTesting
-from .factories import DEFAULT_PASSWORD, CustomUserFactory
+from .factories import DEFAULT_PASSWORD, PlayerFactory
 
 
 class Test_Register_View(AuthTesting):
@@ -19,7 +20,7 @@ class Test_Register_View(AuthTesting):
 
         self.assertResponse201(response)
         responseData = self.loadJSONSafely(response)
-        user = CustomUser.objects.get(email=data['email'], is_staff=False)
+        user = Player.objects.get(email=data['email'], is_staff=False)
         correctResponse = {
             'token': str(Token.objects.get(user=user)),
             'username': user.username
@@ -28,7 +29,7 @@ class Test_Register_View(AuthTesting):
 
     def test_correct_register_one_other_user(self):
         """Testing a legitimate registration with one other user."""
-        CustomUserFactory()
+        PlayerFactory()
         data = {'email': 'testEmail@gmail.com', 'password': DEFAULT_PASSWORD}
 
         client = APIClient()
@@ -37,7 +38,7 @@ class Test_Register_View(AuthTesting):
 
         self.assertResponse201(response)
         responseData = self.loadJSONSafely(response)
-        user = CustomUser.objects.get(email=data['email'], is_staff=False)
+        user = Player.objects.get(email=data['email'], is_staff=False)
         correctResponse = {
             'token': str(Token.objects.get(user=user)),
             'username': user.username
@@ -141,7 +142,7 @@ class Test_Register_View(AuthTesting):
         self.assertEqual(correctResponse, responseData)
 
     def test_register_email_in_use(self):
-        user = CustomUserFactory()
+        user = PlayerFactory()
         data = {'email': user.email, 'password': DEFAULT_PASSWORD}
 
         client = APIClient()
