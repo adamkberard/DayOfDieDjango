@@ -3,14 +3,14 @@ from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
 from .checkers import AuthTesting
-from .factories import DEFAULT_PASSWORD, CustomUserFactory
+from apps.players.tests.factories import DEFAULT_PASSWORD, PlayerFactory
 
 
 class Test_Login_View(AuthTesting):
 
     def test_correct_login_no_data(self):
         """Testing a legitimate login."""
-        userModel = CustomUserFactory()
+        userModel = PlayerFactory()
         data = {'email': userModel.email, 'password': DEFAULT_PASSWORD}
 
         client = APIClient()
@@ -21,14 +21,14 @@ class Test_Login_View(AuthTesting):
         responseData = self.loadJSONSafely(response)
         correctResponse = {
             'token': str(Token.objects.get(user=userModel)),
-            'username': userModel.username
+            'uuid': str(userModel.uuid)
         }
         self.assertEqual(correctResponse, responseData)
 
     def test_correct_login_one_other_user(self):
         """Testing a legitimate login with one other user."""
-        userModel = CustomUserFactory()
-        CustomUserFactory()
+        userModel = PlayerFactory()
+        PlayerFactory()
         data = {'email': userModel.email, 'password': DEFAULT_PASSWORD}
 
         client = APIClient()
@@ -39,7 +39,7 @@ class Test_Login_View(AuthTesting):
         responseData = self.loadJSONSafely(response)
         correctResponse = {
             'token': str(Token.objects.get(user=userModel)),
-            'username': userModel.username
+            'uuid': str(userModel.uuid)
         }
         self.assertEqual(correctResponse, responseData)
 

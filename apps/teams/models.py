@@ -52,6 +52,8 @@ class Team(TimeStampedModel):
                                  on_delete=models.CASCADE,
                                  related_name="teammate")
 
+    team_name = models.CharField(max_length=30, null=True, blank=True)
+
     objects = TeamManager()
 
     def __str__(self):

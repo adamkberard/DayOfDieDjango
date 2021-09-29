@@ -1,8 +1,8 @@
 from rest_framework import serializers
 
 from apps.core.validators import validate_players
-from apps.my_auth.models import CustomUser
-from apps.my_auth.serializers import CustomUserReadSerializer
+from apps.players.models import Player
+from apps.players.serializers import PlayerReadSerializer
 from apps.teams.models import Team
 from apps.teams.serializers import TeamSerializer
 
@@ -36,10 +36,10 @@ class GameWriteSerializer(serializers.Serializer):
         points_data = validated_data.pop('points')
 
         # Must find the teams myself, if they don't exist I create them
-        playerOne = CustomUser.objects.get(uuid=validated_data.pop('playerOne'), is_staff=False)
-        playerTwo = CustomUser.objects.get(uuid=validated_data.pop('playerTwo'), is_staff=False)
-        playerThree = CustomUser.objects.get(uuid=validated_data.pop('playerThree'), is_staff=False)
-        playerFour = CustomUser.objects.get(uuid=validated_data.pop('playerFour'), is_staff=False)
+        playerOne = Player.objects.get(uuid=validated_data.pop('playerOne'), is_staff=False)
+        playerTwo = Player.objects.get(uuid=validated_data.pop('playerTwo'), is_staff=False)
+        playerThree = Player.objects.get(uuid=validated_data.pop('playerThree'), is_staff=False)
+        playerFour = Player.objects.get(uuid=validated_data.pop('playerFour'), is_staff=False)
 
         _, home_team = Team.objects.get_or_create_team(playerOne, playerTwo)
         _, away_team = Team.objects.get_or_create_team(playerThree, playerFour)
@@ -52,7 +52,7 @@ class GameWriteSerializer(serializers.Serializer):
                                    away_team=away_team, confirmed=False)
 
         for point_data in points_data:
-            scorer = CustomUser.objects.get(uuid=point_data.get('scorer'), is_staff=False)
+            scorer = Player.objects.get(uuid=point_data.get('scorer'), is_staff=False)
             type = point_data.get('type')
             Point.objects.create(game=game, scorer=scorer, type=type)
 
@@ -60,7 +60,7 @@ class GameWriteSerializer(serializers.Serializer):
 
 
 class PointSerializer(serializers.ModelSerializer):
-    scorer = CustomUserReadSerializer()
+    scorer = PlayerReadSerializer()
 
     class Meta:
         model = Point
@@ -82,4 +82,8 @@ class GameSerializer(serializers.ModelSerializer):
         points_set = Point.objects.filter(game=instance)
         serialized_points = PointSerializer(points_set, many=True)
         representation['points'] = serialized_points.data
+
+        representation['time_started'] = instance.time_started.isoformat()
+        representation['time_ended'] = instance.time_ended.isoformat()
+
         return representation

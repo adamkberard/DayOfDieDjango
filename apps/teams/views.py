@@ -1,14 +1,30 @@
 from rest_framework import authentication
-from rest_framework.generics import ListAPIView, ListCreateAPIView
+from rest_framework.generics import (ListAPIView, ListCreateAPIView,
+                                     RetrieveAPIView)
 from rest_framework.permissions import IsAuthenticated
 
-from apps.my_auth.models import CustomUser
+from apps.games.models import Game
+from apps.games.serializers import GameSerializer
+from apps.players.models import Player
 
 from .models import Team
 from .serializers import TeamCreateSerializer, TeamSerializer
 
 
-class TeamListCreateAPIView(ListCreateAPIView):
+class TeamDetail(RetrieveAPIView):
+    """
+    View for getting a team
+
+    * Requres token auth
+    """
+    permission_classes = (IsAuthenticated, )
+    authentication_classes = [authentication.TokenAuthentication]
+    serializer_class = TeamSerializer
+    lookup_field = 'uuid'
+    queryset = Team.objects.all()
+
+
+class TeamListCreate(ListCreateAPIView):
     permission_classes = (IsAuthenticated, )
     authentication_classes = [authentication.TokenAuthentication]
     read_serializer = TeamSerializer
@@ -26,12 +42,22 @@ class TeamListCreateAPIView(ListCreateAPIView):
         return {'team_captain': self.request.user}
 
 
-class GetPlayerFriends(ListAPIView):
-    serializer_class = TeamSerializer
+class GetPlayerTeams(ListAPIView):
     permission_classes = (IsAuthenticated,)
     authentication_classes = [authentication.TokenAuthentication]
+    serializer_class = TeamSerializer
 
     def get_queryset(self):
-        urlUser = CustomUser.objects.filter(username=self.kwargs['username'], is_staff=False)
+        urlUser = Player.objects.filter(uuid=self.kwargs['uuid'], is_staff=False)
         allTeams = Team.objects.get_player_teams(user=urlUser.first())
         return allTeams.filter(status=Team.STATUS_ACCEPTED)
+
+
+class GetTeamGames(ListAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = [authentication.TokenAuthentication]
+    serializer_class = GameSerializer
+
+    def get_queryset(self):
+        urlTeam = Team.objects.filter(uuid=self.kwargs['uuid'])
+        return Game.objects.get_team_games(urlTeam.first())

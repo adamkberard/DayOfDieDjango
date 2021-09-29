@@ -4,10 +4,10 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
-from .managers import CustomUserManager
+from .managers import PlayerManager
 
 
-class CustomUser(AbstractUser):
+class Player(AbstractUser):
     email = models.EmailField(_('email address'), unique=True)
     username = models.CharField(max_length=30, unique=True)
     uuid = models.UUIDField(
@@ -20,7 +20,7 @@ class CustomUser(AbstractUser):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
 
-    objects = CustomUserManager()
+    objects = PlayerManager()
 
     def __str__(self):
         return self.email

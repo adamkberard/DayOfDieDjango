@@ -1,16 +1,64 @@
 from rest_framework import authentication
 from rest_framework.generics import (ListAPIView, ListCreateAPIView,
-                                     RetrieveUpdateDestroyAPIView)
+                                     RetrieveAPIView)
 from rest_framework.permissions import IsAuthenticated
 
-from apps.my_auth.models import CustomUser
+from apps.players.models import Player
 from apps.teams.models import Team
 
 from .models import Game
 from .serializers import GameSerializer, GameWriteSerializer
 
 
-class GameListCreateAPIView(ListCreateAPIView):
+class GetPlayerGames(ListAPIView):
+    """
+    View for getting all a player's games
+
+    * Requires player uuid
+    * Requres token auth
+    """
+    permission_classes = (IsAuthenticated, )
+    authentication_classes = [authentication.TokenAuthentication]
+    serializer_class = GameSerializer
+
+    def get_queryset(self):
+        urlUser = Player.objects.filter(uuid=self.kwargs['uuid'], is_staff=False)
+        return Game.objects.get_player_games(user=urlUser.first())
+
+
+class GetTeamGames(ListAPIView):
+    """
+    View for getting all a team's games
+
+    * Requires team uuid
+    * Requres token auth
+    """
+    serializer_class = GameSerializer
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = [authentication.TokenAuthentication]
+
+    def get_queryset(self):
+        urlUser1 = Player.objects.filter(username=self.kwargs['username1'], is_staff=False)
+        urlUser2 = Player.objects.filter(username=self.kwargs['username2'], is_staff=False)
+        urlTeam = Team.objects.get_team(urlUser1.first(), urlUser2.first())
+        return Game.objects.get_team_games(urlTeam)
+
+
+class GameDetail(RetrieveAPIView):
+    """
+    View for retrieving a single game
+
+    * Requires a game uuid
+    * Requres token auth
+    """
+    permission_classes = (IsAuthenticated, )
+    authentication_classes = [authentication.TokenAuthentication]
+    serializer_class = GameSerializer
+    lookup_field = 'uuid'
+    queryset = Game.objects.all()
+
+
+class GameListCreate(ListCreateAPIView):
     permission_classes = (IsAuthenticated, )
     authentication_classes = [authentication.TokenAuthentication]
 
@@ -24,51 +72,3 @@ class GameListCreateAPIView(ListCreateAPIView):
 
     def get_queryset(self):
         return Game.objects.get_player_games(user=self.request.user)
-
-
-class GameRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
-    """
-    Getting, updating, or deleting an existing game
-    """
-    permission_classes = (IsAuthenticated, )
-    authentication_classes = [authentication.TokenAuthentication]
-    serializer_class = GameSerializer
-    lookup_field = 'uuid'
-
-    def get_queryset(self):
-        return Game.objects.get_player_games(user=self.request.user)
-
-
-class GameRetrieveTeamsAPIView(RetrieveUpdateDestroyAPIView):
-    """
-    Getting, updating, or deleting an existing game
-    """
-    permission_classes = (IsAuthenticated, )
-    authentication_classes = [authentication.TokenAuthentication]
-    serializer_class = GameSerializer
-    lookup_field = 'uuid'
-
-    def get_queryset(self):
-        return Game.objects.get_player_games(user=self.request.user)
-
-
-class GetPlayerGames(ListAPIView):
-    serializer_class = GameSerializer
-    permission_classes = (IsAuthenticated,)
-    authentication_classes = [authentication.TokenAuthentication]
-
-    def get_queryset(self):
-        urlUser = CustomUser.objects.filter(username=self.kwargs['username'], is_staff=False)
-        return Game.objects.get_player_games(user=urlUser.first())
-
-
-class GetTeamGames(ListAPIView):
-    serializer_class = GameSerializer
-    permission_classes = (IsAuthenticated,)
-    authentication_classes = [authentication.TokenAuthentication]
-
-    def get_queryset(self):
-        urlUser1 = CustomUser.objects.filter(username=self.kwargs['username1'], is_staff=False)
-        urlUser2 = CustomUser.objects.filter(username=self.kwargs['username2'], is_staff=False)
-        urlTeam = Team.objects.get_team(urlUser1.first(), urlUser2.first())
-        return Game.objects.get_team_games(urlTeam)
