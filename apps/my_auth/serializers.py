@@ -52,4 +52,3 @@ class LogInSerializer(serializers.Serializer):
             'player': PlayerReadSerializer(instance).data
         }
         return data
-
