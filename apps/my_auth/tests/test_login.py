@@ -1,9 +1,12 @@
+from apps.players.models import Player
 from django.urls import reverse
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
-from .checkers import AuthTesting
 from apps.players.tests.factories import DEFAULT_PASSWORD, PlayerFactory
+from apps.players.serializers import PlayerReadSerializer
+
+from .checkers import AuthTesting
 
 
 class Test_Login_View(AuthTesting):
@@ -17,11 +20,11 @@ class Test_Login_View(AuthTesting):
         url = reverse('login')
         response = client.post(url, data, format='json')
 
-        self.assertResponse200(response)
+        self.assertResponse201(response)
         responseData = self.loadJSONSafely(response)
         correctResponse = {
             'token': str(Token.objects.get(user=userModel)),
-            'uuid': str(userModel.uuid)
+            'player': PlayerReadSerializer(userModel).data
         }
         self.assertEqual(correctResponse, responseData)
 
@@ -35,11 +38,11 @@ class Test_Login_View(AuthTesting):
         url = reverse('login')
         response = client.post(url, data, format='json')
 
-        self.assertResponse200(response)
+        self.assertResponse201(response)
         responseData = self.loadJSONSafely(response)
         correctResponse = {
             'token': str(Token.objects.get(user=userModel)),
-            'uuid': str(userModel.uuid)
+            'player': PlayerReadSerializer(userModel).data
         }
         self.assertEqual(correctResponse, responseData)
 

@@ -1,4 +1,5 @@
 from django.contrib.auth import authenticate
+from rest_framework import serializers
 from rest_framework.authtoken.models import Token
 from rest_framework.generics import CreateAPIView
 from rest_framework.renderers import JSONRenderer
@@ -10,27 +11,12 @@ from apps.players.models import Player
 from .serializers import LogInSerializer, RegisterSerializer
 
 
-class LoginView(APIView):
+class LoginView(CreateAPIView):
     """
     View for authenticating users
     """
     renderer_classes = [JSONRenderer]
-
-    def post(self, request):
-        serializer = LogInSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        # Now we retrieve the user and send back their token.
-        user = authenticate(username=request.data['email'], password=request.data['password'])
-        if user is None:
-            return Response({'user': ['Not a valid user.']}, status=400)
-
-        token, _ = Token.objects.get_or_create(user=user)
-        content = {
-            'token': str(token),
-            'uuid': str(user.uuid)
-        }
-        return Response(content, status=200)
+    serializer_class = LogInSerializer
 
 
 class RegisterView(CreateAPIView):
@@ -38,16 +24,4 @@ class RegisterView(CreateAPIView):
     View for registering users
     """
     renderer_classes = [JSONRenderer]
-
-    def post(self, request):
-        serializer = RegisterSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = Player.objects.create_user(email=request.data['email'],
-                                          password=request.data['password'])
-
-        token, _ = Token.objects.get_or_create(user=user)
-        content = {
-            'token': str(token),
-            'uuid': str(user.uuid)
-        }
-        return Response(content, status=201)
+    serializer_class = RegisterSerializer

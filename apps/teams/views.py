@@ -1,6 +1,6 @@
 from rest_framework import authentication
 from rest_framework.generics import (ListAPIView, ListCreateAPIView,
-                                     RetrieveAPIView)
+                                     RetrieveUpdateAPIView)
 from rest_framework.permissions import IsAuthenticated
 
 from apps.games.models import Game
@@ -11,7 +11,7 @@ from .models import Team
 from .serializers import TeamCreateSerializer, TeamSerializer
 
 
-class TeamDetail(RetrieveAPIView):
+class TeamDetail(RetrieveUpdateAPIView):
     """
     View for getting a team
 
@@ -21,7 +21,12 @@ class TeamDetail(RetrieveAPIView):
     authentication_classes = [authentication.TokenAuthentication]
     serializer_class = TeamSerializer
     lookup_field = 'uuid'
-    queryset = Team.objects.all()
+
+    def get_queryset(self):
+        if self.request.method == "PATCH":
+            return Team.objects.get_player_teams(self.request.user)
+        else:
+            return Team.objects.all()
 
 
 class TeamListCreate(ListCreateAPIView):
@@ -59,5 +64,6 @@ class GetTeamGames(ListAPIView):
     serializer_class = GameSerializer
 
     def get_queryset(self):
+        print("HERE")
         urlTeam = Team.objects.filter(uuid=self.kwargs['uuid'])
         return Game.objects.get_team_games(urlTeam.first())

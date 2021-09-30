@@ -18,8 +18,8 @@ class TeamSerializer(serializers.ModelSerializer):
         """
         Makes sure the teams is okay
         """
-        # This is making sure the two users are different
-        if data['team_captain'] == data['teammate']:
+        # This is making sure the two users are different if they are being edited
+        if 'team_captain' in data and data.get('team_captain') == data.get('teammate'):
             raise serializers.ValidationError("Users must be different.")
 
         return data
